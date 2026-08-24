@@ -169,6 +169,44 @@ button{font-family:var(--brod)}
   .padd.spilar .hringur{animation:none;opacity:.6}
 }
 
+/* ---- taktur ---- */
+.taktrod{
+  display:grid;grid-template-columns:minmax(96px,150px) repeat(8,1fr);
+  gap:8px;align-items:center;margin-bottom:10px
+}
+.skrefhaus{
+  font-family:var(--display);font-size:12px;font-weight:600;color:var(--grar);
+  text-align:center;padding-bottom:2px
+}
+.skrefhaus.thungt{color:var(--gulur)}
+.taktnafn{
+  display:flex;align-items:center;gap:8px;background:var(--pappir);color:var(--blek-djup);
+  border-radius:12px;padding:6px 9px;min-width:0
+}
+.taktnafn .thumbi{
+  width:34px;height:34px;flex:none;border-radius:8px;background:#fff;
+  object-fit:contain;transition:transform .07s
+}
+.taktnafn.slaer .thumbi{transform:scale(1.22) rotate(-7deg)}
+.taktnafn .heiti{
+  font-family:var(--display);font-size:13px;font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.skref{
+  aspect-ratio:1;border:2px solid rgba(255,255,255,.16);border-radius:12px;
+  background:rgba(255,255,255,.05);cursor:pointer;padding:0;position:relative
+}
+.skref.thungt{border-color:rgba(255,255,255,.32)}
+.skref[aria-pressed="true"]{background:currentColor;border-color:currentColor}
+.skref:focus-visible{outline:3px solid var(--blar);outline-offset:2px}
+.skref.nuna{box-shadow:0 0 0 3px var(--gulur)}
+.skref[aria-pressed="true"].nuna{transform:scale(1.08)}
+@media (max-width:620px){
+  .taktrod{grid-template-columns:minmax(72px,90px) repeat(8,1fr);gap:5px}
+  .taktnafn .thumbi{width:26px;height:26px}
+  .taktnafn .heiti{font-size:11px}
+}
+
 /* ---- stjórnborð neðst ---- */
 .stjornbord{
   position:fixed;left:0;right:0;bottom:0;background:rgba(14,22,40,.94);
@@ -201,6 +239,7 @@ input[type=range]{accent-color:var(--graenn);width:130px}
     <div class="flipar" role="tablist">
       <button class="flipi" id="flipiUppsetning" role="tab" aria-selected="true">Uppsetning</button>
       <button class="flipi" id="flipiSpila" role="tab" aria-selected="false">Spila</button>
+      <button class="flipi" id="flipiTaktur" role="tab" aria-selected="false">Taktur</button>
     </div>
   </header>
 
@@ -234,6 +273,22 @@ input[type=range]{accent-color:var(--graenn);width:130px}
     <div class="spilborð" id="spilborð"></div>
     <div class="tomt falid" id="tomtSkilabod">
       Engir takkar til ennþá. Farðu í <strong>Uppsetning</strong> og búðu til þann fyrsta.
+    </div>
+  </section>
+
+  <!-- TAKTUR -->
+  <section id="taktur" class="falid">
+    <div class="takkarod" style="margin-bottom:20px">
+      <button class="takki gulur" id="taktSpila">▶ Spila lykkju</button>
+      <label class="sleði" style="color:#C7D0E4">Hraði
+        <input type="range" id="hradi" min="50" max="180" value="100">
+        <span id="hradiTala" style="font-family:var(--display);color:var(--gulur);min-width:62px">100 bpm</span>
+      </label>
+      <button class="takki aukatakki" id="hreinsaTakt">Hreinsa</button>
+    </div>
+    <div id="taktbord"></div>
+    <div class="tomt falid" id="tomtTaktur">
+      Engin hljóð til að raða. Farðu í <strong>Uppsetning</strong> og búðu til takka fyrst.
     </div>
   </section>
 </div>
@@ -314,7 +369,8 @@ async function afkodaHljod(dataUrl){
 
 /* ---------- gögn ---------- */
 function nyrPadd(){
-  return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null, hljod:null, buffer:null};
+  return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null,
+          hljod:null, buffer:null, mynstur:new Array(8).fill(false)};
 }
 function finna(id){ return paddar.find(p=>p.id===id); }
 
@@ -476,16 +532,19 @@ function teiknaAuda(i){
 }
 function litirRaw(i){ return litir[i % litir.length]; }
 
+function raesaBuffer(p, timi){
+  if(!p.buffer) return;
+  const src = ac.createBufferSource();
+  src.buffer = p.buffer;
+  src.connect(thurr);
+  if(omur) src.connect(omur);
+  src.start(timi || 0);
+}
+
 function spila(p, hnappur){
   raesaHljod();
   if(ac.state === "suspended") ac.resume();
-  if(p.buffer){
-    const src = ac.createBufferSource();
-    src.buffer = p.buffer;
-    src.connect(thurr);
-    if(omur) src.connect(omur);
-    src.start();
-  }
+  raesaBuffer(p);
   const b = hnappur || spilborð.querySelector(`[data-id="${p.id}"]`);
   if(!b) return;
   b.classList.remove("spilar");
@@ -495,6 +554,139 @@ function spila(p, hnappur){
   clearTimeout(b._timi);
   b._timi = setTimeout(()=>b.classList.remove("spilar"), lengd);
 }
+
+/* ---------- taktur ---------- */
+const taktbord = document.getElementById("taktbord");
+const tomtTaktur = document.getElementById("tomtTaktur");
+let bpm = 100, taktGengur = false, naestaSkref = 0, naestiTimi = 0, taktTimari = null;
+let sjonRod = [];
+
+function teiknaTakt(){
+  taktbord.innerHTML = "";
+  tomtTaktur.classList.toggle("falid", paddar.length > 0);
+  if(!paddar.length) return;
+
+  const haus = document.createElement("div");
+  haus.className = "taktrod";
+  haus.innerHTML = "<span></span>" + [1,2,3,4,5,6,7,8].map(n=>
+    `<span class="skrefhaus ${n===1||n===5?"thungt":""}">${n}</span>`).join("");
+  taktbord.appendChild(haus);
+
+  paddar.forEach((p,i)=>{
+    const rod = document.createElement("div");
+    rod.className = "taktrod";
+    rod.style.color = litir[i % litir.length];
+    const mynd = p.kyrr || p.virk;
+    rod.innerHTML = `
+      <span class="taktnafn" data-nafnrod="${p.id}">
+        ${mynd ? `<img class="thumbi" src="${mynd}" alt="">`
+               : `<span class="thumbi" style="background:${litir[i%litir.length]};border-radius:8px"></span>`}
+        <span class="heiti">${p.nafn}</span>
+      </span>
+      ${p.mynstur.map((a,s)=>
+        `<button class="skref ${s===0||s===4?"thungt":""}" aria-pressed="${a}"
+                 data-padd="${p.id}" data-skref="${s}"
+                 aria-label="${p.nafn}, slag ${s+1}"></button>`).join("")}
+    `;
+    taktbord.appendChild(rod);
+  });
+}
+
+taktbord.addEventListener("click", e=>{
+  const t = e.target.closest("[data-skref]");
+  if(!t) return;
+  const p = finna(+t.dataset.padd);
+  const s = +t.dataset.skref;
+  p.mynstur[s] = !p.mynstur[s];
+  t.setAttribute("aria-pressed", String(p.mynstur[s]));
+  if(p.mynstur[s] && !taktGengur) spila(p);
+});
+
+function radaSkrefi(skref, timi){
+  paddar.forEach(p=>{ if(p.mynstur[skref]) raesaBuffer(p, timi); });
+  sjonRod.push({skref, timi});
+}
+
+function taktLykkja(){
+  const skreflengd = 60 / bpm;
+  while(naestiTimi < ac.currentTime + 0.12){
+    radaSkrefi(naestaSkref, naestiTimi);
+    naestiTimi += skreflengd;
+    naestaSkref = (naestaSkref + 1) % 8;
+  }
+}
+
+let sidastaSyndaSkref = -1;
+function sjonLykkja(){
+  if(taktGengur && ac){
+    while(sjonRod.length && sjonRod[0].timi <= ac.currentTime){
+      const {skref} = sjonRod.shift();
+      if(skref !== sidastaSyndaSkref){
+        sidastaSyndaSkref = skref;
+        taktbord.querySelectorAll(".skref.nuna").forEach(el=>el.classList.remove("nuna"));
+        taktbord.querySelectorAll(`[data-skref="${skref}"]`).forEach(el=>el.classList.add("nuna"));
+        paddar.forEach(p=>{
+          if(!p.mynstur[skref]) return;
+          const merki = taktbord.querySelector(`[data-nafnrod="${p.id}"]`);
+          if(merki){
+            merki.classList.add("slaer");
+            setTimeout(()=>merki.classList.remove("slaer"), 140);
+          }
+          const padd = spilborð.querySelector(`[data-id="${p.id}"]`);
+          if(padd){
+            padd.classList.remove("spilar"); void padd.offsetWidth; padd.classList.add("spilar");
+            clearTimeout(padd._timi);
+            padd._timi = setTimeout(()=>padd.classList.remove("spilar"), 300);
+          }
+        });
+      }
+    }
+  }
+  requestAnimationFrame(sjonLykkja);
+}
+requestAnimationFrame(sjonLykkja);
+
+const taktSpilaTakki = document.getElementById("taktSpila");
+function skiptaTakti(){
+  raesaHljod();
+  if(ac.state === "suspended") ac.resume();
+  taktGengur = !taktGengur;
+  if(taktGengur){
+    naestaSkref = 0;
+    sidastaSyndaSkref = -1;
+    sjonRod = [];
+    naestiTimi = ac.currentTime + 0.06;
+    taktTimari = setInterval(taktLykkja, 25);
+    taktSpilaTakki.textContent = "■ Stöðva";
+    taktSpilaTakki.classList.remove("gulur");
+    taktSpilaTakki.classList.add("raudur");
+  }else{
+    clearInterval(taktTimari);
+    sjonRod = [];
+    taktbord.querySelectorAll(".skref.nuna").forEach(el=>el.classList.remove("nuna"));
+    taktSpilaTakki.textContent = "▶ Spila lykkju";
+    taktSpilaTakki.classList.add("gulur");
+    taktSpilaTakki.classList.remove("raudur");
+  }
+}
+taktSpilaTakki.onclick = skiptaTakti;
+
+document.getElementById("hradi").oninput = function(){
+  bpm = +this.value;
+  document.getElementById("hradiTala").textContent = bpm + " bpm";
+};
+document.getElementById("hreinsaTakt").onclick = ()=>{
+  paddar.forEach(p=>p.mynstur = new Array(8).fill(false));
+  teiknaTakt();
+};
+
+/* bil = spila/stöðva lykkjuna */
+document.addEventListener("keydown", e=>{
+  if(e.code === "Space" && !document.getElementById("taktur").classList.contains("falid")
+     && e.target.tagName !== "INPUT"){
+    e.preventDefault(); skiptaTakti();
+  }
+});
 
 /* lyklaborð: 1–9 og 0 */
 document.addEventListener("keydown", e=>{
@@ -506,18 +698,23 @@ document.addEventListener("keydown", e=>{
 });
 
 /* ---------- flipar ---------- */
-const flipiU = document.getElementById("flipiUppsetning");
-const flipiS = document.getElementById("flipiSpila");
-function skipta(iSpilun){
-  flipiU.setAttribute("aria-selected", String(!iSpilun));
-  flipiS.setAttribute("aria-selected", String(iSpilun));
-  document.getElementById("uppsetning").classList.toggle("falid", iSpilun);
-  document.getElementById("spilun").classList.toggle("falid", !iSpilun);
-  document.getElementById("stjornbord").classList.toggle("falid", !iSpilun);
-  if(iSpilun){ raesaHljod(); teiknaSpilbord(); }
+const flipar = {
+  uppsetning: document.getElementById("flipiUppsetning"),
+  spilun:     document.getElementById("flipiSpila"),
+  taktur:     document.getElementById("flipiTaktur")
+};
+function skipta(hvad){
+  Object.keys(flipar).forEach(k=>{
+    flipar[k].setAttribute("aria-selected", String(k === hvad));
+    document.getElementById(k).classList.toggle("falid", k !== hvad);
+  });
+  document.getElementById("stjornbord").classList.toggle("falid", hvad === "uppsetning");
+  if(hvad === "spilun"){ raesaHljod(); teiknaSpilbord(); }
+  if(hvad === "taktur"){ raesaHljod(); teiknaSpilbord(); teiknaTakt(); }
 }
-flipiU.onclick = ()=>skipta(false);
-flipiS.onclick = ()=>skipta(true);
+flipar.uppsetning.onclick = ()=>skipta("uppsetning");
+flipar.spilun.onclick     = ()=>skipta("spilun");
+flipar.taktur.onclick     = ()=>skipta("taktur");
 
 /* ---------- stjórnborð ---------- */
 document.getElementById("reverbRofi").onclick = function(){
@@ -538,7 +735,11 @@ document.getElementById("baetaVid").onclick = ()=>{
   teiknaUppsetningu();
 };
 document.getElementById("vistaSkra").onclick = ()=>{
-  const gogn = {utgafa:1, paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod}))};
+  const gogn = {
+    utgafa: 2,
+    bpm: bpm,
+    paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod, mynstur:p.mynstur}))
+  };
   const blob = new Blob([JSON.stringify(gogn)], {type:"application/json"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -556,10 +757,17 @@ document.getElementById("innSkra").onchange = async function(){
     for(const p of gogn.paddar){
       const nyr = nyrPadd();
       nyr.nafn = p.nafn; nyr.kyrr = p.kyrr; nyr.virk = p.virk; nyr.hljod = p.hljod;
+      if(Array.isArray(p.mynstur) && p.mynstur.length === 8) nyr.mynstur = p.mynstur.map(Boolean);
       if(p.hljod) nyr.buffer = await afkodaHljod(p.hljod);
       paddar.push(nyr);
     }
+    if(gogn.bpm){
+      bpm = gogn.bpm;
+      document.getElementById("hradi").value = bpm;
+      document.getElementById("hradiTala").textContent = bpm + " bpm";
+    }
     teiknaUppsetningu();
+    teiknaTakt();
   }catch(err){
     alert("Skráin er ekki hljóðfæraskrá sem forritið les.");
   }
