@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teiknihljóðfærið</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Teiknihljóðfærið">
+<meta name="theme-color" content="#16203A">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blek:#16203A;
+  --blek-djup:#0E1628;
+  --pappir:#FAF6EE;
+  --gulur:#FFC93C;
+  --raudur:#F2545B;
+  --graenn:#2ED3A0;
+  --blar:#4CC9F0;
+  --lilla:#B18CFF;
+  --grar:#8E9AB8;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --brod:"Nunito","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--blek);
+  background-image:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);
+  background-size:22px 22px;
+  color:var(--pappir);
+  font-family:var(--brod);
+  -webkit-tap-highlight-color:transparent;
+}
+.umgjord{
+  max-width:1100px;margin:0 auto;
+  padding:calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 100px calc(16px + env(safe-area-inset-left))
+}
+
+/* ---- haus ---- */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+h1{
+  font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,40px);
+  margin:0;letter-spacing:-.5px;line-height:1
+}
+h1 span{color:var(--gulur)}
+.flipar{display:flex;gap:6px;margin-left:auto;background:rgba(255,255,255,.07);padding:5px;border-radius:999px}
+.flipi{
+  font-family:var(--display);font-size:15px;font-weight:600;color:var(--grar);
+  background:none;border:0;padding:9px 18px;border-radius:999px;cursor:pointer
+}
+.flipi[aria-selected="true"]{background:var(--gulur);color:var(--blek-djup)}
+.flipi:focus-visible{outline:3px solid var(--blar);outline-offset:2px}
+
+/* ---- almennir takkar ---- */
+button{font-family:var(--brod)}
+.takki{
+  font-family:var(--display);font-weight:600;font-size:15px;
+  background:var(--pappir);color:var(--blek-djup);border:0;border-radius:12px;
+  padding:11px 18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.35)
+}
+.takki:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.takki.aukatakki{background:rgba(255,255,255,.12);color:var(--pappir);box-shadow:none}
+.takki.gulur{background:var(--gulur)}
+.takki.raudur{background:var(--raudur);color:#fff}
+.takki:focus-visible{outline:3px solid var(--blar);outline-offset:2px}
+.takkarod{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---- uppsetning ---- */
+.leidbeining{
+  font-size:15px;color:#C7D0E4;max-width:62ch;line-height:1.55;margin:0 0 20px
+}
+.spjaldalisti{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.spjald{
+  background:var(--pappir);color:var(--blek-djup);border-radius:16px;padding:16px;
+  position:relative;box-shadow:0 10px 24px rgba(0,0,0,.35)
+}
+.spjald::before{
+  content:"";position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-2deg);
+  width:74px;height:20px;background:rgba(255,201,60,.85);border-radius:2px;
+  box-shadow:0 1px 2px rgba(0,0,0,.2)
+}
+.spjaldhaus{display:flex;gap:8px;align-items:center;margin:6px 0 12px}
+.numer{
+  font-family:var(--display);font-weight:700;font-size:13px;color:#fff;
+  background:var(--blek);width:26px;height:26px;border-radius:8px;
+  display:grid;place-items:center;flex:none
+}
+.nafn{
+  flex:1;font-family:var(--display);font-size:17px;font-weight:600;
+  border:0;border-bottom:2px dashed #C9C0AE;background:none;padding:4px 2px;color:var(--blek-djup);min-width:0
+}
+.nafn:focus{outline:0;border-bottom-color:var(--raudur)}
+.reitir{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reitur{
+  border:2px dashed #C9C0AE;border-radius:12px;background:#fff;
+  aspect-ratio:1;display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;padding:6px
+}
+.reitur:hover,.reitur.yfir{border-color:var(--raudur);background:#FFF6F6}
+.reitur img{width:100%;height:100%;object-fit:contain}
+.reitur .merki{
+  font-size:12px;color:#7A7362;text-align:center;line-height:1.35;padding:4px
+}
+.merkimidi{
+  position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:#7A7362;background:rgba(255,255,255,.9);padding:2px 5px;border-radius:5px
+}
+.hljodrod{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.hljodstada{font-size:13px;color:#5E6577;flex:1;min-width:110px}
+.hljodstada.tilbuid{color:#1E9B72;font-weight:700}
+.smatakki{
+  border:0;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:var(--display);background:var(--blek);color:#fff
+}
+.smatakki.rautt{background:var(--raudur)}
+.smatakki.tekurupp{background:var(--raudur);animation:pulsa .8s infinite}
+.smatakki.ljos{background:#E7E1D4;color:var(--blek-djup)}
+.smatakki:focus-visible{outline:3px solid var(--blar);outline-offset:2px}
+@keyframes pulsa{50%{opacity:.55}}
+.eyda{
+  position:absolute;top:10px;right:10px;border:0;background:none;color:#B4AC9B;
+  font-size:20px;cursor:pointer;line-height:1;padding:2px 6px
+}
+.eyda:hover{color:var(--raudur)}
+
+/* ---- spilun ---- */
+.spilborð{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.padd{
+  position:relative;background:var(--pappir);border:0;border-radius:18px;padding:10px;
+  aspect-ratio:1;cursor:pointer;box-shadow:0 8px 0 rgba(0,0,0,.35);
+  display:flex;flex-direction:column;touch-action:manipulation
+}
+.padd:focus-visible{outline:4px solid var(--blar);outline-offset:3px}
+.padd .mynd{flex:1;min-height:0;position:relative}
+.padd .mynd img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain
+}
+.padd .mynd img.virk{opacity:0}
+.padd.spilar .mynd img.kyrr{opacity:0}
+.padd.spilar .mynd img.virk{opacity:1}
+.padd.spilar{animation:hristing .38s ease-in-out infinite}
+.padd .titill{
+  font-family:var(--display);font-weight:600;font-size:14px;color:var(--blek-djup);
+  text-align:center;padding-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+.hringur{
+  position:absolute;inset:0;border-radius:18px;border:4px solid currentColor;
+  opacity:0;pointer-events:none
+}
+.padd.spilar .hringur{animation:bylgja .55s ease-out}
+@keyframes hristing{
+  0%{transform:rotate(-2.5deg) scale(1.03)}
+  50%{transform:rotate(2.5deg) scale(1.05)}
+  100%{transform:rotate(-2.5deg) scale(1.03)}
+}
+@keyframes bylgja{
+  from{opacity:.9;transform:scale(1)}
+  to{opacity:0;transform:scale(1.35)}
+}
+@media (prefers-reduced-motion:reduce){
+  .padd.spilar{animation:none;transform:scale(1.04)}
+  .padd.spilar .hringur{animation:none;opacity:.6}
+}
+
+/* ---- stjórnborð neðst ---- */
+.stjornbord{
+  position:fixed;left:0;right:0;bottom:0;background:rgba(14,22,40,.94);
+  backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.12);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;z-index:5
+}
+.rofi{
+  display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;
+  background:rgba(255,255,255,.1);border:0;color:var(--pappir);padding:10px 16px;
+  border-radius:999px;cursor:pointer;font-size:15px
+}
+.rofi[aria-pressed="true"]{background:var(--graenn);color:var(--blek-djup)}
+.rofi .pera{width:11px;height:11px;border-radius:50%;background:#5A6480}
+.rofi[aria-pressed="true"] .pera{background:var(--blek-djup)}
+.sleði{display:flex;align-items:center;gap:10px;font-size:14px;color:#C7D0E4}
+input[type=range]{accent-color:var(--graenn);width:130px}
+.tomt{
+  text-align:center;color:#C7D0E4;padding:60px 20px;font-size:16px;line-height:1.6
+}
+.tomt strong{color:var(--gulur);font-family:var(--display)}
+.falid{display:none}
+.smaletur{font-size:13px;color:var(--grar);margin-top:26px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="umgjord">
+  <header>
+    <h1>Teikni<span>hljóðfærið</span></h1>
+    <div class="flipar" role="tablist">
+      <button class="flipi" id="flipiUppsetning" role="tab" aria-selected="true">Uppsetning</button>
+      <button class="flipi" id="flipiSpila" role="tab" aria-selected="false">Spila</button>
+    </div>
+  </header>
+
+  <!-- UPPSETNING -->
+  <section id="uppsetning">
+    <p class="leidbeining">
+      Búðu til einn takka fyrir hvert hljóð. Settu inn kyrru myndina sem sést venjulega,
+      hreyfimyndina sem birtist á meðan hljóðið hljómar, og hljóðið sjálft — annaðhvort
+      með því að taka það upp hér eða setja inn skrá.
+    </p>
+
+    <div class="takkarod" style="margin-bottom:22px">
+      <button class="takki gulur" id="baetaVid">+ Nýr takki</button>
+      <button class="takki aukatakki" id="vistaSkra">Vista hljóðfærið</button>
+      <button class="takki aukatakki" id="opnaSkra">Opna hljóðfæri</button>
+      <input type="file" id="innSkra" accept=".json,application/json" class="falid">
+    </div>
+
+    <div class="spjaldalisti" id="spjaldalisti"></div>
+
+    <p class="smaletur">
+      „Vista hljóðfærið“ býr til eina skrá með öllum myndum og hljóðum. Geymdu hana og opnaðu
+      aftur næst — þá heldur bekkurinn áfram þar sem frá var horfið. Upptaka krefst þess að
+      vafrinn fái aðgang að hljóðnema; ef upptakan virkar ekki hér skaltu opna skrána beint
+      í vafranum (Chrome eða Safari).
+    </p>
+  </section>
+
+  <!-- SPILUN -->
+  <section id="spilun" class="falid">
+    <div class="spilborð" id="spilborð"></div>
+    <div class="tomt falid" id="tomtSkilabod">
+      Engir takkar til ennþá. Farðu í <strong>Uppsetning</strong> og búðu til þann fyrsta.
+    </div>
+  </section>
+</div>
+
+<div class="stjornbord falid" id="stjornbord">
+  <button class="rofi" id="reverbRofi" aria-pressed="false"><span class="pera"></span>Ómur (reverb)</button>
+  <label class="sleði">Magn <input type="range" id="reverbMagn" min="0" max="100" value="45"></label>
+  <label class="sleði">Styrkur <input type="range" id="hljodstyrkur" min="0" max="100" value="85"></label>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const litir = ["#F2545B","#4CC9F0","#2ED3A0","#FFC93C","#B18CFF"];
+let paddar = [];
+let naestaId = 1;
+
+/* ---------- hljóðkerfi ---------- */
+let ac=null, master=null, thurr=null, blautur=null, omur=null, reverbA=false;
+function raesaHljod(){
+  if(ac) return ac;
+  ac = new (window.AudioContext||window.webkitAudioContext)();
+  master = ac.createGain();
+  master.gain.value = 0.85;
+  master.connect(ac.destination);
+
+  thurr = ac.createGain(); thurr.gain.value = 1; thurr.connect(master);
+
+  omur = ac.createConvolver();
+  omur.buffer = byggjaOm(2.4, 2.6);
+  blautur = ac.createGain(); blautur.gain.value = 0;
+  omur.connect(blautur); blautur.connect(master);
+  return ac;
+}
+function byggjaOm(lengd, hnignun){
+  const sr = ac.sampleRate, n = Math.floor(sr*lengd);
+  const buf = ac.createBuffer(2, n, sr);
+  for(let c=0;c<2;c++){
+    const d = buf.getChannelData(c);
+    for(let i=0;i<n;i++){
+      d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, hnignun);
+    }
+  }
+  return buf;
+}
+function stillaOm(){
+  if(!blautur) return;
+  const magn = document.getElementById("reverbMagn").value/100;
+  blautur.gain.value = reverbA ? magn*0.9 : 0;
+}
+
+/* ---------- hjálpartól ---------- */
+function dataUrlIArrayBuffer(dataUrl){
+  const base64 = dataUrl.split(",")[1];
+  const bin = atob(base64);
+  const buf = new ArrayBuffer(bin.length);
+  const view = new Uint8Array(buf);
+  for(let i=0;i<bin.length;i++) view[i] = bin.charCodeAt(i);
+  return buf;
+}
+function lesaSemDataUrl(file){
+  return new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>res(fr.result);
+    fr.onerror = ()=>rej(new Error("Ekki tókst að lesa skrána"));
+    fr.readAsDataURL(file);
+  });
+}
+async function afkodaHljod(dataUrl){
+  raesaHljod();
+  try{
+    return await ac.decodeAudioData(dataUrlIArrayBuffer(dataUrl));
+  }catch(e){
+    return null;
+  }
+}
+
+/* ---------- gögn ---------- */
+function nyrPadd(){
+  return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null, hljod:null, buffer:null};
+}
+function finna(id){ return paddar.find(p=>p.id===id); }
+
+/* ---------- uppsetningarsýn ---------- */
+const spjaldalisti = document.getElementById("spjaldalisti");
+
+function teiknaUppsetningu(){
+  spjaldalisti.innerHTML = "";
+  paddar.forEach((p,i)=>{
+    const spjald = document.createElement("div");
+    spjald.className = "spjald";
+    spjald.innerHTML = `
+      <button class="eyda" title="Eyða takka" data-eyda="${p.id}">&times;</button>
+      <div class="spjaldhaus">
+        <span class="numer">${i+1}</span>
+        <input class="nafn" value="${p.nafn.replace(/"/g,"&quot;")}" data-nafn="${p.id}" aria-label="Nafn takka">
+      </div>
+      <div class="reitir">
+        <div class="reitur" data-mynd="kyrr" data-id="${p.id}" tabindex="0" role="button" aria-label="Kyrr mynd">
+          <span class="merkimidi">Kyrr</span>
+          ${p.kyrr ? `<img src="${p.kyrr}" alt="">` : `<span class="merki">Smelltu eða dragðu mynd hingað</span>`}
+        </div>
+        <div class="reitur" data-mynd="virk" data-id="${p.id}" tabindex="0" role="button" aria-label="Hreyfimynd">
+          <span class="merkimidi">Á hreyfingu</span>
+          ${p.virk ? `<img src="${p.virk}" alt="">` : `<span class="merki">Myndin sem hristist</span>`}
+        </div>
+      </div>
+      <div class="hljodrod">
+        <span class="hljodstada ${p.buffer?"tilbuid":""}">${p.buffer ? "Hljóð tilbúið" : "Ekkert hljóð"}</span>
+        <button class="smatakki rautt" data-upptaka="${p.id}">Taka upp</button>
+        <button class="smatakki ljos" data-hlada="${p.id}">Hljóðskrá</button>
+        <button class="smatakki ljos" data-profa="${p.id}">Prófa</button>
+      </div>
+    `;
+    spjaldalisti.appendChild(spjald);
+  });
+}
+
+spjaldalisti.addEventListener("input", e=>{
+  const id = e.target.dataset.nafn;
+  if(id){ finna(+id).nafn = e.target.value; }
+});
+
+spjaldalisti.addEventListener("click", async e=>{
+  const t = e.target;
+
+  if(t.dataset.eyda){
+    paddar = paddar.filter(p=>p.id !== +t.dataset.eyda);
+    teiknaUppsetningu(); return;
+  }
+  const reitur = t.closest("[data-mynd]");
+  if(reitur){ veljaMynd(+reitur.dataset.id, reitur.dataset.mynd); return; }
+
+  if(t.dataset.hlada){ veljaHljod(+t.dataset.hlada); return; }
+  if(t.dataset.profa){ spila(finna(+t.dataset.profa)); return; }
+  if(t.dataset.upptaka){ taktuUpp(+t.dataset.upptaka, t); return; }
+});
+
+/* drag og drop á myndareiti */
+spjaldalisti.addEventListener("dragover", e=>{
+  const r = e.target.closest("[data-mynd]");
+  if(r){ e.preventDefault(); r.classList.add("yfir"); }
+});
+spjaldalisti.addEventListener("dragleave", e=>{
+  const r = e.target.closest("[data-mynd]");
+  if(r) r.classList.remove("yfir");
+});
+spjaldalisti.addEventListener("drop", async e=>{
+  const r = e.target.closest("[data-mynd]");
+  if(!r) return;
+  e.preventDefault(); r.classList.remove("yfir");
+  const file = e.dataTransfer.files[0];
+  if(!file || !file.type.startsWith("image/")) return;
+  finna(+r.dataset.id)[r.dataset.mynd] = await lesaSemDataUrl(file);
+  teiknaUppsetningu();
+});
+
+function veljaMynd(id, hvor){
+  const inn = document.createElement("input");
+  inn.type = "file"; inn.accept = "image/*";
+  inn.onchange = async ()=>{
+    if(!inn.files[0]) return;
+    finna(id)[hvor] = await lesaSemDataUrl(inn.files[0]);
+    teiknaUppsetningu();
+  };
+  inn.click();
+}
+
+function veljaHljod(id){
+  const inn = document.createElement("input");
+  inn.type = "file"; inn.accept = "audio/*";
+  inn.onchange = async ()=>{
+    if(!inn.files[0]) return;
+    const p = finna(id);
+    p.hljod = await lesaSemDataUrl(inn.files[0]);
+    p.buffer = await afkodaHljod(p.hljod);
+    teiknaUppsetningu();
+  };
+  inn.click();
+}
+
+/* ---------- upptaka ---------- */
+let virkUpptaka = null;
+async function taktuUpp(id, takki){
+  if(virkUpptaka && virkUpptaka.id === id){ virkUpptaka.rec.stop(); return; }
+  if(virkUpptaka){ virkUpptaka.rec.stop(); }
+  try{
+    const straumur = await navigator.mediaDevices.getUserMedia({audio:true});
+    const rec = new MediaRecorder(straumur);
+    const bitar = [];
+    rec.ondataavailable = e=>bitar.push(e.data);
+    rec.onstop = async ()=>{
+      straumur.getTracks().forEach(t=>t.stop());
+      virkUpptaka = null;
+      const blob = new Blob(bitar, {type: rec.mimeType || "audio/webm"});
+      const p = finna(id);
+      p.hljod = await lesaSemDataUrl(blob);
+      p.buffer = await afkodaHljod(p.hljod);
+      teiknaUppsetningu();
+    };
+    rec.start();
+    virkUpptaka = {id, rec};
+    takki.textContent = "Stöðva";
+    takki.classList.add("tekurupp");
+  }catch(err){
+    alert("Vafrinn fékk ekki aðgang að hljóðnemanum. Opnaðu skrána beint í vafranum eða settu inn hljóðskrá í staðinn.");
+  }
+}
+
+/* ---------- spilun ---------- */
+const spilborð = document.getElementById("spilborð");
+const tomtSkilabod = document.getElementById("tomtSkilabod");
+
+function teiknaSpilbord(){
+  spilborð.innerHTML = "";
+  tomtSkilabod.classList.toggle("falid", paddar.length > 0);
+  paddar.forEach((p,i)=>{
+    const b = document.createElement("button");
+    b.className = "padd";
+    b.style.color = litir[i % litir.length];
+    b.dataset.id = p.id;
+    const kyrr = p.kyrr || p.virk;
+    const virk = p.virk || p.kyrr;
+    b.innerHTML = `
+      <span class="hringur"></span>
+      <span class="mynd">
+        ${kyrr ? `<img class="kyrr" src="${kyrr}" alt="">` : `<img class="kyrr" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
+        ${virk ? `<img class="virk" src="${virk}" alt="">` : `<img class="virk" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
+      </span>
+      <span class="titill">${p.nafn}</span>
+    `;
+    b.addEventListener("pointerdown", ev=>{ ev.preventDefault(); spila(p, b); });
+    spilborð.appendChild(b);
+  });
+}
+function teiknaAuda(i){
+  const litur = encodeURIComponent(litir[i % litir.length]);
+  return encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="none" stroke="${litirRaw(i)}" stroke-width="6" stroke-dasharray="8 7"/></svg>`);
+}
+function litirRaw(i){ return litir[i % litir.length]; }
+
+function spila(p, hnappur){
+  raesaHljod();
+  if(ac.state === "suspended") ac.resume();
+  if(p.buffer){
+    const src = ac.createBufferSource();
+    src.buffer = p.buffer;
+    src.connect(thurr);
+    if(omur) src.connect(omur);
+    src.start();
+  }
+  const b = hnappur || spilborð.querySelector(`[data-id="${p.id}"]`);
+  if(!b) return;
+  b.classList.remove("spilar");
+  void b.offsetWidth;
+  b.classList.add("spilar");
+  const lengd = p.buffer ? Math.min(Math.max(p.buffer.duration*1000, 350), 2200) : 450;
+  clearTimeout(b._timi);
+  b._timi = setTimeout(()=>b.classList.remove("spilar"), lengd);
+}
+
+/* lyklaborð: 1–9 og 0 */
+document.addEventListener("keydown", e=>{
+  if(document.getElementById("spilun").classList.contains("falid")) return;
+  if(/^[0-9]$/.test(e.key)){
+    const vis = e.key === "0" ? 9 : (+e.key - 1);
+    if(paddar[vis]) spila(paddar[vis]);
+  }
+});
+
+/* ---------- flipar ---------- */
+const flipiU = document.getElementById("flipiUppsetning");
+const flipiS = document.getElementById("flipiSpila");
+function skipta(iSpilun){
+  flipiU.setAttribute("aria-selected", String(!iSpilun));
+  flipiS.setAttribute("aria-selected", String(iSpilun));
+  document.getElementById("uppsetning").classList.toggle("falid", iSpilun);
+  document.getElementById("spilun").classList.toggle("falid", !iSpilun);
+  document.getElementById("stjornbord").classList.toggle("falid", !iSpilun);
+  if(iSpilun){ raesaHljod(); teiknaSpilbord(); }
+}
+flipiU.onclick = ()=>skipta(false);
+flipiS.onclick = ()=>skipta(true);
+
+/* ---------- stjórnborð ---------- */
+document.getElementById("reverbRofi").onclick = function(){
+  raesaHljod();
+  reverbA = !reverbA;
+  this.setAttribute("aria-pressed", String(reverbA));
+  stillaOm();
+};
+document.getElementById("reverbMagn").oninput = stillaOm;
+document.getElementById("hljodstyrkur").oninput = function(){
+  raesaHljod();
+  master.gain.value = this.value/100;
+};
+
+/* ---------- vista og opna ---------- */
+document.getElementById("baetaVid").onclick = ()=>{
+  paddar.push(nyrPadd());
+  teiknaUppsetningu();
+};
+document.getElementById("vistaSkra").onclick = ()=>{
+  const gogn = {utgafa:1, paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod}))};
+  const blob = new Blob([JSON.stringify(gogn)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "hljodfaeri.json";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+};
+document.getElementById("opnaSkra").onclick = ()=>document.getElementById("innSkra").click();
+document.getElementById("innSkra").onchange = async function(){
+  const file = this.files[0];
+  if(!file) return;
+  try{
+    const gogn = JSON.parse(await file.text());
+    paddar = [];
+    for(const p of gogn.paddar){
+      const nyr = nyrPadd();
+      nyr.nafn = p.nafn; nyr.kyrr = p.kyrr; nyr.virk = p.virk; nyr.hljod = p.hljod;
+      if(p.hljod) nyr.buffer = await afkodaHljod(p.hljod);
+      paddar.push(nyr);
+    }
+    teiknaUppsetningu();
+  }catch(err){
+    alert("Skráin er ekki hljóðfæraskrá sem forritið les.");
+  }
+  this.value = "";
+};
+
+/* ---------- byrjun ---------- */
+paddar.push(nyrPadd(), nyrPadd(), nyrPadd(), nyrPadd());
+teiknaUppsetningu();
+})();
+</script>
+</body>
+</html>
