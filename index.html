@@ -140,7 +140,7 @@ button{font-family:var(--brod)}
 .padd:focus-visible{outline:4px solid var(--blar);outline-offset:3px}
 .padd .mynd{flex:1;min-height:0;position:relative}
 .padd .mynd img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:contain
+  position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain
 }
 .padd .mynd img.virk{opacity:0}
 .padd.spilar .mynd img.kyrr{opacity:0}
@@ -151,7 +151,7 @@ button{font-family:var(--brod)}
   text-align:center;padding-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 .hringur{
-  position:absolute;inset:0;border-radius:18px;border:4px solid currentColor;
+  position:absolute;top:0;left:0;right:0;bottom:0;border-radius:18px;border:4px solid currentColor;
   opacity:0;pointer-events:none
 }
 .padd.spilar .hringur{animation:bylgja .55s ease-out}
@@ -210,7 +210,7 @@ button{font-family:var(--brod)}
 /* ---- stjórnborð neðst ---- */
 .stjornbord{
   position:fixed;left:0;right:0;bottom:0;background:rgba(14,22,40,.94);
-  backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.12);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid rgba(255,255,255,.12);
   padding:12px 16px calc(12px + env(safe-area-inset-bottom));
   display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;z-index:5
 }
@@ -229,6 +229,13 @@ input[type=range]{accent-color:var(--graenn);width:130px}
 }
 .tomt strong{color:var(--gulur);font-family:var(--display)}
 .falid{display:none}
+.hulinn{position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0}
+@supports not (aspect-ratio: 1 / 1){
+  .reitur{height:132px}
+  .padd{height:184px}
+  .skref{height:42px}
+  @media (max-width:620px){ .skref{height:34px} }
+}
 .smaletur{font-size:13px;color:var(--grar);margin-top:26px;line-height:1.6}
 </style>
 </head>
@@ -255,7 +262,7 @@ input[type=range]{accent-color:var(--graenn);width:130px}
       <button class="takki gulur" id="baetaVid">+ Nýr takki</button>
       <button class="takki aukatakki" id="vistaSkra">Vista hljóðfærið</button>
       <button class="takki aukatakki" id="opnaSkra">Opna hljóðfæri</button>
-      <input type="file" id="innSkra" accept=".json,application/json" class="falid">
+      <input type="file" id="innSkra" accept=".json,application/json" class="hulinn">
     </div>
 
     <div class="spjaldalisti" id="spjaldalisti"></div>
@@ -350,6 +357,64 @@ function dataUrlIArrayBuffer(dataUrl){
   for(let i=0;i<bin.length;i++) view[i] = bin.charCodeAt(i);
   return buf;
 }
+function veljaSkra(accept, cb){
+  /* eldri Safari opnar ekki valmyndina nema reiturinn sé í skjalinu sjálfu */
+  const inn = document.createElement("input");
+  inn.type = "file";
+  inn.accept = accept;
+  inn.className = "hulinn";
+  document.body.appendChild(inn);
+  inn.addEventListener("change", function(){
+    const f = inn.files && inn.files[0];
+    setTimeout(function(){ if(inn.parentNode) inn.parentNode.removeChild(inn); }, 0);
+    if(f) cb(f);
+  });
+  inn.click();
+}
+
+/* Myndir úr iPad-myndavél eru 8–12 megapixlar. Eldri tæki ráða ekki við
+   að halda mörgum slíkum í minni, svo við minnkum þær strax. */
+function minnkaMynd(file, hamark){
+  return new Promise(function(res){
+    lesaSemDataUrl(file).then(function(dataUrl){
+      const img = new Image();
+      img.onload = function(){
+        try{
+          let bw = img.naturalWidth || img.width;
+          let bh = img.naturalHeight || img.height;
+          if(!bw || !bh){ res(dataUrl); return; }
+          if(Math.max(bw,bh) <= hamark && dataUrl.length < 500000){ res(dataUrl); return; }
+          const gegnsaett = /png|gif|webp/i.test(file.type || "");
+          /* helmingum í þrepum — eldri iOS teiknar risamyndir skakkt í einu skrefi */
+          let cnv = document.createElement("canvas");
+          let w = bw, h = bh, heimild = img;
+          while(Math.max(w,h) > hamark*2){
+            const nw = Math.max(1, Math.round(w/2)), nh = Math.max(1, Math.round(h/2));
+            const millicnv = document.createElement("canvas");
+            millicnv.width = nw; millicnv.height = nh;
+            millicnv.getContext("2d").drawImage(heimild, 0, 0, nw, nh);
+            heimild = millicnv; w = nw; h = nh;
+          }
+          const skali = Math.min(1, hamark/Math.max(w,h));
+          cnv.width = Math.max(1, Math.round(w*skali));
+          cnv.height = Math.max(1, Math.round(h*skali));
+          const g = cnv.getContext("2d");
+          if(!gegnsaett){ g.fillStyle = "#ffffff"; g.fillRect(0,0,cnv.width,cnv.height); }
+          g.drawImage(heimild, 0, 0, cnv.width, cnv.height);
+          res(cnv.toDataURL(gegnsaett ? "image/png" : "image/jpeg", 0.85));
+        }catch(e){
+          res(dataUrl);
+        }
+      };
+      img.onerror = function(){ res(dataUrl); };
+      img.src = dataUrl;
+    }).catch(function(){
+      alert("Ekki tókst að lesa myndina. Prófaðu aðra mynd eða minni skrá.");
+      res(null);
+    });
+  });
+}
+
 function lesaSemDataUrl(file){
   return new Promise((res,rej)=>{
     const fr = new FileReader();
@@ -358,13 +423,25 @@ function lesaSemDataUrl(file){
     fr.readAsDataURL(file);
   });
 }
-async function afkodaHljod(dataUrl){
+function lesaSemTexta(file){
+  return new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>res(fr.result);
+    fr.onerror = ()=>rej(new Error("Ekki tókst að lesa skrána"));
+    fr.readAsText(file);
+  });
+}
+function afkodaHljod(dataUrl){
   raesaHljod();
-  try{
-    return await ac.decodeAudioData(dataUrlIArrayBuffer(dataUrl));
-  }catch(e){
-    return null;
-  }
+  return new Promise(function(res){
+    let lokid = false;
+    const takist = function(b){ if(!lokid){ lokid = true; res(b); } };
+    const mistakist = function(){ if(!lokid){ lokid = true; res(null); } };
+    try{
+      const svar = ac.decodeAudioData(dataUrlIArrayBuffer(dataUrl), takist, mistakist);
+      if(svar && svar.then) svar.then(takist, mistakist);
+    }catch(e){ mistakist(); }
+  });
 }
 
 /* ---------- gögn ---------- */
@@ -376,6 +453,8 @@ function finna(id){ return paddar.find(p=>p.id===id); }
 
 /* ---------- uppsetningarsýn ---------- */
 const spjaldalisti = document.getElementById("spjaldalisti");
+
+const styðurUpptoku = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 
 function teiknaUppsetningu(){
   spjaldalisti.innerHTML = "";
@@ -400,7 +479,7 @@ function teiknaUppsetningu(){
       </div>
       <div class="hljodrod">
         <span class="hljodstada ${p.buffer?"tilbuid":""}">${p.buffer ? "Hljóð tilbúið" : "Ekkert hljóð"}</span>
-        <button class="smatakki rautt" data-upptaka="${p.id}">Taka upp</button>
+        ${styðurUpptoku ? `<button class="smatakki rautt" data-upptaka="${p.id}">Taka upp</button>` : ""}
         <button class="smatakki ljos" data-hlada="${p.id}">Hljóðskrá</button>
         <button class="smatakki ljos" data-profa="${p.id}">Prófa</button>
       </div>
@@ -443,33 +522,32 @@ spjaldalisti.addEventListener("drop", async e=>{
   if(!r) return;
   e.preventDefault(); r.classList.remove("yfir");
   const file = e.dataTransfer.files[0];
-  if(!file || !file.type.startsWith("image/")) return;
-  finna(+r.dataset.id)[r.dataset.mynd] = await lesaSemDataUrl(file);
+  if(!file || file.type.indexOf("image/") !== 0) return;
+  const mynd = await minnkaMynd(file, 640);
+  if(!mynd) return;
+  finna(+r.dataset.id)[r.dataset.mynd] = mynd;
   teiknaUppsetningu();
+  teiknaTakt();
 });
 
 function veljaMynd(id, hvor){
-  const inn = document.createElement("input");
-  inn.type = "file"; inn.accept = "image/*";
-  inn.onchange = async ()=>{
-    if(!inn.files[0]) return;
-    finna(id)[hvor] = await lesaSemDataUrl(inn.files[0]);
+  veljaSkra("image/*", async function(file){
+    const mynd = await minnkaMynd(file, 640);
+    if(!mynd) return;
+    finna(id)[hvor] = mynd;
     teiknaUppsetningu();
-  };
-  inn.click();
+    teiknaTakt();
+  });
 }
 
 function veljaHljod(id){
-  const inn = document.createElement("input");
-  inn.type = "file"; inn.accept = "audio/*";
-  inn.onchange = async ()=>{
-    if(!inn.files[0]) return;
+  veljaSkra("audio/*", async function(file){
     const p = finna(id);
-    p.hljod = await lesaSemDataUrl(inn.files[0]);
+    p.hljod = await lesaSemDataUrl(file);
     p.buffer = await afkodaHljod(p.hljod);
+    if(!p.buffer) alert("Vafrinn ræður ekki við þetta hljóðsnið. Prófaðu m4a, mp3 eða wav.");
     teiknaUppsetningu();
-  };
-  inn.click();
+  });
 }
 
 /* ---------- upptaka ---------- */
@@ -496,7 +574,7 @@ async function taktuUpp(id, takki){
     takki.textContent = "Stöðva";
     takki.classList.add("tekurupp");
   }catch(err){
-    alert("Vafrinn fékk ekki aðgang að hljóðnemanum. Opnaðu skrána beint í vafranum eða settu inn hljóðskrá í staðinn.");
+    alert("Vafrinn fékk ekki aðgang að hljóðnemanum. Takið hljóðið upp í Raddupptöku og setjið það inn með „Hljóðskrá“ í staðinn.");
   }
 }
 
@@ -752,7 +830,7 @@ document.getElementById("innSkra").onchange = async function(){
   const file = this.files[0];
   if(!file) return;
   try{
-    const gogn = JSON.parse(await file.text());
+    const gogn = JSON.parse(await lesaSemTexta(file));
     paddar = [];
     for(const p of gogn.paddar){
       const nyr = nyrPadd();
