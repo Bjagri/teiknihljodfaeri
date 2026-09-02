@@ -207,6 +207,47 @@ button{font-family:var(--brod)}
   .taktnafn .heiti{font-size:11px}
 }
 
+/* ---- klippiborð ---- */
+.yfirlag{
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(9,14,26,.9);
+  z-index:20;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto
+}
+.klippispjald{
+  background:var(--pappir);color:var(--blek-djup);border-radius:18px;padding:18px;
+  width:100%;max-width:640px;box-shadow:0 18px 50px rgba(0,0,0,.5)
+}
+.klippihaus{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.klippihaus h2{font-family:var(--display);font-size:19px;margin:0;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bylgja{
+  position:relative;background:var(--blek-djup);border-radius:12px;height:150px;
+  overflow:hidden;touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none
+}
+.bylgja canvas{display:block;width:100%;height:100%}
+.skuggi{position:absolute;top:0;bottom:0;background:rgba(9,14,26,.74);pointer-events:none}
+.handfang{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--gulur);pointer-events:none}
+.handfang::before{
+  content:"";position:absolute;top:0;left:-10px;width:23px;height:22px;
+  background:var(--gulur);border-radius:0 0 9px 9px
+}
+.handfang.endi{background:var(--raudur)}
+.handfang.endi::before{background:var(--raudur)}
+.timamerki{
+  display:flex;justify-content:space-between;font-size:12px;color:#5E6577;
+  font-family:var(--display);margin-top:6px
+}
+.klippilina{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.klippilina label{font-family:var(--display);font-size:14px;display:flex;align-items:center;gap:9px}
+.klippilina input[type=range]{accent-color:var(--raudur);width:170px}
+.tonntala{
+  font-family:var(--display);font-weight:700;background:var(--blek);color:#fff;
+  border-radius:8px;padding:3px 9px;font-size:13px;min-width:54px;text-align:center
+}
+.merkitakki{
+  font-size:11px;font-weight:700;background:#E7E1D4;color:#5E6577;border-radius:6px;
+  padding:2px 6px;margin-left:4px;font-family:var(--display)
+}
+
 /* ---- stjórnborð neðst ---- */
 .stjornbord{
   position:fixed;left:0;right:0;bottom:0;background:rgba(14,22,40,.94);
@@ -298,6 +339,42 @@ input[type=range]{accent-color:var(--graenn);width:130px}
       Engin hljóð til að raða. Farðu í <strong>Uppsetning</strong> og búðu til takka fyrst.
     </div>
   </section>
+</div>
+
+<div class="yfirlag falid" id="klippiborð">
+  <div class="klippispjald">
+    <div class="klippihaus">
+      <h2 id="klippiNafn">Klippa</h2>
+      <button class="smatakki ljos" id="klippiLoka">Loka</button>
+    </div>
+    <div class="bylgja" id="bylgja">
+      <canvas id="bylgjaCanvas"></canvas>
+      <div class="skuggi" id="skuggiV"></div>
+      <div class="skuggi" id="skuggiH"></div>
+      <div class="handfang" id="handfangU"></div>
+      <div class="handfang endi" id="handfangE"></div>
+    </div>
+    <div class="timamerki">
+      <span id="merkiU">Byrjar: 0,00 s</span>
+      <span id="merkiE">Endar: 0,00 s</span>
+    </div>
+    <div class="klippilina">
+      <label>Tónhæð
+        <input type="range" id="tonnSledi" min="-12" max="12" step="1" value="0">
+        <span class="tonntala" id="tonnTala">0</span>
+      </label>
+    </div>
+    <div class="klippilina">
+      <button class="takki gulur" id="klippiSpila">▶ Heyra</button>
+      <button class="takki aukatakki" id="finnaUpphaf" style="background:#E7E1D4;color:#16203A">Finna upphafið</button>
+      <button class="takki aukatakki" id="nullstilla" style="background:#E7E1D4;color:#16203A">Núllstilla</button>
+    </div>
+    <p style="font-size:13px;color:#5E6577;line-height:1.5;margin:14px 0 0">
+      Dragðu fingurinn á bylgjuna til að færa gula upphafsmerkið og það rauða í endann.
+      Tónhæðin er í hálftónum — hljóðið verður líka hraðara þegar það hækkar, alveg eins og
+      þegar segulband er spilað hraðar.
+    </p>
+  </div>
 </div>
 
 <div class="stjornbord falid" id="stjornbord">
@@ -447,7 +524,8 @@ function afkodaHljod(dataUrl){
 /* ---------- gögn ---------- */
 function nyrPadd(){
   return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null,
-          hljod:null, buffer:null, mynstur:new Array(8).fill(false)};
+          hljod:null, buffer:null, mynstur:new Array(8).fill(false),
+          tonn:0, upphaf:0, endir:null};
 }
 function finna(id){ return paddar.find(p=>p.id===id); }
 
@@ -478,10 +556,13 @@ function teiknaUppsetningu(){
         </div>
       </div>
       <div class="hljodrod">
-        <span class="hljodstada ${p.buffer?"tilbuid":""}">${p.buffer ? "Hljóð tilbúið" : "Ekkert hljóð"}</span>
+        <span class="hljodstada ${p.buffer?"tilbuid":""}">${p.buffer ? "Hljóð tilbúið" : "Ekkert hljóð"}${
+          p.buffer && p.tonn ? `<span class="merkitakki">${p.tonn>0?"+":""}${p.tonn}</span>` : ""}${
+          p.buffer && (p.upphaf > 0.001 || p.endir !== null) ? `<span class="merkitakki">klippt</span>` : ""}</span>
         ${styðurUpptoku ? `<button class="smatakki rautt" data-upptaka="${p.id}">Taka upp</button>` : ""}
         <button class="smatakki ljos" data-hlada="${p.id}">Hljóðskrá</button>
         <button class="smatakki ljos" data-profa="${p.id}">Prófa</button>
+        ${p.buffer ? `<button class="smatakki" data-klippa="${p.id}">Klippa &amp; tónhæð</button>` : ""}
       </div>
     `;
     spjaldalisti.appendChild(spjald);
@@ -505,6 +586,7 @@ spjaldalisti.addEventListener("click", async e=>{
 
   if(t.dataset.hlada){ veljaHljod(+t.dataset.hlada); return; }
   if(t.dataset.profa){ spila(finna(+t.dataset.profa)); return; }
+  if(t.dataset.klippa){ opnaKlippi(+t.dataset.klippa); return; }
   if(t.dataset.upptaka){ taktuUpp(+t.dataset.upptaka, t); return; }
 });
 
@@ -610,13 +692,34 @@ function teiknaAuda(i){
 }
 function litirRaw(i){ return litir[i % litir.length]; }
 
+function hradiPadds(p){ return Math.pow(2, (p.tonn || 0) / 12); }
+function upphafPadds(p){
+  return Math.max(0, Math.min(p.upphaf || 0, p.buffer ? p.buffer.duration - 0.01 : 0));
+}
+function endirPadds(p){
+  if(!p.buffer) return 0;
+  const e = (p.endir === null || p.endir === undefined) ? p.buffer.duration : p.endir;
+  return Math.max(upphafPadds(p) + 0.01, Math.min(e, p.buffer.duration));
+}
+/* hversu lengi hljóðið heyrist í raun, þegar tónhæðin hefur breytt hraðanum */
+function heyranlegLengd(p){
+  if(!p.buffer) return 0.45;
+  return (endirPadds(p) - upphafPadds(p)) / hradiPadds(p);
+}
+
 function raesaBuffer(p, timi){
   if(!p.buffer) return;
   const src = ac.createBufferSource();
   src.buffer = p.buffer;
+  src.playbackRate.value = hradiPadds(p);
   src.connect(thurr);
   if(omur) src.connect(omur);
-  src.start(timi || 0);
+  const u = upphafPadds(p), e = endirPadds(p);
+  try{
+    src.start(timi || 0, u, e - u);
+  }catch(err){
+    src.start(timi || 0);
+  }
 }
 
 function spila(p, hnappur){
@@ -628,10 +731,167 @@ function spila(p, hnappur){
   b.classList.remove("spilar");
   void b.offsetWidth;
   b.classList.add("spilar");
-  const lengd = p.buffer ? Math.min(Math.max(p.buffer.duration*1000, 350), 2200) : 450;
+  const lengd = p.buffer ? Math.min(Math.max(heyranlegLengd(p)*1000, 350), 2200) : 450;
   clearTimeout(b._timi);
   b._timi = setTimeout(()=>b.classList.remove("spilar"), lengd);
 }
+
+/* ---------- klippiborð ---------- */
+const klippiborð  = document.getElementById("klippiborð");
+const bylgja      = document.getElementById("bylgja");
+const bylgjaC     = document.getElementById("bylgjaCanvas");
+const handfangU   = document.getElementById("handfangU");
+const handfangE   = document.getElementById("handfangE");
+const skuggiV     = document.getElementById("skuggiV");
+const skuggiH     = document.getElementById("skuggiH");
+const tonnSledi   = document.getElementById("tonnSledi");
+let klippiPadd = null;
+
+function tolustafur(t){ return t.toFixed(2).replace(".", ","); }
+
+function teiknaBylgju(){
+  if(!klippiPadd || !klippiPadd.buffer) return;
+  const breidd = bylgja.clientWidth, haed = bylgja.clientHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  bylgjaC.width  = Math.round(breidd * dpr);
+  bylgjaC.height = Math.round(haed * dpr);
+  const g = bylgjaC.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, breidd, haed);
+
+  const gogn = klippiPadd.buffer.getChannelData(0);
+  const aSteypu = Math.max(1, Math.floor(gogn.length / breidd));
+  const mid = haed / 2;
+  g.fillStyle = "#4CC9F0";
+  for(let x = 0; x < breidd; x++){
+    let lagst = 1, haest = -1;
+    const byrjun = x * aSteypu;
+    for(let i = 0; i < aSteypu; i++){
+      const v = gogn[byrjun + i];
+      if(v === undefined) break;
+      if(v < lagst) lagst = v;
+      if(v > haest) haest = v;
+    }
+    if(lagst > haest){ lagst = 0; haest = 0; }
+    const y1 = mid + lagst * mid * 0.92;
+    const y2 = mid + haest * mid * 0.92;
+    g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
+  }
+  g.fillStyle = "rgba(255,255,255,.25)";
+  g.fillRect(0, mid, breidd, 1);
+  faeraHandfong();
+}
+
+function faeraHandfong(){
+  if(!klippiPadd || !klippiPadd.buffer) return;
+  const lengd = klippiPadd.buffer.duration;
+  const u = upphafPadds(klippiPadd), e = endirPadds(klippiPadd);
+  const pu = (u / lengd) * 100, pe = (e / lengd) * 100;
+  handfangU.style.left  = pu + "%";
+  handfangE.style.left  = pe + "%";
+  skuggiV.style.left = "0"; skuggiV.style.width = pu + "%";
+  skuggiH.style.left = pe + "%"; skuggiH.style.width = (100 - pe) + "%";
+  document.getElementById("merkiU").textContent = "Byrjar: " + tolustafur(u) + " s";
+  document.getElementById("merkiE").textContent = "Endar: " + tolustafur(e) + " s";
+}
+
+/* snerting og mús — pointer-atburðir vantar á eldri iPada */
+function saekjaX(ev){
+  if(ev.touches && ev.touches.length) return ev.touches[0].clientX;
+  if(ev.changedTouches && ev.changedTouches.length) return ev.changedTouches[0].clientX;
+  return ev.clientX;
+}
+let dregur = null;
+function bylgjaNidur(ev){
+  if(!klippiPadd || !klippiPadd.buffer) return;
+  ev.preventDefault();
+  const kassi = bylgja.getBoundingClientRect();
+  const hlutfall = Math.max(0, Math.min(1, (saekjaX(ev) - kassi.left) / kassi.width));
+  const timi = hlutfall * klippiPadd.buffer.duration;
+  /* færum það merki sem er nær */
+  dregur = Math.abs(timi - upphafPadds(klippiPadd)) <= Math.abs(timi - endirPadds(klippiPadd)) ? "u" : "e";
+  bylgjaHreyfing(ev);
+}
+function bylgjaHreyfing(ev){
+  if(!dregur || !klippiPadd || !klippiPadd.buffer) return;
+  ev.preventDefault();
+  const kassi = bylgja.getBoundingClientRect();
+  const hlutfall = Math.max(0, Math.min(1, (saekjaX(ev) - kassi.left) / kassi.width));
+  const timi = hlutfall * klippiPadd.buffer.duration;
+  if(dregur === "u") klippiPadd.upphaf = Math.min(timi, endirPadds(klippiPadd) - 0.02);
+  else               klippiPadd.endir  = Math.max(timi, upphafPadds(klippiPadd) + 0.02);
+  faeraHandfong();
+}
+function bylgjaUpp(){
+  if(dregur){ dregur = null; teiknaUppsetningu(); }
+}
+if(window.PointerEvent){
+  bylgja.addEventListener("pointerdown", bylgjaNidur);
+  document.addEventListener("pointermove", bylgjaHreyfing);
+  document.addEventListener("pointerup", bylgjaUpp);
+}else{
+  bylgja.addEventListener("touchstart", bylgjaNidur, {passive:false});
+  document.addEventListener("touchmove", bylgjaHreyfing, {passive:false});
+  document.addEventListener("touchend", bylgjaUpp);
+  bylgja.addEventListener("mousedown", bylgjaNidur);
+  document.addEventListener("mousemove", bylgjaHreyfing);
+  document.addEventListener("mouseup", bylgjaUpp);
+}
+
+function opnaKlippi(id){
+  klippiPadd = finna(id);
+  if(!klippiPadd || !klippiPadd.buffer) return;
+  document.getElementById("klippiNafn").textContent = klippiPadd.nafn;
+  tonnSledi.value = klippiPadd.tonn || 0;
+  syniTon();
+  klippiborð.classList.remove("falid");
+  setTimeout(teiknaBylgju, 30);
+}
+function lokaKlippi(){
+  klippiborð.classList.add("falid");
+  klippiPadd = null;
+  teiknaUppsetningu();
+}
+document.getElementById("klippiLoka").onclick = lokaKlippi;
+klippiborð.addEventListener("click", e=>{ if(e.target === klippiborð) lokaKlippi(); });
+window.addEventListener("resize", ()=>{ if(klippiPadd) teiknaBylgju(); });
+
+function syniTon(){
+  const t = +tonnSledi.value;
+  document.getElementById("tonnTala").textContent = (t > 0 ? "+" : "") + t;
+}
+tonnSledi.oninput = function(){
+  syniTon();
+  if(klippiPadd) klippiPadd.tonn = +this.value;
+};
+tonnSledi.onchange = function(){ if(klippiPadd) spila(klippiPadd); };
+
+document.getElementById("klippiSpila").onclick = ()=>{ if(klippiPadd) spila(klippiPadd); };
+
+document.getElementById("finnaUpphaf").onclick = ()=>{
+  if(!klippiPadd || !klippiPadd.buffer) return;
+  const b = klippiPadd.buffer, d = b.getChannelData(0);
+  let topp = 0;
+  for(let i = 0; i < d.length; i += 16){ const v = Math.abs(d[i]); if(v > topp) topp = v; }
+  const mork = Math.max(0.012, topp * 0.1);
+  let u = 0, e = d.length - 1;
+  for(let i = 0; i < d.length; i++){ if(Math.abs(d[i]) > mork){ u = i; break; } }
+  for(let i = d.length - 1; i >= 0; i--){ if(Math.abs(d[i]) > mork){ e = i; break; } }
+  klippiPadd.upphaf = Math.max(0, u / b.sampleRate - 0.02);
+  klippiPadd.endir  = Math.min(b.duration, e / b.sampleRate + 0.08);
+  faeraHandfong();
+  spila(klippiPadd);
+};
+
+document.getElementById("nullstilla").onclick = ()=>{
+  if(!klippiPadd) return;
+  klippiPadd.upphaf = 0;
+  klippiPadd.endir = null;
+  klippiPadd.tonn = 0;
+  tonnSledi.value = 0;
+  syniTon();
+  faeraHandfong();
+};
 
 /* ---------- taktur ---------- */
 const taktbord = document.getElementById("taktbord");
@@ -814,9 +1074,10 @@ document.getElementById("baetaVid").onclick = ()=>{
 };
 document.getElementById("vistaSkra").onclick = ()=>{
   const gogn = {
-    utgafa: 2,
+    utgafa: 3,
     bpm: bpm,
-    paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod, mynstur:p.mynstur}))
+    paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod,
+                            mynstur:p.mynstur, tonn:p.tonn, upphaf:p.upphaf, endir:p.endir}))
   };
   const blob = new Blob([JSON.stringify(gogn)], {type:"application/json"});
   const a = document.createElement("a");
@@ -836,6 +1097,9 @@ document.getElementById("innSkra").onchange = async function(){
       const nyr = nyrPadd();
       nyr.nafn = p.nafn; nyr.kyrr = p.kyrr; nyr.virk = p.virk; nyr.hljod = p.hljod;
       if(Array.isArray(p.mynstur) && p.mynstur.length === 8) nyr.mynstur = p.mynstur.map(Boolean);
+      if(typeof p.tonn === "number") nyr.tonn = p.tonn;
+      if(typeof p.upphaf === "number") nyr.upphaf = p.upphaf;
+      if(typeof p.endir === "number") nyr.endir = p.endir;
       if(p.hljod) nyr.buffer = await afkodaHljod(p.hljod);
       paddar.push(nyr);
     }
