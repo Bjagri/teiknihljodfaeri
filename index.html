@@ -170,10 +170,7 @@ button{font-family:var(--brod)}
 }
 
 /* ---- taktur ---- */
-.taktrod{
-  display:grid;grid-template-columns:minmax(96px,150px) repeat(8,1fr);
-  gap:8px;align-items:center;margin-bottom:10px
-}
+.taktrod{display:grid;align-items:center;margin-bottom:10px}
 .skrefhaus{
   font-family:var(--display);font-size:12px;font-weight:600;color:var(--grar);
   text-align:center;padding-bottom:2px
@@ -202,10 +199,17 @@ button{font-family:var(--brod)}
 .skref.nuna{box-shadow:0 0 0 3px var(--gulur)}
 .skref[aria-pressed="true"].nuna{transform:scale(1.08)}
 @media (max-width:620px){
-  .taktrod{grid-template-columns:minmax(72px,90px) repeat(8,1fr);gap:5px}
-  .taktnafn .thumbi{width:26px;height:26px}
+  .taktnafn{padding:4px 6px;gap:5px}
+  .taktnafn .thumbi{width:24px;height:24px}
   .taktnafn .heiti{font-size:11px}
 }
+.val{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:4px;border-radius:999px}
+.val button{
+  font-family:var(--display);font-size:14px;font-weight:600;color:var(--grar);
+  background:none;border:0;padding:8px 15px;border-radius:999px;cursor:pointer
+}
+.val button[aria-pressed="true"]{background:var(--blar);color:var(--blek-djup)}
+.val button:focus-visible{outline:3px solid var(--gulur);outline-offset:2px}
 
 /* ---- klippiborð ---- */
 .yfirlag{
@@ -329,9 +333,14 @@ input[type=range]{accent-color:var(--graenn);width:130px}
     <div class="takkarod" style="margin-bottom:20px">
       <button class="takki gulur" id="taktSpila">▶ Spila lykkju</button>
       <label class="sleði" style="color:#C7D0E4">Hraði
-        <input type="range" id="hradi" min="50" max="180" value="100">
+        <input type="range" id="hradi" min="50" max="240" value="100">
         <span id="hradiTala" style="font-family:var(--display);color:var(--gulur);min-width:62px">100 bpm</span>
       </label>
+      <span class="val" role="group" aria-label="Fjöldi slaga">
+        <button id="val8" data-fjoldi="8" aria-pressed="true">8 slög</button>
+        <button id="val16" data-fjoldi="16" aria-pressed="false">16 slög</button>
+      </span>
+      <button class="takki aukatakki" id="tvofalda">Tvöfalda</button>
       <button class="takki aukatakki" id="hreinsaTakt">Hreinsa</button>
     </div>
     <div id="taktbord"></div>
@@ -524,7 +533,7 @@ function afkodaHljod(dataUrl){
 /* ---------- gögn ---------- */
 function nyrPadd(){
   return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null,
-          hljod:null, buffer:null, mynstur:new Array(8).fill(false),
+          hljod:null, buffer:null, mynstur:new Array(16).fill(false),
           tonn:0, upphaf:0, endir:null};
 }
 function finna(id){ return paddar.find(p=>p.id===id); }
@@ -896,7 +905,7 @@ document.getElementById("nullstilla").onclick = ()=>{
 /* ---------- taktur ---------- */
 const taktbord = document.getElementById("taktbord");
 const tomtTaktur = document.getElementById("tomtTaktur");
-let bpm = 100, taktGengur = false, naestaSkref = 0, naestiTimi = 0, taktTimari = null;
+let bpm = 100, skrefFjoldi = 8, taktGengur = false, naestaSkref = 0, naestiTimi = 0, taktTimari = null;
 let sjonRod = [];
 
 function teiknaTakt(){
@@ -904,10 +913,22 @@ function teiknaTakt(){
   tomtTaktur.classList.toggle("falid", paddar.length > 0);
   if(!paddar.length) return;
 
+  const breitt = window.innerWidth > 620;
+  const nafnbreidd = breitt ? "minmax(96px,150px)" : (skrefFjoldi === 16 ? "56px" : "72px");
+  const bil = skrefFjoldi === 16 ? (breitt ? "6px" : "3px") : (breitt ? "8px" : "5px");
+  const stillaRod = rod=>{
+    rod.style.gridTemplateColumns = nafnbreidd + " repeat(" + skrefFjoldi + ",1fr)";
+    rod.style.gap = bil;
+  };
+
+  const numer = [];
+  for(let n = 1; n <= skrefFjoldi; n++) numer.push(n);
+
   const haus = document.createElement("div");
   haus.className = "taktrod";
-  haus.innerHTML = "<span></span>" + [1,2,3,4,5,6,7,8].map(n=>
-    `<span class="skrefhaus ${n===1||n===5?"thungt":""}">${n}</span>`).join("");
+  stillaRod(haus);
+  haus.innerHTML = "<span></span>" + numer.map(n=>
+    `<span class="skrefhaus ${(n-1)%4===0?"thungt":""}">${n}</span>`).join("");
   taktbord.appendChild(haus);
 
   paddar.forEach((p,i)=>{
@@ -921,11 +942,12 @@ function teiknaTakt(){
                : `<span class="thumbi" style="background:${litir[i%litir.length]};border-radius:8px"></span>`}
         <span class="heiti">${p.nafn}</span>
       </span>
-      ${p.mynstur.map((a,s)=>
-        `<button class="skref ${s===0||s===4?"thungt":""}" aria-pressed="${a}"
+      ${p.mynstur.slice(0, skrefFjoldi).map((a,s)=>
+        `<button class="skref ${s%4===0?"thungt":""}" aria-pressed="${a}"
                  data-padd="${p.id}" data-skref="${s}"
                  aria-label="${p.nafn}, slag ${s+1}"></button>`).join("")}
     `;
+    stillaRod(rod);
     taktbord.appendChild(rod);
   });
 }
@@ -950,7 +972,7 @@ function taktLykkja(){
   while(naestiTimi < ac.currentTime + 0.12){
     radaSkrefi(naestaSkref, naestiTimi);
     naestiTimi += skreflengd;
-    naestaSkref = (naestaSkref + 1) % 8;
+    naestaSkref = (naestaSkref + 1) % skrefFjoldi;
   }
 }
 
@@ -1014,9 +1036,37 @@ document.getElementById("hradi").oninput = function(){
   document.getElementById("hradiTala").textContent = bpm + " bpm";
 };
 document.getElementById("hreinsaTakt").onclick = ()=>{
-  paddar.forEach(p=>p.mynstur = new Array(8).fill(false));
+  paddar.forEach(p=>p.mynstur = new Array(16).fill(false));
   teiknaTakt();
 };
+
+function veljaFjolda(n){
+  skrefFjoldi = n;
+  document.getElementById("val8").setAttribute("aria-pressed", String(n === 8));
+  document.getElementById("val16").setAttribute("aria-pressed", String(n === 16));
+  document.getElementById("tvofalda").style.display = n === 16 ? "" : "none";
+  if(naestaSkref >= skrefFjoldi) naestaSkref = 0;
+  teiknaTakt();
+}
+document.getElementById("val8").onclick  = ()=>veljaFjolda(8);
+document.getElementById("val16").onclick = ()=>veljaFjolda(16);
+document.getElementById("tvofalda").style.display = "none";
+
+/* afritar fyrri helminginn yfir á þann seinni svo lykkjan hljómi eins, tvöfalt löng */
+document.getElementById("tvofalda").onclick = ()=>{
+  paddar.forEach(p=>{
+    for(let i = 0; i < 8; i++) p.mynstur[i+8] = p.mynstur[i];
+  });
+  teiknaTakt();
+};
+
+/* dálkabreiddin er reiknuð eftir skjábreidd — teiknum upp á nýtt við snúning */
+let snuningsTimi = null;
+window.addEventListener("resize", ()=>{
+  if(document.getElementById("taktur").classList.contains("falid")) return;
+  clearTimeout(snuningsTimi);
+  snuningsTimi = setTimeout(teiknaTakt, 150);
+});
 
 /* bil = spila/stöðva lykkjuna */
 document.addEventListener("keydown", e=>{
@@ -1074,8 +1124,9 @@ document.getElementById("baetaVid").onclick = ()=>{
 };
 document.getElementById("vistaSkra").onclick = ()=>{
   const gogn = {
-    utgafa: 3,
+    utgafa: 4,
     bpm: bpm,
+    skrefFjoldi: skrefFjoldi,
     paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod,
                             mynstur:p.mynstur, tonn:p.tonn, upphaf:p.upphaf, endir:p.endir}))
   };
@@ -1096,7 +1147,10 @@ document.getElementById("innSkra").onchange = async function(){
     for(const p of gogn.paddar){
       const nyr = nyrPadd();
       nyr.nafn = p.nafn; nyr.kyrr = p.kyrr; nyr.virk = p.virk; nyr.hljod = p.hljod;
-      if(Array.isArray(p.mynstur) && p.mynstur.length === 8) nyr.mynstur = p.mynstur.map(Boolean);
+      if(Array.isArray(p.mynstur)){
+        /* eldri skrár geyma aðeins 8 slög — fyllum upp í 16 */
+        for(let i = 0; i < 16; i++) nyr.mynstur[i] = Boolean(p.mynstur[i]);
+      }
       if(typeof p.tonn === "number") nyr.tonn = p.tonn;
       if(typeof p.upphaf === "number") nyr.upphaf = p.upphaf;
       if(typeof p.endir === "number") nyr.endir = p.endir;
@@ -1108,6 +1162,7 @@ document.getElementById("innSkra").onchange = async function(){
       document.getElementById("hradi").value = bpm;
       document.getElementById("hradiTala").textContent = bpm + " bpm";
     }
+    veljaFjolda(gogn.skrefFjoldi === 16 ? 16 : 8);
     teiknaUppsetningu();
     teiknaTakt();
   }catch(err){
