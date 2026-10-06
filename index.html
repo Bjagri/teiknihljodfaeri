@@ -3,26 +3,282 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Teiknihljóðfærið</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Teiknihljóðfærið">
-<meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1E2238" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="apple-touch-icon.png">
-<link rel="manifest" href="manifest.json">
+<title>Hljóðhringir</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F3EEE4; --card:#FBF8F1; --ink:#27306B; --ink-soft:#5A6190;
-  --line:rgba(39,48,107,.24);
-  --pink:#FF48B0; --blue:#0078BF; --yellow:#FFE800; --green:#00A95C;
-  --aqua:#5EC8E5; --orange:#FF6C2F;
-  --mis:#FF48B0; --mis2:#0078BF;
+  --paper:#E4EFEA; --ink:#1B2A41; --ink-soft:#4A5A72; --card:#FFFFFF; --line:rgba(27,42,65,.16);
+  --water:#1F6470; --water-deep:#123F48;
+  --perc:#FF6B3D; --tone:#FFC93C; --amb:#7BD389; --glow:#F2A7FF;
+  --shadow:rgba(10,30,40,.28);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#13212A; --ink:#EAF2EE; --ink-soft:#A7B8C3; --card:#1D2E3A; --line:rgba(234,242,238,.16);
+    --water:#18525C; --water-deep:#0C2D34; --shadow:rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#13212A; --ink:#EAF2EE; --ink-soft:#A7B8C3; --card:#1D2E3A; --line:rgba(234,242,238,.16);
+  --water:#18525C; --water-deep:#0C2D34; --shadow:rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--paper);color:var(--ink);
+  font-family:"Fredoka","Baloo 2",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+  transition:background-color .9s ease,color .9s ease;
+}
+body.w-tofrar{--paper:#24163F;--ink:#F6ECFF;--ink-soft:#CBB6EA;--card:#34225C;--line:rgba(246,236,255,.2);--water:#3C2878;--water-deep:#170D33;--shadow:rgba(0,0,0,.5);--glow:#F2A7FF}
+body.w-haf{--paper:#0E3A4A;--ink:#E6FBFF;--ink-soft:#9FD3DE;--card:#145063;--line:rgba(230,251,255,.18);--water:#1B6E86;--water-deep:#082733;--shadow:rgba(0,0,0,.4);--glow:#8FF3FF}
+body.w-geimur{--paper:#0B1026;--ink:#EEF0FF;--ink-soft:#A9B0D6;--card:#171E40;--line:rgba(238,240,255,.16);--water:#1A2250;--water-deep:#05081A;--shadow:rgba(0,0,0,.55);--glow:#FFE9A3}
+body.w-robot{--paper:#23272E;--ink:#E8F6FF;--ink-soft:#9AA9B5;--card:#2F353E;--line:rgba(232,246,255,.16);--water:#2C3440;--water-deep:#161A20;--shadow:rgba(0,0,0,.5);--glow:#38E1FF}
+body::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;opacity:0;transition:opacity 1.2s ease}
+body.w-tofrar::before,body.w-geimur::before{background-image:radial-gradient(2px 2px at 12% 18%,var(--ink-soft) 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 33% 72%,var(--ink-soft) 50%,transparent 51%),
+    radial-gradient(2px 2px at 58% 12%,var(--glow) 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 76% 44%,var(--glow) 50%,transparent 51%),
+    radial-gradient(2.5px 2.5px at 88% 82%,var(--glow) 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 90%,var(--glow) 50%,transparent 51%),
+    radial-gradient(2px 2px at 47% 52%,var(--glow) 50%,transparent 51%),
+    radial-gradient(1.5px 1.5px at 92% 14%,var(--glow) 50%,transparent 51%);opacity:1;animation:twinkle 4s ease-in-out infinite alternate}
+body.w-haf::before{opacity:1;background-image:
+    radial-gradient(circle at 8% 85%,transparent 7px,rgba(0,88,94,.25) 8px,transparent 9.5px),
+    radial-gradient(circle at 27% 62%,transparent 4px,rgba(0,88,94,.22) 5px,transparent 6.5px),
+    radial-gradient(circle at 63% 78%,transparent 10px,rgba(0,88,94,.2) 11px,transparent 12.5px),
+    radial-gradient(circle at 85% 40%,transparent 5px,rgba(0,88,94,.22) 6px,transparent 7.5px),
+    radial-gradient(circle at 46% 25%,transparent 3px,rgba(0,88,94,.22) 4px,transparent 5.5px);
+  animation:rise 9s ease-in-out infinite alternate}
+body.w-robot::before{opacity:1;background-image:linear-gradient(rgba(59,68,80,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(59,68,80,.08) 1px,transparent 1px);background-size:32px 32px}
+@keyframes twinkle{from{opacity:.45}to{opacity:1}}
+@keyframes rise{from{transform:translateY(0)}to{transform:translateY(-36px)}}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:3px solid var(--perc);outline-offset:2px}
+
+/* ---------- Header ---------- */
+.bar{position:relative;z-index:2;display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 18px 10px}
+.brand{font-weight:700;font-size:24px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand i{display:inline-flex;gap:4px}
+.brand i b{width:12px;height:12px;display:block}
+.brand i b:nth-child(1){background:var(--perc);border-radius:50%}
+.brand i b:nth-child(2){background:var(--tone);border-radius:3px;transform:rotate(45deg) scale(.85)}
+.brand i b:nth-child(3){background:var(--amb);border-radius:42% 58% 63% 37%/45% 40% 60% 55%}
+.tabs{display:flex;background:var(--card);border-radius:999px;padding:4px;box-shadow:0 2px 0 var(--line)}
+.tabs button{padding:9px 18px;border-radius:999px;font-weight:500;font-size:16px;color:var(--ink-soft)}
+.tabs button.on{background:var(--ink);color:var(--paper)}
+.world-btn{padding:10px 18px;border-radius:999px;font-weight:600;font-size:16px;background:var(--card);box-shadow:0 2px 0 var(--line);display:flex;align-items:center;gap:8px}
+.world-btn .wi{font-size:19px;line-height:1}
+body.w-tofrar .world-btn{background:linear-gradient(120deg,#8E5BFF,#F27BD8);color:#fff;box-shadow:0 0 22px rgba(242,167,255,.55)}
+body.w-haf .world-btn{background:linear-gradient(120deg,#178FB0,#4FDCC8);color:#fff;box-shadow:0 0 22px rgba(143,243,255,.45)}
+body.w-geimur .world-btn{background:linear-gradient(120deg,#2B3A8C,#B57BFF);color:#fff;box-shadow:0 0 22px rgba(255,233,163,.35)}
+body.w-robot .world-btn{background:linear-gradient(120deg,#3A4452,#1EA9C9);color:#fff;box-shadow:0 0 22px rgba(56,225,255,.45)}
+.wmenu{position:fixed;z-index:31;right:14px;width:min(92vw,340px);background:var(--card);border-radius:26px;padding:10px;box-shadow:0 12px 34px rgba(0,0,0,.28);display:none}
+.wmenu.on{display:block}
+.wopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:9px 10px;border-radius:18px}
+.wopt .wi{font-size:26px;width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:var(--paper);flex:none}
+.wopt b{display:block;font-size:17px;font-weight:600}
+.wopt small{display:block;color:var(--ink-soft);font-size:14px;line-height:1.25}
+.wopt.on{background:var(--paper)}
+.wopt.on .wi{background:var(--card)}
+.woff{display:block;width:100%;padding:12px;margin-top:4px;border-radius:999px;background:var(--paper);font-weight:500}
+
+main{position:relative;z-index:1;flex:1;min-height:0;display:flex}
+.page{flex:1;min-height:0;display:none;flex-direction:column}
+.page.on{display:flex}
+
+/* ---------- Page 1: pond ---------- */
+.pond{
+  position:relative;flex:1;min-height:240px;margin:4px 18px 0;border-radius:32px;overflow:hidden;
+  background:#8DBEEF;
+  transition:background .9s ease;
+}
+.pond-empty{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(80%,420px);text-align:center;color:rgba(255,255,255,.82);font-size:19px;line-height:1.4}
+.blob{position:absolute;left:0;top:0;will-change:transform;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;touch-action:manipulation}
+.shape{width:var(--sz);height:var(--sz)}
+.shape svg,.mini svg{display:block;width:100%;height:100%;overflow:visible}
+.shd{fill:var(--shadow);transition:fill .9s ease}
+.wv{fill:none;stroke:#27306B;stroke-width:3.4;stroke-linecap:round;opacity:.7}
+.spin{transform-box:fill-box;transform-origin:center;animation:spin 46s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.blob .lbl{font-size:14px;font-weight:500;color:#fff;background:rgba(0,0,0,.28);padding:2px 10px;border-radius:12px;max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blob .ring-fx{position:absolute;top:0;left:50%;width:var(--sz);height:var(--sz);margin-left:calc(var(--sz) / -2);border-radius:50%;border:3px solid #fff;opacity:0;pointer-events:none}
+.blob.ping .ring-fx{animation:ripple .7s ease-out}
+@keyframes ripple{from{opacity:.8;transform:scale(.9)}to{opacity:0;transform:scale(1.7)}}
+.blob.new .shape{animation:popin .5s cubic-bezier(.3,1.6,.5,1)}
+@keyframes popin{from{transform:scale(.2)}to{transform:scale(1)}}
+body.magic .shd{fill:var(--glow);opacity:.5}
+
+.rec-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:14px 18px 10px}
+.rec{background:var(--card);border-radius:26px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto auto;column-gap:14px;align-items:center;box-shadow:0 3px 0 var(--line);transition:background-color .9s ease}
+.rec-btn{grid-row:1/4;width:74px;height:74px;display:grid;place-items:center;position:relative}
+.rec-btn .shape{--sz:64px}
+.rec-btn .dot{position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 5px var(--ink)}
+.rec.on .rec-btn .dot{border-radius:4px;box-shadow:none;background:var(--ink)}
+.rec h2{margin:0;font-size:20px;font-weight:600}
+.rec p{margin:2px 0 0;font-size:14px;color:var(--ink-soft);line-height:1.3}
+.rec .file{justify-self:start;margin-top:6px;font-size:14px;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px;padding:4px 0}
+.rec.on{background:var(--ink);color:var(--paper)}
+.rec.on p,.rec.on .file{color:var(--paper);opacity:.8}
+.rec .time{font-variant-numeric:tabular-nums}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 18px 14px}
+.textbtn{font-size:14px;color:var(--ink-soft);padding:8px 2px;text-decoration:underline;text-underline-offset:3px}
+.textbtn.warn{color:#D6402A;font-weight:600}
+.next{background:var(--ink);color:var(--paper);padding:12px 22px;border-radius:999px;font-weight:600;font-size:17px}
+
+/* ---------- Page 2: rings ---------- */
+#page-rada{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.transport{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:6px 18px 12px}
+.play{width:68px;height:68px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;box-shadow:0 4px 0 var(--shadow);flex:none}
+.play svg{width:26px;height:26px}
+.play .i-stop{display:none}
+.play.on .i-play{display:none}
+.play.on .i-stop{display:block}
+.tempo{display:flex;align-items:center;gap:10px;font-weight:500}
+.tempo output{min-width:3ch;font-variant-numeric:tabular-nums;font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;height:8px;border-radius:8px;background:var(--line);width:150px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--ink);border:4px solid var(--card)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--card)}
+.hint{color:var(--ink-soft);font-size:15px;margin-left:auto;max-width:300px;line-height:1.3}
+
+.rings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 18px}
+.ringcard{background:var(--card);border-radius:30px;padding:14px 12px 12px;display:flex;flex-direction:column;align-items:center;box-shadow:0 3px 0 var(--line);transition:opacity .3s,background-color .9s ease}
+.ringcard h3{margin:0 0 4px;font-size:19px;font-weight:600}
+.ringcard.muted .ring{opacity:.35}
+.ring{position:relative;width:100%;max-width:310px;touch-action:none;cursor:grab}
+.ring::before{content:"";display:block;padding-top:100%}
+.rotor{position:absolute;top:9%;left:9%;right:9%;bottom:9%;border-radius:50%;transition:transform .28s cubic-bezier(.3,1.3,.5,1)}
+.rotor.drag,.rotor.drag .si{transition:none}
+.hub{position:absolute;left:50%;top:50%;width:30%;height:30%;margin:-15% 0 0 -15%;border-radius:50%;background:var(--paper);display:grid;place-items:center;color:var(--ink-soft)}
+.hub svg{width:46%;height:46%}
+.slot{position:absolute;width:24%;height:24%;margin:-12% 0 0 -12%;border-radius:50%;border:2.5px dashed var(--line);background:var(--paper);touch-action:none}
+.slot.filled{border-color:transparent;background:transparent;cursor:grab}
+.slot.over,.aslot.over{border-color:var(--ink);border-style:solid;background:var(--line)}
+.si{position:absolute;top:0;left:0;right:0;bottom:0;display:grid;place-items:center;transition:transform .28s cubic-bezier(.3,1.3,.5,1)}
+.si .mini{width:86%;height:86%;transition:transform .09s ease-out}
+.slot.hit .si .mini{transform:scale(1.22)}
+
+.deg{position:absolute;bottom:-6px;right:-6px;min-width:24px;height:24px;padding:0 5px;border-radius:12px;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.phwrap{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+.ph{position:absolute;left:50%;top:0;width:0;height:0;margin-left:-9px;border-left:9px solid transparent;border-right:9px solid transparent;border-top:13px solid var(--ink);opacity:.25;transition:opacity .2s}
+.playing .ph{opacity:1}
+.rctl{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.seg{display:flex;background:var(--paper);border-radius:999px;padding:3px}
+.seg button{padding:6px 12px;border-radius:999px;font-size:14px;color:var(--ink-soft)}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.mute{padding:7px 14px;border-radius:999px;font-size:14px;background:var(--paper)}
+.mute[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+.lower{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;padding:14px 18px 18px}
+.panel{background:var(--card);border-radius:28px;padding:14px 16px;box-shadow:0 3px 0 var(--line);transition:background-color .9s ease}
+.panel h3{margin:0 0 10px;font-size:18px;font-weight:600}
+.aslots{display:flex;gap:10px}
+.aslot{flex:1;min-height:76px;border-radius:24px;border:2.5px dashed var(--line);background:var(--paper);display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:14px;color:var(--ink-soft);touch-action:none;line-height:1.25}
+.aslot.filled{border-style:solid;border-color:transparent;color:var(--ink);font-weight:500}
+.aslot .mini{width:48px;height:48px;flex:none}
+.aslot.filled.live .mini{animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.12)}}
+.avol{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:15px}
+.avol input{flex:1;width:auto}
+.tray{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:999px;background:var(--paper);font-size:15px;font-weight:500;touch-action:none;cursor:grab;max-width:100%}
+.chip span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip .mini{width:32px;height:32px;flex:none}
+.chip.ping{animation:chipping .35s}
+@keyframes chipping{50%{transform:scale(1.08)}}
+.empty{color:var(--ink-soft);font-size:15px;line-height:1.4;margin:0}
+
+.mini{display:block}
+
+.ghost{position:fixed;left:0;top:0;width:64px;height:64px;pointer-events:none;z-index:50}
+.ghost .mini{width:100%;height:100%;opacity:.9}
+
+/* ---------- Editor sheet ---------- */
+.scrim{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,20,30,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
+.scrim.on{opacity:1;pointer-events:auto}
+.scrim.clear{background:transparent}
+.sheet{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:880px;z-index:21;background:var(--card);border-radius:30px 30px 0 0;
+  padding:18px 22px calc(20px + env(safe-area-inset-bottom,0px));transform:translateY(110%);transition:transform .32s cubic-bezier(.3,1.1,.4,1),background-color .9s ease;box-shadow:0 -8px 30px rgba(0,0,0,.18)}
+.sheet.on{transform:none}
+.ed-top{display:flex;align-items:center;gap:14px}
+.ed-top .mini{width:44px;height:44px;flex:none}
+.ed-top input{flex:1;min-width:0;font:inherit;font-size:22px;font-weight:600;color:var(--ink);background:var(--paper);border:0;border-radius:14px;padding:8px 14px;-webkit-user-select:text;user-select:text}
+.done{background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:999px;font-weight:600}
+.types{display:flex;gap:8px;margin:14px 0 12px;flex-wrap:wrap}
+.types button{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border-radius:999px;background:var(--paper);font-size:15px;color:var(--ink-soft)}
+.types button .mini{width:22px;height:22px;box-shadow:none}
+.types button.on{background:var(--ink);color:var(--paper)}
+.wave{position:relative;height:150px;border-radius:18px;background:var(--paper);overflow:hidden;touch-action:none;cursor:ew-resize}
+.wave canvas{position:absolute;top:0;left:0;width:100%;height:100%}
+.sel{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--c) 30%,transparent);box-shadow:0 0 0 2000px rgba(120,130,140,.38)}
+@supports not (background:color-mix(in srgb,red 30%,transparent)){.sel{background:rgba(255,255,255,.15)}}
+.hnd{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--ink)}
+.hnd::after{content:"";position:absolute;top:50%;left:50%;width:26px;height:42px;margin:-21px 0 0 -13px;border-radius:13px;background:var(--ink);box-shadow:inset 0 0 0 4px var(--c)}
+.pl{position:absolute;top:0;bottom:0;width:2px;background:#fff;display:none}
+.ed-info{display:flex;gap:18px;margin-top:10px;color:var(--ink-soft);font-size:15px;font-variant-numeric:tabular-nums}
+.ed-act{display:flex;gap:10px;align-items:center;margin-top:12px}
+.listen{display:flex;align-items:center;gap:8px;background:var(--c);color:#1B2A41;padding:11px 20px;border-radius:999px;font-weight:600;font-size:17px}
+.listen svg{width:16px;height:16px}
+.del{margin-left:auto;font-size:15px;color:var(--ink-soft);padding:10px 4px;text-decoration:underline;text-underline-offset:3px}
+.del.warn{color:#D6402A;font-weight:600}
+
+/* ---------- Slot popover ---------- */
+.pop{position:fixed;z-index:31;background:var(--card);border-radius:22px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.25);width:230px;display:none}
+.pop.on{display:block}
+.pop .pname{font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pitch{display:flex;align-items:center;justify-content:space-between;background:var(--paper);border-radius:999px;padding:4px;margin-bottom:10px}
+.pitch button{width:44px;height:44px;border-radius:50%;background:var(--card);font-size:22px;font-weight:600;display:grid;place-items:center}
+.pitch div{text-align:center;line-height:1.1}
+.pitch b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.pitch small{font-size:12px;color:var(--ink-soft)}
+.pop .rm{width:100%;padding:10px;border-radius:999px;background:var(--paper);font-weight:500}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);opacity:0;z-index:60;background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:18px;max-width:min(90vw,520px);text-align:center;font-size:16px;line-height:1.35;transition:transform .3s,opacity .3s;pointer-events:none}
+.toast.on{transform:translate(-50%,0);opacity:1}
+.hidden{display:none}
+
+@media (max-width:820px){
+  .rec-row{grid-template-columns:1fr}
+  .rec{grid-template-rows:auto auto auto}
+  .rings{grid-template-columns:1fr}
+  .ring{max-width:290px}
+  .lower{grid-template-columns:1fr}
+  .hint{margin-left:0}
+}
+@media (max-width:820px) and (orientation:portrait) and (min-width:560px){
+  .rings{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .spin,body.magic::before,.aslot.filled.live .mini{animation:none}
+}
+
+/* ---------- additions v4 ---------- */
+.sel-wrap select{font:inherit;font-weight:600;color:var(--ink);background:var(--card);border:0;border-radius:999px;padding:8px 12px;box-shadow:0 2px 0 var(--line)}
+.songrec{display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:999px;background:var(--card);font-weight:600;box-shadow:0 2px 0 var(--line);font-variant-numeric:tabular-nums}
+.rdot{width:14px;height:14px;border-radius:50%;background:#E5483B;flex:none}
+.songrec.on{background:#E5483B;color:#fff}
+.songrec.on .rdot{background:#fff;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.steps{display:flex;align-items:center;background:var(--paper);border-radius:999px;padding:3px}
+.steps button{width:32px;height:32px;border-radius:50%;font-size:18px;font-weight:600;display:grid;place-items:center}
+.steps span{font-size:14px;padding:0 4px;min-width:52px;text-align:center}
+.tune{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin-top:10px;padding:10px 14px;border-radius:16px;background:var(--paper);font-size:15px}
+.tune span{flex:1;min-width:200px}
+.tune label{display:flex;align-items:center;gap:8px;font-weight:500}
+.tune input{width:22px;height:22px;accent-color:var(--ink)}
+#songSheet{--c:#FF6B3D}
+#songSheet h2{margin:0;font-size:22px;font-weight:600;flex:none}
+#songSheet audio{width:100%;margin-top:14px}
+.share{font-size:16px;font-weight:500;padding:11px 18px;border-radius:999px;background:var(--paper)}
+
+/* ---------- bubbly, hand-made shapes ---------- */
+:root{
   --blob-1:42px 58px 46px 62px / 56px 44px 60px 48px;
   --blob-2:60px 44px 64px 46px / 46px 60px 44px 58px;
   --blob-3:50px 64px 42px 56px / 62px 48px 56px 42px;
@@ -30,1155 +286,2130 @@
   --pill-2:36px 26px 38px 28px / 26px 36px 28px 38px;
   --bub-1:52% 48% 55% 45% / 48% 54% 46% 52%;
   --bub-2:46% 54% 44% 56% / 55% 45% 53% 47%;
-  --letur:"Fredoka","Baloo 2",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
+  --bub-3:55% 45% 50% 50% / 45% 52% 48% 55%;
+}
+.pond{border-radius:64px 92px 72px 98px / 82px 60px 94px 70px}
+.dust{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.rec:nth-child(1){border-radius:var(--blob-1)}
+.rec:nth-child(2){border-radius:var(--blob-2)}
+.rec:nth-child(3){border-radius:var(--blob-3)}
+.ringcard:nth-child(1){border-radius:var(--blob-2)}
+.ringcard:nth-child(2){border-radius:var(--blob-3)}
+.ringcard:nth-child(3){border-radius:var(--blob-1)}
+.panel:nth-child(1){border-radius:var(--blob-3)}
+.panel:nth-child(2){border-radius:var(--blob-1)}
+.aslot:nth-child(1){border-radius:var(--blob-1)}
+.aslot:nth-child(2){border-radius:var(--blob-2)}
+.tabs,.world-btn,.done,.share,.mute,.woff,.rm,.toast,.tune,.steps,.types button:nth-child(odd){border-radius:var(--pill-1)}
+.tabs button:nth-child(1),.next,.listen,.songrec,.seg,.pitch,.sel-wrap select,.ed-top input,.wopt,.types button:nth-child(even){border-radius:var(--pill-2)}
+.tabs button:nth-child(2){border-radius:var(--pill-1)}
+.seg button:nth-child(odd){border-radius:var(--pill-1)}
+.seg button:nth-child(even){border-radius:var(--pill-2)}
+.chip:nth-child(odd){border-radius:var(--pill-1)}
+.chip:nth-child(even){border-radius:var(--pill-2)}
+.play,.steps button,.wopt .wi{border-radius:var(--bub-1)}
+.hub,.pitch button{border-radius:var(--bub-2)}
+.slot:nth-child(3n){border-radius:var(--bub-1)}
+.slot:nth-child(3n+1){border-radius:var(--bub-2)}
+.slot:nth-child(3n+2){border-radius:var(--bub-3)}
+.pop,.wmenu{border-radius:var(--blob-2)}
+.sheet{border-radius:48px 66px 0 0 / 40px 54px 0 0}
+.wave{border-radius:28px 40px 30px 44px / 36px 28px 42px 30px}
+input[type=range]{border-radius:6px 10px 7px 9px}
+input[type=range]::-webkit-slider-thumb{border-radius:52% 48% 55% 45% / 48% 54% 46% 52%}
+button{transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .25s,color .25s}
+button:active{transform:scale(.94)}
+@media (prefers-reduced-motion:reduce){button:active{transform:none}}
+
+.pond-empty{width:min(84%,580px)}
+body.magic .pond{background:linear-gradient(170deg,var(--water),var(--water-deep))}
+.pond-empty img{display:block;width:100%;height:auto;animation:bob 6s ease-in-out infinite alternate;-webkit-user-drag:none}
+@keyframes bob{from{transform:translateY(-5px) rotate(-1deg)}to{transform:translateY(5px) rotate(1deg)}}
+@media (prefers-reduced-motion:reduce){.pond-empty img{animation:none}}
+
+/* =========================================================
+   RISOGRAPH LOOK — paper, grain, halftone, spot inks,
+   slightly mis-registered second ink.
+   ========================================================= */
+:root{
+  --grain:none;
+  --paper:#F3EEE4; --card:#FBF8F1; --ink:#27306B; --ink-soft:#5A6190; --line:rgba(39,48,107,.24);
+  --pink:#FF48B0; --blue:#0078BF; --yellow:#FFE800; --green:#00A95C; --aqua:#5EC8E5; --orange:#FF6C2F;
+  --perc:#FF48B0; --tone:#FFE800; --amb:#00A95C;
+  --mis:#FF48B0; --mis2:#0078BF; --shadow:rgba(39,48,107,.25);
 }
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9;
-    --line:rgba(243,238,228,.22);
-  }
+  :root:not([data-theme="light"]){ --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9; --line:rgba(243,238,228,.22); --shadow:rgba(0,0,0,.4); }
 }
-:root[data-theme="dark"]{
-  --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9;
-  --line:rgba(243,238,228,.22);
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;height:100%}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{
-  background:var(--paper);color:var(--ink);font-family:var(--letur);font-weight:400;
-  -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
-}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;
-  transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .25s,color .25s}
-button:active{transform:scale(.94)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){button:active{transform:none}}
-.umgjord{
-  max-width:1100px;margin:0 auto;
-  padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 110px calc(16px + env(safe-area-inset-left))
-}
+:root[data-theme="dark"]{ --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9; --line:rgba(243,238,228,.22); --shadow:rgba(0,0,0,.4); }
+body.w-tofrar{--paper:#F4E6F1;--card:#FBF2F8;--ink:#5B3F8F;--ink-soft:#8C73B3;--line:rgba(91,63,143,.24);--water:#C9A8E6;--water-deep:#B993E0;--glow:#FF48B0;--mis:#FF48B0;--mis2:#765BA7}
+body.w-haf{--paper:#E2F1EE;--card:#F2FAF8;--ink:#00585E;--ink-soft:#3F8A8E;--line:rgba(0,88,94,.24);--water:#5EC8E5;--water-deep:#47B9DD;--glow:#FF665E;--mis:#FF665E;--mis2:#00838A}
+body.w-geimur{--paper:#1F2550;--card:#2A3163;--ink:#FFE800;--ink-soft:#E8D97A;--line:rgba(255,232,0,.26);--water:#141A45;--water-deep:#0E1336;--glow:#FF48B0;--mis:#FF48B0;--mis2:#5EC8E5}
+body.w-robot{--paper:#E4E4DE;--card:#F0F0EA;--ink:#3B4450;--ink-soft:#6B7480;--line:rgba(59,68,80,.24);--water:#A6B0B5;--water-deep:#97A2A8;--glow:#FF6C2F;--mis:#FF6C2F;--mis2:#3B4450}
 
-/* ---- haus ---- */
-header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
-h1{
-  font-weight:700;font-size:clamp(23px,4.6vw,30px);margin:0;letter-spacing:-.01em;line-height:1;
-  display:flex;align-items:center;gap:10px;text-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
-}
-h1 span{color:inherit}
-h1 i{display:inline-flex;gap:4px;flex:none}
-h1 i b{width:12px;height:12px;display:block}
-h1 i b:nth-child(1){background:var(--pink);border-radius:50%}
-h1 i b:nth-child(2){background:var(--yellow);border-radius:3px;transform:rotate(45deg) scale(.85)}
-h1 i b:nth-child(3){background:var(--green);border-radius:42% 58% 63% 37%/45% 40% 60% 55%}
-.flipar{display:flex;gap:4px;margin-left:auto;background:var(--card);padding:4px;border-radius:var(--pill-1);box-shadow:0 2px 0 var(--line)}
-.flipi{padding:9px 17px;border-radius:var(--pill-2);font-weight:500;font-size:16px;color:var(--ink-soft)}
-.flipi:nth-child(2){border-radius:var(--pill-1)}
-.flipi[aria-selected="true"]{background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)}
+body{background-color:var(--paper);background-image:var(--grain)}
+.brand{text-shadow:2px 2px 0 var(--mis)}
+.rec h2,.ringcard h3,.panel h3,#songSheet h2{text-shadow:1.5px 1.5px 0 color-mix(in srgb,var(--mis) 75%,transparent)}
+@supports not (color:color-mix(in srgb,red 50%,transparent)){.rec h2,.ringcard h3,.panel h3,#songSheet h2{text-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)}}
 
-/* ---- almennir takkar ---- */
-.takki{
-  font-weight:600;font-size:16px;background:var(--ink);color:var(--paper);
-  border-radius:var(--pill-2);padding:11px 20px;box-shadow:2px 2px 0 rgba(255,72,176,.7)
-}
-.takki.aukatakki{background:var(--card);color:var(--ink);box-shadow:2px 2px 0 rgba(0,120,191,.55)}
-.takki.gulur{background:var(--ink);color:var(--paper)}
-.takki.raudur{background:var(--pink);color:#fff;box-shadow:2px 2px 0 var(--ink)}
-.takkarod{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* cards: grain + halftone tint + hard offset in a second ink */
+.rec,.ringcard,.panel,.tabs,.pop,.wmenu,.sheet{background-color:var(--card);background-image:var(--grain)}
+.rec,.ringcard,.panel{background-image:var(--grain),radial-gradient(circle,var(--ht) 1.3px,transparent 1.9px);background-size:auto,8px 8px}
+.rec[data-type="perc"],.k0{--ht:rgba(255,72,176,.28)}
+.rec[data-type="tone"],.k1,.k2{--ht:rgba(255,200,0,.42)}
+.rec[data-type="amb"],.panel:nth-child(1){--ht:rgba(0,169,92,.26)}
+.panel:nth-child(2){--ht:rgba(0,120,191,.2)}
+.rec,.ringcard,.panel{box-shadow:6px 7px 0 var(--sh)}
+.rec[data-type="perc"],.k0,.panel:nth-child(2){--sh:rgba(0,120,191,.75)}
+.rec[data-type="tone"],.k1,.k2{--sh:rgba(255,72,176,.75)}
+.rec[data-type="amb"],.panel:nth-child(1){--sh:rgba(255,72,176,.7)}
+body.magic .rec,body.magic .ringcard,body.magic .panel{--sh:var(--mis)}
+.rec.on{background-color:var(--ink);background-image:var(--grain)}
 
-/* ---- uppsetning ---- */
-.spjaldalisti{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (max-width:700px){ .spjaldalisti{grid-template-columns:1fr} }
-.spjald{
-  background-color:var(--card);color:var(--ink);padding:16px;position:relative;
-  background-image:radial-gradient(circle,var(--ht,rgba(255,72,176,.14)) 1px,transparent 1.5px);
-  background-size:10px 10px;box-shadow:4px 5px 0 var(--sh,rgba(0,120,191,.35));
-  border-radius:var(--blob-1)
-}
-.spjald:nth-child(3n+2){border-radius:var(--blob-2);--ht:rgba(255,200,0,.22);--sh:rgba(255,72,176,.35)}
-.spjald:nth-child(3n){border-radius:var(--blob-3);--ht:rgba(0,169,92,.13);--sh:rgba(255,108,47,.35)}
-.spjaldhaus{display:flex;gap:9px;align-items:center;margin:2px 0 12px}
-.numer{
-  font-weight:600;font-size:14px;color:var(--paper);background:var(--ink);
-  width:28px;height:28px;border-radius:var(--bub-1);display:grid;place-items:center;flex:none
-}
-.nafn{
-  flex:1;min-width:0;font:inherit;font-size:19px;font-weight:600;color:var(--ink);
-  background:var(--paper);border:0;border-radius:var(--pill-2);padding:7px 13px;
-  -webkit-user-select:text;user-select:text
-}
-.reitir{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.reitur{
-  border:2.5px dashed var(--line);border-radius:var(--bub-2);aspect-ratio:1;
-  background:radial-gradient(circle,rgba(39,48,107,.09) 1px,transparent 1.5px) 0 0/6px 6px,var(--paper);
-  display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;padding:8px
-}
-.reitarammi:nth-child(2) .reitur{border-radius:var(--bub-1)}
-.reitur:hover,.reitur.yfir{border-color:var(--pink);border-style:solid}
-.reitur img{width:100%;height:100%;object-fit:contain}
-.merki{font-size:13px;color:var(--ink-soft);text-align:center;line-height:1.3;padding:4px}
-.reitarammi{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
-.reitarammi .reitur{width:100%}
-.reitmerki{
-  font-size:13px;font-weight:500;color:var(--ink-soft);text-align:center;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%
-}
-.hljodrod{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
-.hljodstada{font-size:14px;color:var(--ink-soft);flex:1;min-width:110px}
-.hljodstada.tilbuid{color:var(--green);font-weight:600}
-.smatakki{
-  padding:9px 14px;font-size:14px;font-weight:500;border-radius:var(--pill-1);
-  background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)
-}
-.smatakki:nth-of-type(even){border-radius:var(--pill-2)}
-.smatakki.rautt{background:var(--pink);color:#fff;box-shadow:2px 2px 0 var(--ink)}
-.smatakki.tekurupp{background:var(--pink);color:#fff;animation:pulsa .8s infinite}
-.smatakki.ljos{background:var(--paper);color:var(--ink);box-shadow:2px 2px 0 var(--line)}
-@keyframes pulsa{50%{opacity:.5}}
-.eyda{
-  position:absolute;top:12px;right:14px;color:var(--ink-soft);font-size:22px;
-  line-height:1;padding:2px 6px
-}
-.eyda:hover{color:var(--pink)}
-.merkitakki{
-  font-size:11px;font-weight:600;background:var(--paper);color:var(--ink-soft);
-  border-radius:999px;padding:2px 8px;margin-left:5px;box-shadow:1.5px 1.5px 0 var(--line)
-}
+/* pond: flat paper-blue with grain */
+.pond{background-color:#8DBEEF;background-image:var(--grain);box-shadow:inset 0 0 0 3px rgba(39,48,107,.12)}
+body.magic .pond{background:var(--grain),linear-gradient(170deg,var(--water),var(--water-deep))}
+.blob .lbl{color:var(--paper);background:var(--ink);box-shadow:2px 2px 0 var(--mis)}
 
-/* ---- spilun ---- */
-.spilborð{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
-.padd{
-  position:relative;background:var(--card);padding:12px;aspect-ratio:1;cursor:pointer;
-  display:flex;flex-direction:column;box-shadow:5px 6px 0 currentColor;border-radius:var(--blob-2)
-}
-.padd:nth-child(3n+2){border-radius:var(--blob-3)}
-.padd:nth-child(3n){border-radius:var(--blob-1)}
-.padd::after{
-  content:"";position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;
-  background-image:radial-gradient(circle,currentColor 1px,transparent 1.5px);
-  background-size:10px 10px;opacity:.16;pointer-events:none
-}
-.padd .mynd{flex:1;min-height:0;position:relative;z-index:1}
-.padd .mynd img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain}
-.padd .mynd img.virk{opacity:0}
-.padd.spilar .mynd img.kyrr{opacity:0}
-.padd.spilar .mynd img.virk{opacity:1}
-.padd.spilar{animation:hristing .38s ease-in-out infinite}
-.padd .titill{
-  position:relative;z-index:1;font-weight:500;font-size:15px;color:var(--ink);
-  text-align:center;padding-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-}
-.hringur{
-  position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;
-  border:3px solid currentColor;opacity:0;pointer-events:none
-}
-.padd.spilar .hringur{animation:bylgja .55s ease-out}
-@keyframes hristing{
-  0%{transform:rotate(-2.5deg) scale(1.03)}
-  50%{transform:rotate(2.5deg) scale(1.05)}
-  100%{transform:rotate(-2.5deg) scale(1.03)}
-}
-@keyframes bylgja{
-  from{opacity:.9;transform:scale(1)}
-  to{opacity:0;transform:scale(1.3)}
-}
-@media (prefers-reduced-motion:reduce){
-  .padd.spilar{animation:none;transform:scale(1.04)}
-  .padd.spilar .hringur{animation:none;opacity:.6}
-}
+/* buttons: solid ink with a pink plate peeking out */
+.play,.next,.done,.tabs button.on,.seg button.on,.mute[aria-pressed="true"],.types button.on{background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 var(--mis)}
+.world-btn,.songrec,.share,.mute,.woff,.rm,.steps,.seg,.sel-wrap select,.chip,.aslot,.tune,.pitch,.ed-top input,.types button{background-color:var(--card);background-image:var(--grain)}
+.world-btn,.songrec,.sel-wrap select{box-shadow:3px 3px 0 var(--mis2)}
+.chip{box-shadow:2px 2px 0 var(--line)}
+body.w-tofrar .world-btn{background:#FF48B0;color:#fff;box-shadow:3px 3px 0 #765BA7}
+body.w-haf .world-btn{background:#00838A;color:#fff;box-shadow:3px 3px 0 #FF665E}
+body.w-geimur .world-btn{background:#FFE800;color:#1F2550;box-shadow:3px 3px 0 #FF48B0}
+body.w-robot .world-btn{background:#FF6C2F;color:#fff;box-shadow:3px 3px 0 #3B4450}
+.songrec.on{background:#FF48B0;color:#fff;box-shadow:3px 3px 0 var(--ink)}
+.rdot{background:#FF48B0}
+.listen{color:#27306B;box-shadow:3px 3px 0 var(--ink)}
+input[type=range]{background:var(--line)}
+input[type=range]::-webkit-slider-thumb{background:var(--ink);border-color:var(--card);box-shadow:2px 2px 0 var(--mis)}
+.toast{background:var(--ink);color:var(--paper);box-shadow:3px 3px 0 var(--mis)}
+.deg{box-shadow:1.5px 1.5px 0 var(--mis)}
 
-/* ---- taktur ---- */
-.taktrod{display:grid;align-items:center;margin-bottom:10px}
-.skrefhaus{font-size:13px;font-weight:500;color:var(--ink-soft);text-align:center;padding-bottom:2px}
-.skrefhaus.thungt{color:var(--pink);font-weight:600}
-.taktnafn{
-  display:flex;align-items:center;gap:8px;background:var(--card);color:var(--ink);
-  border-radius:var(--pill-1);padding:6px 10px;min-width:0;box-shadow:2px 2px 0 currentColor
-}
-.taktnafn .thumbi{width:34px;height:34px;flex:none;border-radius:var(--bub-2);background:var(--paper);
-  object-fit:contain;transition:transform .07s}
-.taktnafn.slaer .thumbi{transform:scale(1.22) rotate(-7deg)}
-.taktnafn .heiti{font-size:14px;font-weight:500;color:var(--ink);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.skref{
-  aspect-ratio:1;border:2.5px dashed var(--line);border-radius:var(--bub-1);padding:0;position:relative;
-  background:radial-gradient(circle,rgba(39,48,107,.09) 1px,transparent 1.5px) 0 0/6px 6px,var(--card)
-}
-.skref:nth-child(3n){border-radius:var(--bub-2)}
-.skref.thungt{border-color:var(--ink-soft)}
-.skref[aria-pressed="true"]{background:currentColor;border-style:solid;border-color:currentColor;
-  box-shadow:2px 2px 0 var(--line)}
-.skref.nuna{border-color:var(--ink);border-style:solid;box-shadow:0 0 0 3px var(--ink)}
-.skref[aria-pressed="true"].nuna{transform:scale(1.08)}
-@media (max-width:620px){
-  .taktnafn{padding:4px 7px;gap:5px}
-  .taktnafn .thumbi{width:24px;height:24px}
-  .taktnafn .heiti{font-size:12px}
-}
-.val{display:flex;gap:3px;background:var(--card);padding:4px;border-radius:var(--pill-1);box-shadow:0 2px 0 var(--line)}
-.val button{font-size:15px;font-weight:500;color:var(--ink-soft);padding:8px 15px;border-radius:var(--pill-2)}
-.val button:nth-child(2){border-radius:var(--pill-1)}
-.val button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+/* empty slots: halftone dots instead of a flat fill */
+.slot{border:2px dashed var(--line);background:radial-gradient(circle,rgba(39,48,107,.16) 1px,transparent 1.5px) 0 0/5px 5px,var(--card)}
+.slot.filled{background:transparent}
+.hub{background-color:var(--card);background-image:var(--grain);box-shadow:2px 2px 0 var(--mis)}
 
-/* ---- klippiborð ---- */
-.yfirlag{
-  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(27,32,60,.55);
-  z-index:20;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto
-}
-.klippispjald{
-  background:var(--card);color:var(--ink);padding:20px;width:100%;max-width:640px;
-  border-radius:48px 66px 52px 60px / 56px 48px 62px 50px;
-  box-shadow:6px 7px 0 var(--mis),0 18px 44px rgba(0,0,0,.25)
-}
-.klippihaus{display:flex;align-items:center;gap:10px;margin:0 0 14px}
-.klippihaus h2{font-size:21px;font-weight:600;margin:0;flex:1;min-width:0;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 rgba(255,72,176,.4)}
-.bylgja{
-  position:relative;background:var(--paper);height:150px;overflow:hidden;
-  border-radius:28px 40px 30px 44px / 36px 28px 42px 30px;
-  touch-action:none;cursor:ew-resize;-webkit-user-select:none;user-select:none
-}
-.bylgja canvas{display:block;width:100%;height:100%}
-.skuggi{position:absolute;top:0;bottom:0;background:rgba(39,48,107,.26);pointer-events:none}
-.handfang{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--pink);pointer-events:none}
-.handfang::before{content:"";position:absolute;top:0;left:-10px;width:23px;height:22px;
-  background:var(--pink);border-radius:0 0 10px 10px}
-.handfang.endi{background:var(--blue)}
-.handfang.endi::before{background:var(--blue)}
-.timamerki{display:flex;justify-content:space-between;font-size:15px;color:var(--ink-soft);
-  margin-top:10px;font-variant-numeric:tabular-nums}
-.klippilina{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
-.klippilina label{font-size:16px;font-weight:500;display:flex;align-items:center;gap:10px}
-.tonntala{
-  font-weight:600;font-size:16px;background:var(--ink);color:var(--paper);
-  border-radius:999px;padding:4px 12px;min-width:56px;text-align:center;
-  font-variant-numeric:tabular-nums;box-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
-}
+/* imperfect, slightly oval rings */
+.ring-in{position:absolute;top:0;left:0;right:0;bottom:0}
+.k0 .ring-in{transform:rotate(-7deg) scale(1.07,.9)}
+.k1 .ring-in{transform:rotate(10deg) scale(.95,1.03)}
+.k2 .ring-in{transform:rotate(-15deg) scale(1.08,.88)}
+.track{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.track .t1{fill:none;stroke:var(--mis);stroke-width:1.4;opacity:.7}
+.track .t2{fill:none;stroke:var(--ink);stroke-width:1.1;opacity:.85;stroke-linecap:round}
+.ph{border-top-color:var(--mis)}
+.playing .ph{border-top-color:var(--ink)}
 
-/* ---- stjórnborð neðst ---- */
-.stjornbord{
-  position:fixed;left:0;right:0;bottom:0;background:var(--card);
-  border-top:2.5px solid var(--line);
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-  display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;z-index:5
-}
-.rofi{
-  display:flex;align-items:center;gap:9px;font-weight:500;font-size:16px;
-  background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:var(--pill-1);
-  box-shadow:2px 2px 0 var(--line)
-}
-.rofi .pera{width:12px;height:12px;border-radius:50%;background:var(--line)}
-.rofi[aria-pressed="true"]{background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)}
-.rofi[aria-pressed="true"] .pera{background:var(--yellow)}
-.sleði{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:var(--ink)}
-input[type=range]{
-  -webkit-appearance:none;appearance:none;height:8px;width:140px;background:var(--line);
-  border-radius:6px 10px 7px 9px
-}
-input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:26px;height:26px;background:var(--ink);border:4px solid var(--card);
-  border-radius:52% 48% 55% 45% / 48% 54% 46% 52%;box-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
-}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--card)}
+/* ---------- Riso, turned down a notch ---------- */
+.brand{text-shadow:1.5px 1.5px 0 color-mix(in srgb,var(--mis) 60%,transparent)}
+.rec h2,.ringcard h3,.panel h3,#songSheet h2{text-shadow:1px 1px 0 color-mix(in srgb,var(--mis) 40%,transparent)}
+.rec,.ringcard,.panel{background-image:var(--grain),radial-gradient(circle,var(--ht) 1px,transparent 1.5px);background-size:auto,10px 10px}
+.rec[data-type="perc"],.k0{--ht:rgba(255,72,176,.14)}
+.rec[data-type="tone"],.k1,.k2{--ht:rgba(255,200,0,.22)}
+.rec[data-type="amb"],.panel:nth-child(1){--ht:rgba(0,169,92,.13)}
+.panel:nth-child(2){--ht:rgba(0,120,191,.1)}
+.rec,.ringcard,.panel{box-shadow:4px 5px 0 var(--sh)}
+.rec[data-type="perc"],.k0,.panel:nth-child(2){--sh:rgba(0,120,191,.35)}
+.rec[data-type="tone"],.k1,.k2{--sh:rgba(255,72,176,.35)}
+.rec[data-type="amb"],.panel:nth-child(1){--sh:rgba(255,72,176,.32)}
+body.magic .rec,body.magic .ringcard,body.magic .panel{--sh:color-mix(in srgb,var(--mis) 40%,transparent)}
+.play,.next,.done,.tabs button.on,.seg button.on,.mute[aria-pressed="true"],.types button.on,.toast{box-shadow:2px 2px 0 color-mix(in srgb,var(--mis) 70%,transparent)}
+.world-btn,.songrec,.sel-wrap select{box-shadow:2px 2px 0 color-mix(in srgb,var(--mis2) 55%,transparent)}
+.listen{box-shadow:2px 2px 0 color-mix(in srgb,var(--ink) 60%,transparent)}
+.blob .lbl,.hub,.deg,input[type=range]::-webkit-slider-thumb{box-shadow:1.5px 1.5px 0 color-mix(in srgb,var(--mis) 60%,transparent)}
+.slot{background:radial-gradient(circle,rgba(39,48,107,.09) 1px,transparent 1.5px) 0 0/6px 6px,var(--card)}
+.slot.filled{background:transparent}
+.track .t1{opacity:.4}
 
-.tomt{text-align:center;color:var(--ink-soft);padding:56px 20px;font-size:17px;line-height:1.5}
-.tomt strong{color:var(--pink)}
-.falid{display:none}
-.hulinn{position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0}
-@supports not (aspect-ratio: 1 / 1){
-  .reitur{height:132px}
-  .padd{height:184px}
-  .skref{height:42px}
-  @media (max-width:620px){ .skref{height:34px} }
-}
+/* v10: no title, round rings */
+.tabs{margin-right:auto}
+.k0 .ring-in,.k1 .ring-in,.k2 .ring-in{transform:none}
+
+/* v11: groups + swing */
+.group-btn{max-width:260px}
+.group-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.group-btn svg{flex:none}
+#groupSheet{--c:#FFE800}
+#groupSheet h2{margin:0;font-size:22px;font-weight:600;flex:1}
+.gcur{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-top:14px}
+.gcur label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink-soft);flex:1;min-width:220px}
+.gcur input,.gnew input{font:inherit;font-size:20px;font-weight:600;color:var(--ink);background-color:var(--paper);background-image:var(--grain);border:0;padding:9px 14px;border-radius:var(--pill-2);-webkit-user-select:text;user-select:text}
+.gnew input{font-size:17px;font-weight:500;flex:1;min-width:0}
+.glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:16px 0;max-height:38vh;overflow-y:auto;padding:2px 6px 6px 2px}
+.grow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 16px;background-color:var(--paper);background-image:var(--grain);border-radius:var(--pill-1);box-shadow:2px 2px 0 var(--line)}
+.grow:nth-child(even){border-radius:var(--pill-2)}
+.grow b{font-size:17px;font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grow small{font-size:13px;color:var(--ink-soft)}
+.grow.on{background-color:var(--ink);color:var(--paper);box-shadow:2px 2px 0 color-mix(in srgb,var(--mis) 70%,transparent)}
+.grow.on small{color:var(--paper);opacity:.8}
+.gnew{display:flex;gap:10px;align-items:center}
+.ghint{margin:12px 0 0;color:var(--ink-soft);font-size:14px;line-height:1.35}
+@media (max-width:820px){ .group-btn{max-width:170px} }
+
+/* v12: parts + song */
+.partbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0 18px 12px}
+.ptab{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;background-color:var(--card);background-image:var(--grain);box-shadow:2px 2px 0 var(--line);opacity:.75}
+.ptab:nth-child(odd){border-radius:var(--pill-1)} .ptab:nth-child(even){border-radius:var(--pill-2)}
+.ptab.used{opacity:1}
+.ptab .plt,.pc-row .plt{width:30px;height:30px;display:grid;place-items:center;font-weight:700;background:var(--pc);color:#27306B;border-radius:var(--bub-1);flex:none}
+.ptab:not(.used) .plt{background:transparent;box-shadow:inset 0 0 0 2.5px var(--pc)}
+.ptab .pn{font-weight:500}
+.ptab.on{background-color:var(--ink);color:var(--paper);opacity:1;box-shadow:2px 2px 0 color-mix(in srgb,var(--mis) 70%,transparent)}
+.pcopy{padding:8px 14px;font-size:15px;color:var(--ink-soft);text-decoration:underline;text-underline-offset:3px}
+.pempty{font-size:14px;color:var(--ink-soft);margin-left:auto;max-width:340px;line-height:1.3}
+.pmsg{margin:4px 0 8px;font-size:14px;color:var(--ink-soft)}
+.pc-row{display:flex;align-items:center;gap:10px;margin-top:6px;text-align:left}
+.warnrow{color:#D6402A}
+#partPop{width:250px}
+#page-lag{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.songlen{font-weight:600;font-variant-numeric:tabular-nums}
+.lag{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px;padding:0 18px 18px}
+.palette{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ptile{display:flex;flex-direction:column;gap:6px}
+.padd{display:flex;flex-direction:column;align-items:center;gap:0;padding:14px 8px 10px;background:var(--pc);color:#27306B;box-shadow:3px 4px 0 color-mix(in srgb,var(--ink) 25%,transparent)}
+.ptile:nth-child(1) .padd{border-radius:var(--blob-1)} .ptile:nth-child(2) .padd{border-radius:var(--blob-2)}
+.ptile:nth-child(3) .padd{border-radius:var(--blob-3)} .ptile:nth-child(4) .padd{border-radius:var(--blob-2)}
+.padd b{font-size:34px;line-height:1}
+.padd span{font-weight:600;font-size:16px}
+.padd small{font-size:13px;opacity:.75}
+.ptile.empty .padd{background:transparent;box-shadow:inset 0 0 0 3px var(--pc);color:var(--ink)}
+.pctl{display:flex;justify-content:center;gap:6px}
+.pctl button{font-size:13px;padding:5px 10px;background-color:var(--card);background-image:var(--grain);border-radius:var(--pill-1);box-shadow:1.5px 1.5px 0 var(--line)}
+.phint{margin:12px 0 0;font-size:14px;color:var(--ink-soft)}
+.strip{display:flex;flex-wrap:wrap;gap:10px;min-height:96px;align-content:flex-start}
+.stile{width:72px;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--pc);color:#27306B;box-shadow:3px 3px 0 color-mix(in srgb,var(--ink) 25%,transparent);transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s}
+.stile:nth-child(3n){border-radius:var(--bub-1)} .stile:nth-child(3n+1){border-radius:var(--bub-2)} .stile:nth-child(3n+2){border-radius:var(--bub-3)}
+.stile b{font-size:30px;line-height:1}
+.stile small{font-size:12px;opacity:.7}
+.stile.now{transform:translateY(-6px) scale(1.12);box-shadow:0 0 0 4px var(--ink),4px 6px 0 var(--mis)}
+.forms{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:16px;font-size:14px;color:var(--ink-soft)}
+.forms button[data-form]{padding:7px 12px;font-size:14px;font-weight:600;letter-spacing:.04em;color:var(--ink);background-color:var(--paper);background-image:var(--grain);border-radius:var(--pill-2);box-shadow:1.5px 1.5px 0 var(--line)}
+@media (max-width:820px){ .lag{grid-template-columns:1fr} .palette{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:560px){ .palette{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* v14: parts are opt-in */
+.ptoggle{display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;font-weight:600;background-color:var(--card);background-image:var(--grain);border-radius:var(--pill-2);box-shadow:2px 2px 0 color-mix(in srgb,var(--mis2) 55%,transparent)}
+.ptoggle[aria-pressed="true"]{background-color:var(--ink);color:var(--paper);box-shadow:2px 2px 0 color-mix(in srgb,var(--mis) 70%,transparent)}
+.pdots{display:grid;grid-template-columns:repeat(2,9px);gap:3px}
+.pdots i{width:9px;height:9px;display:block;border-radius:52% 48% 55% 45% / 48% 54% 46% 52%}
+.partbar .ptoggle{margin-right:6px}
 </style>
 </head>
 <body>
-<div class="umgjord">
-  <header>
-    <h1><i aria-hidden="true"><b></b><b></b><b></b></i>Teikni<span>hljóðfærið</span></h1>
-    <div class="flipar" role="tablist">
-      <button class="flipi" id="flipiUppsetning" role="tab" aria-selected="true">Uppsetning</button>
-      <button class="flipi" id="flipiSpila" role="tab" aria-selected="false">Spila</button>
-      <button class="flipi" id="flipiTaktur" role="tab" aria-selected="false">Taktur</button>
-    </div>
-  </header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><pattern id="ht" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><circle cx="3" cy="3" r="1.1" fill="#27306B" fill-opacity=".11"/></pattern></defs></svg>
+<header class="bar">
+    <nav class="tabs" aria-label="Síður">
+    <button data-page="safna" class="on">Safna hljóðum</button>
+    <button data-page="rada">Raða í hringi</button>
+    <button data-page="lag">Lagið</button>
+  </nav>
+  <button id="groupBtn" class="world-btn group-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9.5" r="2.5"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2"/><path d="M15.5 14.2c2.6-.3 4.8 1.2 5.5 4.3"/></svg><span id="groupName">Hópur 1</span></button>
+  <button id="worldBtn" class="world-btn" aria-haspopup="true" aria-expanded="false"><span class="wi" id="worldIcon">✨</span><span id="worldName">Töfraheimar</span></button>
+</header>
 
-  <!-- UPPSETNING -->
-  <section id="uppsetning">
-    <div class="takkarod" style="margin-bottom:22px">
-      <button class="takki gulur" id="baetaVid">+ Nýr takki</button>
-      <button class="takki aukatakki" id="vistaSkra">Vista hljóðfærið</button>
-      <button class="takki aukatakki" id="opnaSkra">Opna hljóðfæri</button>
-      <input type="file" id="innSkra" accept=".json,application/json" class="hulinn">
+<main>
+  <!-- PAGE 1 -->
+  <section id="page-safna" class="page on">
+    <div id="pond" class="pond">
+      <canvas id="dust" class="dust" aria-hidden="true"></canvas>
+      <div id="pondEmpty" class="pond-empty" aria-hidden="true"></div>
     </div>
-
-    <div class="spjaldalisti" id="spjaldalisti"></div>
+    <div class="rec-row">
+      <div class="rec" data-type="perc">
+        <button class="rec-btn" aria-label="Taka upp slagverk"><span class="shape" data-fam="perc"></span><span class="dot"></span></button>
+        <h2>Slagverk</h2>
+        <p class="txt">Stutt hljóð: bank, klapp, smellur.</p>
+        <button class="file">eða veldu hljóðskrá</button>
+      </div>
+      <div class="rec" data-type="tone">
+        <button class="rec-btn" aria-label="Taka upp tón"><span class="shape" data-fam="tone"></span><span class="dot"></span></button>
+        <h2>Tónn</h2>
+        <p class="txt">Hljóð sem syngur: glas, flauta, rödd.</p>
+        <button class="file">eða veldu hljóðskrá</button>
+      </div>
+      <div class="rec" data-type="amb">
+        <button class="rec-btn" aria-label="Taka upp umhverfishljóð"><span class="shape" data-fam="amb"></span><span class="dot"></span></button>
+        <h2>Umhverfi</h2>
+        <p class="txt">Langt hljóð: vindur, rigning, frímínútur.</p>
+        <button class="file">eða veldu hljóðskrá</button>
+      </div>
+    </div>
+    <div class="foot">
+      <button id="resetBtn" class="textbtn">Byrja upp á nýtt</button>
+      <button class="next" data-goto="rada">Raða í hringi</button>
+    </div>
+    <input id="fileIn" type="file" accept="audio/*" class="hidden">
   </section>
 
-  <!-- SPILUN -->
-  <section id="spilun" class="falid">
-    <div class="spilborð" id="spilborð"></div>
-    <div class="tomt falid" id="tomtSkilabod">
-      Engir takkar til ennþá. Farðu í <strong>Uppsetning</strong> og búðu til þann fyrsta.
-    </div>
-  </section>
-
-  <!-- TAKTUR -->
-  <section id="taktur" class="falid">
-    <div class="takkarod" style="margin-bottom:20px">
-      <button class="takki gulur" id="taktSpila">▶ Spila lykkju</button>
-      <label class="sleði" style="color:#C7D0E4">Hraði
-        <input type="range" id="hradi" min="50" max="240" value="100">
-        <span class="tonntala" id="hradiTala" style="min-width:86px">100 bpm</span>
+  <!-- PAGE 2 -->
+  <section id="page-rada" class="page">
+    <div class="transport">
+      <button id="playBtn" class="play" aria-label="Spila">
+        <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"/></svg>
+        <svg class="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>
+      </button>
+      <label class="tempo">Hraði <input id="bpm" type="range" min="60" max="160" step="1" value="100"> <output id="bpmOut">100</output></label>
+      <label class="tempo">Grúv <input id="swing" type="range" min="0" max="100" step="1" value="0"> <output id="swingOut">0</output></label>
+      <label class="tempo sel-wrap">Grunntónn
+        <select id="root">
+          <option value="0">C</option><option value="2">D</option><option value="4">E</option><option value="5">F</option>
+          <option value="7">G</option><option value="9">A</option><option value="10">B</option>
+        </select>
       </label>
-      <span class="val" role="group" aria-label="Fjöldi slaga">
-        <button id="val8" data-fjoldi="8" aria-pressed="true">8 slög</button>
-        <button id="val16" data-fjoldi="16" aria-pressed="false">16 slög</button>
-      </span>
-      <button class="takki aukatakki" id="tvofalda">Tvöfalda</button>
-      <button class="takki aukatakki" id="hreinsaTakt">Hreinsa</button>
+      <button id="songRec" class="songrec" data-label="Taka upp lag"><span class="rdot"></span><span class="rtxt">Taka upp lag</span></button>
     </div>
-    <div id="taktbord"></div>
-    <div class="tomt falid" id="tomtTaktur">
-      Engin hljóð til að raða. Farðu í <strong>Uppsetning</strong> og búðu til takka fyrst.
+    <div class="partbar" id="partbar"></div>
+    <div id="rings" class="rings"></div>
+    <div class="lower">
+      <div class="panel">
+        <h3>Umhverfið undir</h3>
+        <div class="aslots" id="aslots"></div>
+        <label class="avol">Styrkur <input id="ambVol" type="range" min="0" max="1" step="0.01" value="0.7"></label>
+      </div>
+      <div class="panel">
+        <h3>Hljóðin þín</h3>
+        <div id="tray" class="tray"></div>
+      </div>
     </div>
   </section>
-</div>
 
-<div class="yfirlag falid" id="klippiborð">
-  <div class="klippispjald">
-    <div class="klippihaus">
-      <h2 id="klippiNafn">Klippa</h2>
-      <button class="smatakki ljos" id="klippiLoka">Loka</button>
+  <!-- PAGE 3 -->
+  <section id="page-lag" class="page">
+    <div class="transport">
+      <button id="songPlay" class="play" aria-label="Spila lagið">
+        <svg class="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"/></svg>
+        <svg class="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2.5"/></svg>
+      </button>
+      <button id="songRec2" class="songrec" data-label="Taka upp allt lagið"><span class="rdot"></span><span class="rtxt">Taka upp allt lagið</span></button>
+      <span class="songlen" id="songLen"></span>
+      <p class="hint">Raðið pörtunum í röð. Lagið spilast frá vinstri til hægri.</p>
     </div>
-    <div class="bylgja" id="bylgja">
-      <canvas id="bylgjaCanvas"></canvas>
-      <div class="skuggi" id="skuggiV"></div>
-      <div class="skuggi" id="skuggiH"></div>
-      <div class="handfang" id="handfangU"></div>
-      <div class="handfang endi" id="handfangE"></div>
+    <div class="lag">
+      <div class="panel">
+        <h3>Partarnir</h3>
+        <div class="palette" id="palette"></div>
+        <p class="phint">Ýttu á part til að bæta honum aftast í lagið.</p>
+      </div>
+      <div class="panel">
+        <h3>Lagið ykkar</h3>
+        <div class="strip" id="strip"></div>
+        <div class="forms">
+          <span>Prófið form:</span>
+          <button data-form="AABA">A A B A</button>
+          <button data-form="ABAB">A B A B</button>
+          <button data-form="ABABCB">A B A B C B</button>
+          <button data-form="DABABCBD">D A B A B C B D</button>
+          <button id="stripClear" class="textbtn">Hreinsa röðina</button>
+        </div>
+      </div>
     </div>
-    <div class="timamerki">
-      <span id="merkiU">Byrjar: 0,00 s</span>
-      <span id="merkiE">Endar: 0,00 s</span>
-    </div>
-    <div class="klippilina">
-      <label>Tónhæð
-        <input type="range" id="tonnSledi" min="-12" max="12" step="1" value="0">
-        <span class="tonntala" id="tonnTala">0</span>
-      </label>
-    </div>
-    <div class="klippilina">
-      <button class="takki gulur" id="klippiSpila">▶ Heyra</button>
-      <button class="takki aukatakki" id="finnaUpphaf">Finna upphafið</button>
-      <button class="takki aukatakki" id="nullstilla">Núllstilla</button>
-    </div>
-    <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:16px 0 0">
-      Dragðu fingurinn á bylgjuna til að færa gula upphafsmerkið og það rauða í endann.
-      Tónhæðin er í hálftónum — hljóðið verður líka hraðara þegar það hækkar, alveg eins og
-      þegar segulband er spilað hraðar.
-    </p>
+  </section>
+</main>
+
+<div id="scrim" class="scrim"></div>
+<div id="sheet" class="sheet" role="dialog" aria-label="Breyta hljóði">
+  <div class="ed-top">
+    <span id="edMini" class="mini"></span>
+    <input id="edName" type="text" maxlength="24" aria-label="Nafn hljóðs">
+    <button id="edDone" class="done">Tilbúið</button>
+  </div>
+  <div class="types" id="edTypes">
+    <button data-type="perc"><span class="mini" data-fam="perc"></span>Slagverk</button>
+    <button data-type="tone"><span class="mini" data-fam="tone"></span>Tónn</button>
+    <button data-type="amb"><span class="mini" data-fam="amb"></span>Umhverfi</button>
+  </div>
+  <div id="wave" class="wave">
+    <canvas id="cv"></canvas>
+    <div id="sel" class="sel"></div>
+    <div id="hS" class="hnd"></div>
+    <div id="hE" class="hnd"></div>
+    <div id="pl" class="pl"></div>
+  </div>
+  <div class="ed-info"><span id="lblStart"></span><span id="lblLen"></span></div>
+  <div class="tune" id="edTune">
+    <span id="tuneTxt"></span>
+    <label><input type="checkbox" id="tuneChk" checked> Stilla tónhæð sjálfkrafa</label>
+  </div>
+  <div class="ed-act">
+    <button id="edPlay" class="listen"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 001.5.86l12-7.5a1 1 0 000-1.72l-12-7.5A1 1 0 007 4.5z"/></svg>Hlusta</button>
+    <button id="edDel" class="del">Eyða hljóði</button>
   </div>
 </div>
 
-<div class="stjornbord falid" id="stjornbord">
-  <button class="rofi" id="reverbRofi" aria-pressed="false"><span class="pera"></span>Ómur (reverb)</button>
-  <label class="sleði">Magn <input type="range" id="reverbMagn" min="0" max="100" value="45"></label>
-  <label class="sleði">Styrkur <input type="range" id="hljodstyrkur" min="0" max="100" value="85"></label>
+<div id="songSheet" class="sheet" role="dialog" aria-label="Lagið ykkar">
+  <div class="ed-top">
+    <h2>Lagið ykkar</h2>
+    <input id="songName" type="text" maxlength="40" value="Lagið okkar" aria-label="Nafn lagsins">
+    <button id="songClose" class="done">Loka</button>
+  </div>
+  <audio id="songAudio" controls></audio>
+  <div class="ed-act">
+    <button id="songSave" class="listen">Vista lagið</button>
+    <button id="songShare" class="share hidden">Deila</button>
+  </div>
 </div>
+
+<div id="groupSheet" class="sheet" role="dialog" aria-label="Hópar">
+  <div class="ed-top">
+    <h2>Hópar á þessum iPad</h2>
+    <button id="gClose" class="done">Loka</button>
+  </div>
+  <div class="gcur">
+    <label>Opinn hópur <input id="gName" type="text" maxlength="30" aria-label="Nafn hópsins"></label>
+    <button id="gDel" class="del">Eyða hópnum</button>
+  </div>
+  <div id="gList" class="glist"></div>
+  <div class="gnew">
+    <input id="gNewName" type="text" maxlength="30" placeholder="Nafn á nýjum hóp, t.d. 5. bekkur – Hópur 2" aria-label="Nafn á nýjum hóp">
+    <button id="gNew" class="listen">Búa til hóp</button>
+  </div>
+  <p class="ghint">Allt vistast sjálfkrafa á þessum iPad. Þegar skipt er um hóp opnast hljóðin og hringirnir sem sá hópur bjó til.</p>
+</div>
+
+<div id="partScrim" class="scrim clear"></div>
+<div id="partPop" class="pop"></div>
+
+<div id="popScrim" class="scrim clear"></div>
+<div id="pop" class="pop">
+  <div class="pname" id="popName"></div>
+  <div class="pitch" id="popPitch">
+    <button id="pDown" aria-label="Lægra">−</button>
+    <div><b id="pVal">0</b><small>tónhæð</small></div>
+    <button id="pUp" aria-label="Hærra">+</button>
+  </div>
+  <button class="rm" id="popRm">Taka úr hólfinu</button>
+</div>
+
+<div id="wScrim" class="scrim clear"></div>
+<div id="wmenu" class="wmenu" role="menu"></div>
+
+<div id="toast" class="toast" role="status"></div>
 
 <script>
 (function(){
-"use strict";
+'use strict';
+var $ = function(s){ return document.querySelector(s); };
 
-const litir = ["#FF48B0","#0078BF","#00A95C","#FF6C2F","#5EC8E5","#FFE800"];
-let paddar = [];
-let naestaId = 1;
+/* ================= Constants ================= */
+var TYPES = {
+  perc:{label:'Slagverk', max:3,  trim:0.6, size:76},
+  tone:{label:'Tónn',     max:6,  trim:1.4, size:84},
+  amb: {label:'Umhverfi', max:20, trim:0,   size:118}
+};
+var ORDER = ['perc','tone','amb'];
+var SCALE = [0,2,4,7,9];                 // pentatonic: always sounds nice together
+function deg2semi(d){ return 12*Math.floor(d/5) + SCALE[((d%5)+5)%5]; }
+var PAT = [[0,0,0,0,0,0,0,0],[0,1,2,4,3,2,1,2],[-5,-3,-2,-3,-5,-1,-3,-2]];
+var RING_NAMES = ['Taktur','Laglína 1','Laglína 2'];
+var SPEEDDIV = {'0.5':4,'1':2,'2':1};
+var NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','B','H'];
+var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------- hljóðkerfi ---------- */
-let ac=null, master=null, thurr=null, blautur=null, omur=null, reverbA=false;
-function raesaHljod(){
-  if(ac) return ac;
-  ac = new (window.AudioContext||window.webkitAudioContext)();
-  master = ac.createGain();
-  master.gain.value = 0.85;
-  master.connect(ac.destination);
+/* ================= State ================= */
+function newRing(){ return {slots:[null,null,null,null,null,null,null,null], rot:0, speed:1, mute:false, len:8}; }
+var S = { sounds:new Map(), rings:[newRing(),newRing(),newRing()], amb:[null,null], ambVol:0.7, bpm:100, root:0, world:'tofrar', swing:0, parts:null, cur:'A', song:[], partsOn:false };
+var PARTS = ['A','B','C','D'];
+var PART_NAME = {A:'Erindi', B:'Viðlag', C:'Brú', D:'Endir'};
+var PART_COL = {A:'#FF48B0', B:'#FFE800', C:'#5EC8E5', D:'#00A95C'};
+function emptyPart(){ return {rings:[newRing(),newRing(),newRing()], amb:[null,null], world:null, bars:4}; }
+function emptyParts(){ var o = {}; PARTS.forEach(function(k){ o[k] = emptyPart(); }); return o; }
+S.parts = emptyParts();
+var counter = {perc:0,tone:0,amb:0};
+var magicTarget = 0, magicAmt = 0, rampRunning = false;
 
-  thurr = ac.createGain(); thurr.gain.value = 1; thurr.connect(master);
-
-  omur = ac.createConvolver();
-  omur.buffer = byggjaOm(2.4, 2.6);
-  blautur = ac.createGain(); blautur.gain.value = 0;
-  omur.connect(blautur); blautur.connect(master);
-  return ac;
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function fmt(x){ return x.toFixed(2).replace('.',','); }
+function mmss(s){ s = Math.floor(s); return Math.floor(s/60) + ':' + ('0' + (s%60)).slice(-2); }
+function toast(msg){
+  var t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._t); toast._t = setTimeout(function(){ t.classList.remove('on'); }, 3600);
 }
-function byggjaOm(lengd, hnignun){
-  const sr = ac.sampleRate, n = Math.floor(sr*lengd);
-  const buf = ac.createBuffer(2, n, sr);
-  for(let c=0;c<2;c++){
-    const d = buf.getChannelData(c);
-    for(let i=0;i<n;i++){
-      d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, hnignun);
+
+/* ================= Worlds =================
+   Each world sets, per channel, how far the effects go when fully "on".
+   Anything left out falls back to NEUTRAL (= no effect). */
+var NEUTRAL = {lp:20000, q:0.7, lfo:0, lfoRate:0.1, lfoSync:0, crush:0, verb:0, delay:0, echo:0, echoTime:0.75,
+  vib:0, vibRate:1, am:0, amType:'sine', amFreq:30, amSync:0, pan:0, glitch:0, bubbles:0, grains:0, grainRates:[1], rate:1, wander:0};
+var WORLDS = {
+  tofrar:{name:'Töfraveröld', icon:'✨', desc:'Glitrandi korn og hljóð sem hiksta.',
+    perc:{lp:1700, q:2.9, lfo:0.4, lfoRate:0.13, verb:0.1, echo:0.38},
+    tone:{verb:0.5, delay:0.32, wander:0.005, grains:0.38, grainRates:[1,1,2,2,1.5]},
+    amb: {lp:2600, q:1.5, lfo:0.4, lfoRate:0.07, pan:0.5, glitch:0.14}},
+  haf:{name:'Neðansjávar', icon:'🫧', desc:'Dempað, vaggandi og bubblandi.',
+    perc:{lp:650, q:3.5, lfo:0.35, lfoRate:0.18, verb:0.25, echo:0.22},
+    tone:{lp:1300, q:1.6, vib:0.0035, vibRate:1.3, verb:0.55, delay:0.18},
+    amb: {lp:600, q:2.5, lfo:0.4, lfoRate:0.1, pan:0.6, vib:0.005, vibRate:0.45, verb:0.25, bubbles:0.22}},
+  geimur:{name:'Geimurinn', icon:'🪐', desc:'Víðátta, bergmál og stjörnuryk.',
+    perc:{lp:7000, verb:0.35, echo:0.42},
+    tone:{lp:9000, vib:0.0012, vibRate:0.3, verb:0.85, delay:0.42, grains:0.4, grainRates:[2,2,1,1.5]},
+    amb: {lp:5000, lfo:0.3, lfoRate:0.05, pan:0.7, verb:0.6, rate:0.5}},
+  robot:{name:'Vélmennaheimur', icon:'🤖', desc:'Bitakramið, suðandi og vélrænt.',
+    perc:{lp:9000, q:1, crush:0.7, verb:0.05, echo:0.35, echoTime:0.25},
+    tone:{lp:4200, q:4, lfo:0.45, lfoSync:2, am:0.55, amFreq:30, crush:0.45, verb:0.12, delay:0.2},
+    amb: {lp:6000, am:0.75, amType:'square', amSync:4, crush:0.55, glitch:0.22, pan:0.4}}
+};
+function WP(ch, k){ var w = WORLDS[S.world] || WORLDS.tofrar, v = w[ch] && w[ch][k]; return v === undefined ? NEUTRAL[k] : v; }
+
+/* ================= Shapes & colours =================
+   Slagverk = round blobs, Tónn = pointy stars, Umhverfi = clouds.
+   Every sound gets its own shape + colour inside its family; each world re-dresses them. */
+var PAL = {
+  base:  {perc:['#FF48B0','#FF665E','#FF6C2F','#F15060','#FF7EC4','#E45D50'], tone:['#FFE800','#FFB511','#FFD23F','#F2E43A','#FFC64D','#FFCF00'], amb:['#00A95C','#0078BF','#5EC8E5','#00838A','#82D8D5','#3255A4']},
+  tofrar:{perc:['#FF5FD2','#FF7AA8','#E36BFF','#FF4FA0','#FF9BE6','#C77DFF'], tone:['#5CF2FF','#7AFFD6','#64B8FF','#A6F7FF','#4FE3C1','#8FD0FF'], amb:['#B28CFF','#8C7BFF','#D59CFF','#7FA8FF','#C3B0FF','#9E7CF0']},
+  haf:   {perc:['#FF7F6E','#FF9AA2','#FF6F91','#FFA07A','#F7797D','#FFB4A2'], tone:['#7FE7E0','#A0F0ED','#5FD3E6','#B8F2E6','#67E8C9','#9ADCF5'], amb:['#2EC4B6','#4FB0A5','#3DA5D9','#57CC99','#80CED7','#38A3A5']},
+  geimur:{perc:['#FF8C42','#FF5E5B','#FFB347','#E8634A','#FF9F68','#D9544F'], tone:['#FFF07C','#FFE8A3','#F9F871','#FFD166','#FFFBE0','#F6E58D'], amb:['#6C8CFF','#9D7BFF','#5EC8FF','#B38CFF','#7DA2FF','#8E7DFF']},
+  robot: {perc:['#FF5A36','#FF7B2E','#FF3D5A','#FF9233','#E85D2C','#FF6F4F'], tone:['#38E1FF','#4DF3FF','#2BC8F0','#7AEBFF','#3AD0E0','#5BE0FF'], amb:['#7CFF6B','#A3FF4F','#5CF07A','#C2FF6B','#6BE38A','#95F065']}
+};
+function mode(){ return magicTarget > 0.5 ? S.world : null; }
+function palFor(type, md){ return (PAL[md] || PAL.base)[type]; }
+function colorFor(s){ var v = s.v||0; return palFor(s.type, mode())[(v + Math.floor(v/6)) % 6]; }
+function star(n, inner, sh, ph){ return function(a, m){ var i = m ? inner*0.8 : inner, s = m ? sh*2.3 : sh; return i + (1-i)*Math.pow(Math.abs(Math.cos(n*(a+(ph||0))/2)), s); }; }
+function cloud(a1,a2,a3,p1,p2,p3){ return function(a, m){ return 0.84 + a1*Math.sin(2*a+p1) + a2*Math.sin(3*a+p2) + a3*Math.sin(5*a+p3) + (m ? 0.07*Math.sin(7*a+p1) : 0); }; }
+function roundish(fn){ return function(a, m){ return fn(a) + (m ? 0.045*Math.sin(13*a) : 0); }; }
+var SHAPES = {
+  perc:[
+    {f:roundish(function(a){ return 0.97 + 0.03*Math.sin(3*a); })},
+    {f:roundish(function(){ return 1; }), sy:0.64, rot:20},
+    {f:roundish(function(a){ return 0.92 + 0.08*Math.sin(3*a); })},
+    {f:roundish(function(a){ return 0.92 + 0.08*Math.cos(a); }), sx:0.82},
+    {f:roundish(function(a){ return 0.86/Math.pow(Math.pow(Math.abs(Math.cos(a)),4) + Math.pow(Math.abs(Math.sin(a)),4), 0.25); }), rot:12},
+    {f:roundish(function(a){ return 0.93 + 0.07*Math.sin(5*a+1); }), sy:0.78, rot:-18}
+  ],
+  tone:[
+    {f:star(4,0.58,1.4), n:4},
+    {f:star(3,0.5,1.4), n:3},
+    {f:star(5,0.6,1.8), n:5},
+    {f:star(4,0.58,1.4), n:4, sx:0.66},
+    {f:star(6,0.74,1.6), n:6},
+    {f:star(3,0.52,1.4,Math.PI/3), n:3, ph:Math.PI/3}
+  ],
+  amb:[
+    {f:cloud(.05,.06,.03,0,1,2)},
+    {f:cloud(.09,.03,.03,1,0,3), sy:0.74},
+    {f:cloud(.03,.08,.04,2,2,0)},
+    {f:cloud(.04,.04,.07,.5,3,1), sx:0.78},
+    {f:cloud(.08,.06,.02,3,1,2)},
+    {f:cloud(.02,.04,.08,1,2,.5), sy:0.82}
+  ]
+};
+var shapeCache = {};
+var MIS = {perc:'#0078BF', tone:'#FF48B0', amb:'#FF48B0'};    // second ink plate, slightly off-register
+function shapePath(type, v, md){
+  var key = type + (v%6) + (md||'');
+  if (shapeCache[key]) return shapeCache[key];
+  var d = SHAPES[type][v%6], sx = d.sx||1, sy = d.sy||1, rr = (d.rot||0)*Math.PI/180, c = Math.cos(rr), sn = Math.sin(rr);
+  var robot = md === 'robot', n = 80, off = 0;
+  if (robot){                              // angular, few corners
+    if (type === 'tone'){ n = d.n*2; off = -(d.ph||0); } else { n = type === 'perc' ? 8 : 12; off = Math.PI/n; }
+  }
+  var out = '';
+  for (var i=0;i<n;i++){
+    var a = off + i/n*Math.PI*2, r;
+    if (md === 'haf') r = 46*(0.5*d.f(a,false) + 0.5 + 0.03*Math.sin(4*a + v));      // rounder, bubble-like
+    else r = 46*d.f(a, md === 'tofrar');
+    var x = Math.sin(a)*r*sx, y = -Math.cos(a)*r*sy;
+    out += (i ? 'L' : 'M') + (50 + x*c - y*sn).toFixed(1) + ' ' + (50 + x*sn + y*c).toFixed(1);
+  }
+  return (shapeCache[key] = out + 'Z');
+}
+function shapeSVG(type, v, md, color, wave){
+  var p = shapePath(type, v, md), sp = (type === 'amb' && md !== 'robot') ? 'spin' : '';
+  var behind = '', front = '';
+  if (md === 'geimur') front = '<ellipse cx="50" cy="54" rx="63" ry="14" fill="none" stroke="' + color + '" stroke-width="4" opacity=".8" transform="rotate(-16 50 54)"/>';
+  if (md === 'haf') front = '<ellipse cx="34" cy="31" rx="9" ry="5.5" fill="#fff" opacity=".5" transform="rotate(-35 34 31)"/>';
+  if (md === 'robot') front = '<rect x="33" y="28" width="10" height="10" rx="2" fill="#1B2A41"/><rect x="57" y="28" width="10" height="10" rx="2" fill="#1B2A41"/>';
+  var w = '';
+  if (wave) w = md === 'robot' ? '<g transform="translate(15 24) scale(.7)"><path class="wv" d="' + wave + '"/></g>' : '<path class="wv" d="' + wave + '"/>';
+  return '<svg viewBox="0 0 100 100" aria-hidden="true">' + behind + '<g transform="translate(3.5 4.5)"><path class="shd ' + sp + '" style="fill:' + MIS[type] + ';opacity:.6" d="' + p + '"/></g><path class="' + sp + '" d="' + p + '" fill="' + color + '"/><path class="' + sp + '" d="' + p + '" fill="url(#ht)"/>' + w + front + '</svg>';
+}
+function miniHTML(s){ return '<span class="mini">' + shapeSVG(s.type, s.v||0, mode(), colorFor(s)) + '</span>'; }
+function paintIcons(){
+  document.querySelectorAll('[data-fam]').forEach(function(el){
+    var f = el.dataset.fam; el.innerHTML = shapeSVG(f, 0, mode(), palFor(f, mode())[0]);
+  });
+}
+
+/* ================= Audio engine ================= */
+var ctx = null, N = {}, panOK = false;
+var ECHO_SLOTS = [0,0,1,0,0,1,0,1];      // which rhythm slots throw an echo
+function gainNode(v){ var g = ctx.createGain(); g.gain.value = v; return g; }
+function filt(type, f, q){ var b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; if (q) b.Q.value = q; return b; }
+function lfoNode(){ var o = ctx.createOscillator(); var g = ctx.createGain(); g.gain.value = 0; o.connect(g); o.start(); return {o:o, g:g}; }
+function beat(){ return 60 / S.bpm; }
+function crushCurve(){
+  var n = 2048, c = new Float32Array(n), lv = 5;
+  for (var i=0;i<n;i++){ var x = i/(n-1)*2 - 1; c[i] = Math.round(Math.tanh(x*1.6)*lv)/lv; }
+  return c;
+}
+/* One channel = in -> (clean | bit-crush) -> filter(+LFO) -> vibrato -> AM/gate -> [pan] -> out (+ reverb & space-delay sends) */
+function makeChannel(name, master, curve){
+  var C = {};
+  C.in = gainNode(1); C.dry = gainNode(1); C.shp = ctx.createWaveShaper(); C.shp.curve = curve; C.crush = gainNode(0);
+  C.flt = filt('lowpass', 20000, 0.7);
+  C.in.connect(C.dry); C.dry.connect(C.flt); C.in.connect(C.shp); C.shp.connect(C.crush); C.crush.connect(C.flt);
+  C.lfo = lfoNode(); C.lfo.g.connect(C.flt.frequency);
+  C.vib = ctx.createDelay(0.05); C.vib.delayTime.value = 0.006; C.vlfo = lfoNode(); C.vlfo.g.connect(C.vib.delayTime);
+  C.am = gainNode(1); C.alfo = lfoNode(); C.alfo.g.connect(C.am.gain);
+  C.flt.connect(C.vib); C.vib.connect(C.am);
+  var last = C.am;
+  if (name === 'amb' && panOK){ C.pan = ctx.createStereoPanner(); C.am.connect(C.pan); last = C.pan; C.plfo = lfoNode(); C.plfo.o.frequency.value = 0.11; C.plfo.g.connect(C.pan.pan); }
+  C.out = gainNode(1); last.connect(C.out); C.out.connect(master);
+  C.verbS = gainNode(0); C.out.connect(C.verbS); C.verbS.connect(N.verb);
+  C.delS = gainNode(0); C.out.connect(C.delS); C.delS.connect(N.spaceIn);
+  return C;
+}
+function ensureCtx(){
+  if (ctx){ if (ctx.state !== 'running') ctx.resume(); return ctx; }
+  var AC = window.AudioContext || window.webkitAudioContext;
+  ctx = new AC();
+  panOK = typeof ctx.createStereoPanner === 'function';
+  var master = gainNode(0.85), comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -14; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.2;
+  master.connect(comp); comp.connect(ctx.destination);
+  N.final = comp;
+
+  N.verb = ctx.createConvolver(); N.verb.buffer = impulse(3.4, 2.3);
+  var vOut = gainNode(0.6); N.verb.connect(vOut); vOut.connect(master);
+
+  // shared "space" delay (melodies & ambient)
+  N.spaceIn = gainNode(1); N.sd = ctx.createDelay(2); N.sdFb = gainNode(0.38); N.sdLp = filt('lowpass', 2400);
+  N.spaceIn.connect(N.sd); N.sd.connect(N.sdLp); N.sdLp.connect(N.sdFb); N.sdFb.connect(N.sd);
+  var sdOut = gainNode(0.6), sdVerb = gainNode(0.3); N.sdLp.connect(sdOut); sdOut.connect(master); N.sdLp.connect(sdVerb); sdVerb.connect(N.verb);
+  N.sdl = lfoNode(); N.sdl.o.frequency.value = 0.27; N.sdl.g.connect(N.sd.delayTime);
+
+  var curve = crushCurve();
+  N.perc = makeChannel('perc', master, curve);
+  N.tone = makeChannel('tone', master, curve);
+  N.amb  = makeChannel('amb',  master, curve);
+
+  // rhythm echo (sent from selected hits, runs back through the rhythm filter)
+  N.echoIn = gainNode(1); N.echoD = ctx.createDelay(2); N.echoFb = gainNode(0.28); N.echoHp = filt('highpass', 280);
+  N.echoIn.connect(N.echoD); N.echoD.connect(N.echoHp); N.echoHp.connect(N.echoFb); N.echoFb.connect(N.echoD); N.echoHp.connect(N.perc.flt);
+
+  N.bubbles = gainNode(1); N.bubbles.connect(master); var bv = gainNode(0.6); N.bubbles.connect(bv); bv.connect(N.verb);
+
+  syncDelays(); applyMagic();
+  if (ctx.state !== 'running') ctx.resume();
+  return ctx;
+}
+function impulse(sec, decay){
+  var r = ctx.sampleRate, len = Math.floor(r*sec), b = ctx.createBuffer(2, len, r);
+  for (var c=0;c<2;c++){ var d = b.getChannelData(c);
+    for (var i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay); }
+  return b;
+}
+function syncDelays(){
+  if (!ctx) return; var t = ctx.currentTime;
+  N.echoD.delayTime.setTargetAtTime(beat()*WP('perc','echoTime'), t, 0.05);
+  N.sd.delayTime.setTargetAtTime(beat()*0.75, t, 0.2);
+}
+function applyMagic(k){
+  if (!ctx) return;
+  k = k || 0.06;
+  var m = magicAmt, t = ctx.currentTime;
+  ['perc','tone','amb'].forEach(function(ch){
+    var C = N[ch], f = 20000*Math.pow(WP(ch,'lp')/20000, m);
+    C.flt.frequency.setTargetAtTime(f, t, k);
+    C.flt.Q.setTargetAtTime(0.7 + (WP(ch,'q') - 0.7)*m, t, k);
+    var lr = WP(ch,'lfoSync') ? WP(ch,'lfoSync')*S.bpm/60 : WP(ch,'lfoRate');
+    C.lfo.o.frequency.setTargetAtTime(lr, t, k);
+    C.lfo.g.gain.setTargetAtTime(f*WP(ch,'lfo')*m, t, k);
+    var cr = WP(ch,'crush')*m;
+    C.crush.gain.setTargetAtTime(cr*0.8, t, k); C.dry.gain.setTargetAtTime(1 - cr*0.85, t, k);
+    C.vlfo.o.frequency.setTargetAtTime(WP(ch,'vibRate'), t, k);
+    C.vlfo.g.gain.setTargetAtTime(WP(ch,'vib')*m, t, k);
+    var type = WP(ch,'amType'); if (C.alfo.o.type !== type) C.alfo.o.type = type;
+    C.alfo.o.frequency.setTargetAtTime(WP(ch,'amSync') ? WP(ch,'amSync')*S.bpm/60 : WP(ch,'amFreq'), t, k);
+    var depth = WP(ch,'am')*m*(type === 'square' ? 0.5 : 1);
+    C.am.gain.setTargetAtTime(1 - depth, t, k); C.alfo.g.gain.setTargetAtTime(depth, t, k);
+    C.verbS.gain.setTargetAtTime(WP(ch,'verb')*m, t, k);
+    C.delS.gain.setTargetAtTime(WP(ch,'delay')*m, t, k);
+    if (C.plfo) C.plfo.g.gain.setTargetAtTime(WP(ch,'pan')*m, t, k);
+  });
+  N.sdl.g.gain.setTargetAtTime(WP('tone','wander')*m, t, k);
+  updateAmbGain(k);
+}
+function buf(s){
+  if (!s.buffer){ s.buffer = ctx.createBuffer(1, s.data.length, s.sr); s.buffer.getChannelData(0).set(s.data); }
+  return s.buffer;
+}
+function rbuf(s){
+  if (!s.rbuffer){ var d = s.data, n = d.length; s.rbuffer = ctx.createBuffer(1, n, s.sr);
+    var o = s.rbuffer.getChannelData(0); for (var i=0;i<n;i++) o[i] = d[n-1-i]; }
+  return s.rbuffer;
+}
+function playDry(s, t, rate, vol, dest, echo){
+  var src = ctx.createBufferSource(); src.buffer = buf(s); src.playbackRate.value = rate;
+  var g = ctx.createGain();
+  var len = Math.max(0.03, s.end - s.start), dur = len / rate, v = vol * s.norm;
+  var rel = Math.min(0.06, dur*0.3);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(v, t+0.004);
+  g.gain.setValueAtTime(v, t+Math.max(0.005, dur-rel));
+  g.gain.linearRampToValueAtTime(0, t+dur);
+  src.connect(g); g.connect(dest);
+  if (echo){ var es = gainNode(echo); g.connect(es); es.connect(N.echoIn); }
+  src.start(t, s.start, len);
+  src.stop(t + dur + 0.05);
+  return {g:g, src:src, end:t+dur};
+}
+function choke(v, t){
+  if (!v || v.end <= t) return;
+  try { v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0, t, 0.035); } catch(e){}
+}
+function grain(s, gt, off, size, rate, gv, dest, pan){
+  var src = ctx.createBufferSource(); src.buffer = buf(s); src.playbackRate.value = rate;
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0, gt);
+  g.gain.linearRampToValueAtTime(gv, gt + size*0.5);
+  g.gain.linearRampToValueAtTime(0, gt + size);
+  src.connect(g);
+  var node = g;
+  if (panOK){ var p = ctx.createStereoPanner(); p.pan.value = pan === undefined ? Math.random()*1.6-0.8 : pan; g.connect(p); node = p; }
+  node.connect(dest);
+  src.start(gt, off); src.stop(gt + size + 0.02);
+}
+function playGrains(s, t, rate, vol, rates){
+  var len = Math.max(0.03, s.end - s.start), n = 5, v = vol * s.norm * 1.2;
+  for (var k=0;k<n;k++){
+    var gt = t + 0.03 + (k/n)*1.0 + Math.random()*0.05;
+    var size = 0.08 + Math.random()*0.18, r = rate * pick(rates);
+    var off = s.start + Math.random()*Math.max(0, len - size*r);
+    grain(s, gt, off, size, r, v*(1 - k/n*0.5), N.tone.in);
+  }
+}
+/* Glitch slices for the ambient channel */
+function slice(b, t, off, len, rate, gv, pan){
+  var src = ctx.createBufferSource(); src.buffer = b; src.playbackRate.value = rate;
+  var g = ctx.createGain(), f = Math.min(0.004, len/4);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gv, t+f);
+  g.gain.setValueAtTime(gv, t+len-f); g.gain.linearRampToValueAtTime(0, t+len);
+  src.connect(g);
+  var node = g;
+  if (panOK){ var p = ctx.createStereoPanner(); p.pan.value = pan; g.connect(p); node = p; }
+  node.connect(N.amb.in);
+  src.start(t, Math.max(0, off)); src.stop(t + len + 0.02);
+}
+function glitch(s, t, six){
+  var len = s.end - s.start; if (len < 0.2) return;
+  var gv = S.ambVol * s.norm * 0.42 * magicAmt, pan = Math.random()*1.2 - 0.6;
+  var kind = pick(['stutter','stutter','stutter','stutter','reverse','jump']);
+  if (kind === 'stutter'){
+    var sl = pick([six, six, six/2, six*2]), reps = pick([2,3,4]), rate = pick([1,1,1,1,2]);
+    var off = s.start + Math.random()*Math.max(0, len - sl*rate);
+    for (var k=0;k<reps;k++) slice(buf(s), t + k*sl, off, sl*0.92, rate, gv*(1 - k/reps*0.55), clamp(pan + (k%2 ? 0.35 : -0.35), -1, 1));
+  } else if (kind === 'reverse'){
+    var sl2 = six*pick([2,4]), off2 = s.start + Math.random()*Math.max(0, len - sl2);
+    slice(rbuf(s), t, s.dur - (off2 + sl2), sl2, 1, gv, pan);
+  } else {
+    var sl3 = six*2, r3 = pick([2,2,0.5]), off3 = s.start + Math.random()*Math.max(0, len - sl3*r3);
+    slice(buf(s), t, off3, sl3, r3, gv, -pan); slice(buf(s), t + sl3, off3, sl3, r3, gv*0.6, pan);
+  }
+}
+function bubble(t){                       // small rising "bloop" tuned to the scale
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  var midi = 72 + S.root + deg2semi(Math.floor(Math.random()*6)), f = 440*Math.pow(2, (midi-69)/12);
+  o.frequency.setValueAtTime(f*0.7, t); o.frequency.exponentialRampToValueAtTime(f*1.2, t + 0.09);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07*magicAmt*S.ambVol + 0.0001, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);
+  o.connect(g); g.connect(N.bubbles); o.start(t); o.stop(t + 0.2);
+}
+function ambExtras(t, six, tk){
+  if (magicAmt < 0.05 || tk % 2) return;
+  var gp = WP('amb','glitch')*magicAmt;
+  if (gp && Math.random() < gp){
+    var c = []; playAmb().forEach(function(a){ var s = a && S.sounds.get(a.id); if (s) c.push(s); });
+    if (c.length) glitch(pick(c), t, six);
+  }
+  var bp = WP('amb','bubbles')*magicAmt;
+  if (bp && Math.random() < bp) bubble(t + Math.random()*six);
+}
+
+/* ---------- Pitch: detect + auto-tune tone sounds ---------- */
+function detectPitch(s){
+  var q = s.sr >= 32000 ? 2 : 1, sr = s.sr/q;
+  var a = Math.floor((s.start + Math.min(0.04, (s.end-s.start)*0.2))*s.sr), b = Math.floor(s.end*s.sr);
+  var n = Math.floor((b-a)/q); if (n < 600) return 0;
+  var d = new Float32Array(n);
+  for (var i=0;i<n;i++){ var j = a + i*q; d[i] = q === 2 ? (s.data[j] + s.data[j+1])*0.5 : s.data[j]; }
+  var maxLag = Math.min(Math.floor(sr/60), Math.floor(n/3)), minLag = Math.max(2, Math.floor(sr/1400));
+  var W = Math.min(1024, n - maxLag - 1); if (W < 256 || maxLag <= minLag+2) return 0;
+  var ests = [], df = new Float32Array(maxLag+2), cm = new Float32Array(maxLag+2);
+  for (var st = 0; st + W + maxLag < n && ests.length < 12; st += 512){
+    var e = 0; for (i=0;i<W;i++) e += d[st+i]*d[st+i];
+    if (Math.sqrt(e/W)*s.norm < 0.03) continue;
+    for (var tau=1; tau<=maxLag+1; tau++){
+      var sum = 0; for (i=0;i<W;i++){ var x = d[st+i] - d[st+i+tau]; sum += x*x; } df[tau] = sum;
+    }
+    var run = 0; cm[0] = 1;
+    for (tau=1; tau<=maxLag+1; tau++){ run += df[tau]; cm[tau] = run ? df[tau]*tau/run : 1; }
+    var te = -1;
+    for (tau=minLag; tau<=maxLag; tau++){ if (cm[tau] < 0.2){ while (tau+1 <= maxLag && cm[tau+1] < cm[tau]) tau++; te = tau; break; } }
+    if (te < 0) continue;
+    var x0 = cm[te-1], x1 = cm[te], x2 = cm[te+1], den = x0 + x2 - 2*x1;
+    ests.push(sr / (te + (den ? (x0 - x2)/(2*den) : 0)));
+  }
+  if (ests.length < 2) return 0;
+  ests.sort(function(p,r){ return p-r; });
+  var med = ests[Math.floor(ests.length/2)], ok = ests.filter(function(f){ return Math.abs(f/med - 1) < 0.04; }).length;
+  return ok >= Math.max(2, ests.length*0.5) ? med : 0;
+}
+function tuneOf(s){
+  if (!s.f0 || s.autotune === false) return 0;
+  var midi = 69 + 12*Math.log(s.f0/440)/Math.LN2;
+  var diff = ((S.root - midi) % 12 + 12) % 12;          // 0..12 up to the nearest root
+  return diff > 6 ? diff - 12 : diff;
+}
+
+/* ch = which channel the sound plays through: perc | tone | amb */
+function trigger(s, t, semi, vol, ch, echo){
+  var rate = Math.pow(2, semi/12), m = magicAmt;
+  if (ch === 'perc') return playDry(s, t, rate, vol, N.perc.in, (echo && m > 0.02) ? WP('perc','echo')*m : 0);
+  if (ch === 'tone'){
+    rate *= Math.pow(2, tuneOf(s)/12);
+    var g = WP('tone','grains'), v = playDry(s, t, rate, vol*(1 - 0.3*g*m), N.tone.in, 0);
+    if (g > 0 && m > 0.02) playGrains(s, t, rate, vol*m*g, WP('tone','grainRates'));
+    return v;
+  }
+  return playDry(s, t, rate, vol, N.amb.in, 0);
+}
+var prevVoice = null;
+function preview(s, semi, ch){
+  ensureCtx();
+  var t = ctx.currentTime + 0.01;
+  ch = ch || s.type;
+  choke(prevVoice, t);
+  prevVoice = trigger(s, t, semi||0, 1, ch, false);
+  if (ch === 'amb' && magicAmt > 0.05 && WP('amb','glitch')) glitch(s, t + beat(), beat()/4);
+}
+
+/* ---------- Sequencer ---------- */
+var playing = false, timer = null, tick = 0, nextT = 0, vq = [], lastVoices = [null,null,null];
+function stepDeg(r){ return 360 / r.len; }
+function rotSteps(r){ return ((Math.round(r.rot/stepDeg(r)) % r.len) + r.len) % r.len; }
+
+var songMode = false, songDone = false, segIdx = 0, segStart = 0, segEnd = 0;
+function playRings(){ return songMode ? S.parts[S.song[segIdx]].rings : S.rings; }
+function playAmb(){ return songMode ? S.parts[S.song[segIdx]].amb : S.amb; }
+function atTime(t, fn){ setTimeout(fn, Math.max(0, (t - ctx.currentTime)*1000)); }
+function beginSeg(t){
+  var k = S.song[segIdx], part = S.parts[k];
+  segStart = tick; segEnd = tick + part.bars*16;
+  lastVoices.forEach(function(v){ choke(v, t); }); lastVoices = [null,null,null];
+  var idx = segIdx;
+  atTime(t, function(){
+    if (!songMode) return;
+    markStrip(idx);
+    var cw = magicTarget > 0.5 ? S.world : null;
+    if ((part.world || null) !== cw) setWorld(part.world || null, true);
+    startAmb(part.amb);
+  });
+}
+function schedule(){
+  if (songDone) return;
+  var ahead = ctx.currentTime + 0.12, td = 60 / S.bpm / 4;
+  while (nextT < ahead){
+    if (songMode && tick >= segEnd){
+      segIdx++;
+      if (segIdx >= S.song.length){ songDone = true; var endT = nextT; atTime(endT + 0.05, function(){ if (songMode) stop(); }); return; }
+      beginSeg(nextT);
+    }
+    if (tick % 64 === 0 && tick > 0 && magicAmt > 0.05 && WP('tone','wander'))
+      N.sd.delayTime.setTargetAtTime(pick([0.5,0.75,0.75,1])*beat(), nextT, 0.6);
+    var rings = playRings(), lt = tick - segStart;
+    for (var ri=0; ri<3; ri++){
+      var r = rings[ri], div = SPEEDDIV[String(r.speed)];
+      if (lt % div) continue;
+      var step = lt/div, pos = step % r.len;
+      var si = ((pos - rotSteps(r)) % r.len + r.len) % r.len;
+      // grúv: every second step of the ring lands a little late
+      var tt = nextT + ((r.speed >= 1 && step % 2) ? S.swing*0.5*td*div : 0);
+      if (!songMode) vq.push({t:tt, ri:ri, pos:pos, si:si, len:r.len});
+      var slot = r.slots[si];
+      if (!slot || r.mute) continue;
+      var s = S.sounds.get(slot.id); if (!s) continue;
+      if (ri > 0) choke(lastVoices[ri], tt);
+      var v = trigger(s, tt, deg2semi(slot.deg), ri===0 ? 1 : 0.8, ri===0 ? 'perc' : 'tone', ri===0 && ECHO_SLOTS[si]);
+      if (ri > 0) lastVoices[ri] = v;
+    }
+    ambExtras(nextT, td, tick);
+    nextT += td; tick++;
+  }
+  vq.sort(function(a,b){ return a.t - b.t; });
+}
+
+/* ---------- Ambient bed ---------- */
+var ambVoices = [];
+function ambLevel(s){ return S.ambVol * s.norm * 0.6 * (1 - 0.15*magicAmt); }
+function ambRate(){ return 1 + (WP('amb','rate') - 1)*magicAmt; }
+function startAmb(list){
+  stopAmb(0.15);
+  (list || S.amb).forEach(function(a){
+    if (!a) return; var s = S.sounds.get(a.id); if (!s) return;
+    var src = ctx.createBufferSource(); src.buffer = buf(s); src.loop = true;
+    src.loopStart = s.start; src.loopEnd = s.end; src.playbackRate.value = ambRate();
+    var g = ctx.createGain(); g.gain.value = 0;
+    g.gain.setTargetAtTime(ambLevel(s), ctx.currentTime, 0.4);
+    src.connect(g); g.connect(N.amb.in);
+    src.start(ctx.currentTime, s.start);
+    ambVoices.push({src:src, g:g, s:s});
+  });
+  renderAmb();
+}
+function stopAmb(fade){
+  if (!ctx) return;
+  ambVoices.forEach(function(v){
+    try { v.g.gain.cancelScheduledValues(ctx.currentTime); v.g.gain.setTargetAtTime(0, ctx.currentTime, fade/3); v.src.stop(ctx.currentTime + fade + 0.1); } catch(e){}
+  });
+  ambVoices = [];
+}
+function updateAmbGain(k){
+  if (!ctx) return;
+  ambVoices.forEach(function(v){
+    v.g.gain.setTargetAtTime(ambLevel(v.s), ctx.currentTime, k || 0.12);
+    v.src.playbackRate.setTargetAtTime(ambRate(), ctx.currentTime, 0.5);
+  });
+}
+
+function play(){
+  ensureCtx();
+  songMode = false; songDone = false; segStart = 0;
+  playing = true; tick = 0; nextT = ctx.currentTime + 0.08; vq = [];
+  startAmb(); schedule();
+  timer = setInterval(schedule, 25);
+  $('#playBtn').classList.add('on'); $('#playBtn').setAttribute('aria-label','Stoppa');
+  document.body.classList.add('playing');
+}
+function stop(){
+  playing = false; clearInterval(timer);
+  stopAmb(0.5);
+  lastVoices.forEach(function(v){ choke(v, ctx.currentTime); });
+  lastVoices = [null,null,null]; vq = [];
+  $('#playBtn').classList.remove('on'); $('#playBtn').setAttribute('aria-label','Spila');
+  document.body.classList.remove('playing');
+  ringEls.forEach(function(r){ r.ph.style.transform = 'rotate(0deg)'; });
+  if (songMode){
+    songMode = false; songDone = false; markStrip(-1);
+    $('#songPlay').classList.remove('on'); $('#songPlay').setAttribute('aria-label','Spila lagið');
+    var w = S.parts[S.cur].world || null, cw = magicTarget > 0.5 ? S.world : null;
+    if (w !== cw) setWorld(w, true);
+  }
+  renderAmb();
+  if (songRec) setTimeout(stopSong, 1500);          // let the reverb tail finish
+}
+function playSongMode(){
+  commitCur();
+  if (!S.song.length){ toast('Raðið fyrst pörtum í lagið.'); return false; }
+  ensureCtx();
+  if (playing) stop();
+  songMode = true; songDone = false; segIdx = 0;
+  playing = true; tick = 0; nextT = ctx.currentTime + 0.1; vq = [];
+  beginSeg(nextT); schedule();
+  timer = setInterval(schedule, 25);
+  $('#songPlay').classList.add('on'); $('#songPlay').setAttribute('aria-label','Stoppa');
+  document.body.classList.add('playing');
+  return true;
+}
+
+/* ---------- Worlds on/off ---------- */
+function setWorld(id, quiet){             // id = null turns magic off; quiet = don't store in the part
+  ensureCtx();
+  var on = !!id;
+  if (on) S.world = id;
+  magicTarget = on ? 1 : 0;
+  Object.keys(WORLDS).forEach(function(w){ document.body.classList.toggle('w-' + w, on && w === S.world); });
+  document.body.classList.toggle('magic', on);
+  $('#worldIcon').textContent = on ? WORLDS[S.world].icon : '✨';
+  $('#worldName').textContent = on ? WORLDS[S.world].name : 'Töfraheimar';
+  syncDelays();
+  applyMagic(0.25);
+  refreshAllShapes();
+  if (!quiet){ S.parts[S.cur].world = on ? id : null; saveState(); renderParts(); }
+  if (!rampRunning){
+    rampRunning = true;
+    var last = performance.now();
+    var step = function(now){
+      var dt = Math.max(0, (now - last)/1000); last = now;
+      var d = magicTarget - magicAmt, sv = dt/1.6;
+      if (Math.abs(d) <= sv){ magicAmt = magicTarget; rampRunning = false; }
+      else magicAmt += (d > 0 ? sv : -sv);
+      applyMagic();
+      if (rampRunning) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+}
+function refreshAllShapes(){
+  blobs.forEach(function(b){
+    refreshBlob(b.s);
+    b.el.classList.remove('new'); void b.el.offsetWidth; b.el.classList.add('new');
+    (function(el){ setTimeout(function(){ el.classList.remove('new'); }, 600); })(b.el);
+  });
+  renderRings(); renderAmb(); renderTray(); paintIcons();
+  if (edId && cur()) styleEditor(cur());
+}
+function buildWorldMenu(){
+  var m = $('#wmenu'), html = '';
+  Object.keys(WORLDS).forEach(function(id){
+    var w = WORLDS[id], on = magicTarget > 0.5 && S.world === id;
+    html += '<button class="wopt' + (on ? ' on' : '') + '" data-w="' + id + '" role="menuitem"><span class="wi">' + w.icon + '</span><span><b>' + w.name + '</b><small>' + w.desc + '</small></span></button>';
+  });
+  if (magicTarget > 0.5) html += '<button class="woff" data-w="">Slökkva á töfrum</button>';
+  m.innerHTML = html;
+  m.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){ closeWorldMenu(); setWorld(b.dataset.w || null); });
+  });
+}
+function openWorldMenu(){
+  buildWorldMenu();
+  var r = $('#worldBtn').getBoundingClientRect(), m = $('#wmenu');
+  m.style.top = (r.bottom + 8) + 'px';
+  m.style.right = Math.max(8, innerWidth - r.right) + 'px';
+  m.classList.add('on'); $('#wScrim').classList.add('on'); $('#worldBtn').setAttribute('aria-expanded','true');
+}
+function closeWorldMenu(){ $('#wmenu').classList.remove('on'); $('#wScrim').classList.remove('on'); $('#worldBtn').setAttribute('aria-expanded','false'); }
+$('#worldBtn').addEventListener('click', function(){ $('#wmenu').classList.contains('on') ? closeWorldMenu() : openWorldMenu(); });
+$('#wScrim').addEventListener('click', closeWorldMenu);
+
+/* ================= Recording sounds ================= */
+var mic = null, rec = null;
+async function getMic(){
+  if (mic && mic.getAudioTracks().some(function(t){ return t.readyState === 'live'; })) return mic;
+  mic = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
+  return mic;
+}
+async function startRec(type, card){
+  ensureCtx();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    toast('Þessi vafri leyfir ekki upptöku. Veldu hljóðskrá í staðinn.'); return;
+  }
+  try { await getMic(); }
+  catch(e){ toast('Fékk ekki aðgang að hljóðnemanum. Leyfðu hljóðnema í stillingum vafrans, eða veldu hljóðskrá.'); return; }
+  var src = ctx.createMediaStreamSource(mic);
+  var proc = ctx.createScriptProcessor(4096, 1, 1);
+  var mute = ctx.createGain(); mute.gain.value = 0;
+  var chunks = [], lvl = 0;
+  proc.onaudioprocess = function(e){
+    var d = e.inputBuffer.getChannelData(0); chunks.push(new Float32Array(d));
+    var m = 0; for (var i=0;i<d.length;i+=16){ var a = Math.abs(d[i]); if (a > m) m = a; } lvl = m;
+  };
+  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+  var t0 = performance.now(), max = TYPES[type].max*1000;
+  var shape = card.querySelector('.rec-btn .shape'), txt = card.querySelector('.txt');
+  rec = {type:type, card:card, src:src, proc:proc, mute:mute, chunks:chunks, txt:txt, orig:txt.textContent, shape:shape};
+  card.classList.add('on');
+  rec.iv = setInterval(function(){
+    var el = performance.now() - t0;
+    txt.innerHTML = 'Tek upp… <span class="time">' + fmt(Math.max(0,(max-el)/1000)) + ' s</span> eftir. Ýttu til að stoppa.';
+    shape.style.transform = 'scale(' + (1 + Math.min(1, lvl*2)*0.35).toFixed(3) + ')';
+    if (el >= max) stopRec();
+  }, 50);
+}
+function stopRec(){
+  if (!rec) return;
+  var r = rec; rec = null;
+  clearInterval(r.iv);
+  try { r.src.disconnect(); r.proc.disconnect(); r.mute.disconnect(); } catch(e){}
+  r.proc.onaudioprocess = null;
+  r.card.classList.remove('on'); r.txt.textContent = r.orig; r.shape.style.transform = '';
+  var n = 0; r.chunks.forEach(function(c){ n += c.length; });
+  if (n < ctx.sampleRate*0.2){ toast('Upptakan var of stutt. Haltu áfram aðeins lengur.'); return; }
+  var data = new Float32Array(n), o = 0;
+  r.chunks.forEach(function(c){ data.set(c, o); o += c.length; });
+  addSound(r.type, data, ctx.sampleRate);
+}
+
+var uploadType = 'perc';
+async function loadFile(file, type){
+  ensureCtx();
+  try {
+    var ab = await new Response(file).arrayBuffer();
+    var b = await new Promise(function(res, rej){ ctx.decodeAudioData(ab, res, rej); });
+    var len = Math.min(b.length, Math.floor(b.sampleRate * (type === 'amb' ? 30 : 8)));
+    var d = new Float32Array(len), ch = b.numberOfChannels;
+    for (var c=0;c<ch;c++){ var x = b.getChannelData(c); for (var i=0;i<len;i++) d[i] += x[i]/ch; }
+    addSound(type, d, b.sampleRate);
+  } catch(e){ toast('Ekki tókst að lesa skrána. Prófaðu aðra hljóðskrá.'); }
+}
+
+function analyse(data, sr, type){
+  var peak = 0;
+  for (var i=0;i<data.length;i++){ var a = Math.abs(data[i]); if (a > peak) peak = a; }
+  var norm = peak > 0.0001 ? Math.min(0.9/peak, 12) : 1;
+  var dur = data.length / sr, start = 0, end = dur;
+  if (type !== 'amb'){
+    var th = peak*0.18, j = Math.min(data.length-1, Math.floor(sr*0.06));
+    for (; j<data.length; j++) if (Math.abs(data[j]) > th) break;
+    start = Math.max(0, j/sr - 0.008);
+    if (start >= dur - 0.05) start = 0;
+    end = Math.min(dur, start + TYPES[type].trim);
+  }
+  return {norm:norm, start:start, end:end, dur:dur};
+}
+function addSound(type, data, sr){
+  var a = analyse(data, sr, type);
+  counter[type]++;
+  var s = {id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), type:type,
+    name:TYPES[type].label+' '+counter[type], data:data, sr:sr, start:a.start, end:a.end,
+    norm:a.norm, dur:a.dur, v:counter[type]-1, t:Date.now(), f0:0, autotune:true};
+  if (type === 'tone') s.f0 = detectPitch(s);
+  S.sounds.set(s.id, s);
+  spawnBlob(s, true);
+  renderTray();
+  dbPut(s);
+  preview(s);
+  ping(s.id);
+}
+
+/* ================= Pond ================= */
+var pond = $('#pond'), blobs = new Map();
+function waveD(s){
+  var nb = 12, st = Math.floor(s.start*s.sr), step = Math.max(1, Math.floor((s.end-s.start)*s.sr/nb)), d = '';
+  for (var k=0;k<nb;k++){
+    var m = 0, a = st + k*step, b = Math.min(s.data.length, a+step);
+    for (var i=a;i<b;i+=8){ var v = Math.abs(s.data[i]); if (v > m) m = v; }
+    var h = Math.max(0.8, Math.min(1, m*s.norm)*13), x = (31 + k*38/(nb-1)).toFixed(1);
+    d += 'M' + x + ' ' + (50-h).toFixed(1) + 'V' + (50+h).toFixed(1);
+  }
+  return d;
+}
+function blobSVG(s){ return shapeSVG(s.type, s.v||0, mode(), colorFor(s), waveD(s)); }
+function spawnBlob(s, fresh){
+  var el = document.createElement('div');
+  el.className = 'blob ' + s.type + (fresh ? ' new' : '');
+  var sz = TYPES[s.type].size;
+  el.style.setProperty('--sz', sz + 'px');
+  el.innerHTML = '<span class="ring-fx"></span><div class="shape">' + blobSVG(s) + '</div><div class="lbl"></div>';
+  el.querySelector('.lbl').textContent = s.name;
+  pond.appendChild(el);
+  var W = pond.clientWidth || 600, H = pond.clientHeight || 300;
+  var b = {el:el, s:s, sz:sz,
+    x: fresh ? W/2 - sz/2 + (Math.random()-0.5)*40 : Math.random()*Math.max(1, W-sz),
+    y: fresh ? H/2 - sz/2 + (Math.random()-0.5)*30 : Math.random()*Math.max(1, H-sz-28),
+    vx:(Math.random()-0.5)*50, vy:(Math.random()-0.5)*50, ph:Math.random()*6.28};
+  blobs.set(s.id, b);
+  el.addEventListener('click', function(){ preview(s); ping(s.id); openEditor(s.id); });
+  if (fresh) setTimeout(function(){ el.classList.remove('new'); }, 600);
+  $('#pondEmpty').style.display = 'none';
+}
+function refreshBlob(s){
+  var b = blobs.get(s.id); if (!b) return;
+  b.sz = TYPES[s.type].size;
+  b.el.className = 'blob ' + s.type;
+  b.el.style.setProperty('--sz', b.sz + 'px');
+  b.el.querySelector('.shape').innerHTML = blobSVG(s);
+  b.el.querySelector('.lbl').textContent = s.name;
+}
+function ping(id){
+  var b = blobs.get(id);
+  if (b){ b.el.classList.remove('ping'); void b.el.offsetWidth; b.el.classList.add('ping'); b.vx += (Math.random()-0.5)*60; b.vy -= 30; }
+}
+function physics(dt){
+  var W = pond.clientWidth, H = pond.clientHeight; if (!W) return;
+  var list = Array.from(blobs.values()), sp = REDUCED ? 0.35 : 1;
+  for (var i=0;i<list.length;i++){
+    var b = list[i];
+    b.ph += dt*0.6;
+    b.vx += Math.cos(b.ph*1.3 + i)*14*dt*sp;
+    b.vy += Math.sin(b.ph + i*0.7)*14*dt*sp;
+    for (var j=i+1;j<list.length;j++){
+      var o = list[j], dx = (o.x+o.sz/2)-(b.x+b.sz/2), dy = (o.y+o.sz/2)-(b.y+b.sz/2);
+      var dist = Math.sqrt(dx*dx+dy*dy) || 1, min = (b.sz+o.sz)/2 + 14;
+      if (dist < min){ var f = (min-dist)/min*60*dt, ux = dx/dist, uy = dy/dist;
+        b.vx -= ux*f*10; b.vy -= uy*f*10; o.vx += ux*f*10; o.vy += uy*f*10; }
     }
   }
-  return buf;
-}
-function stillaOm(){
-  if(!blautur) return;
-  const magn = document.getElementById("reverbMagn").value/100;
-  blautur.gain.value = reverbA ? magn*0.9 : 0;
-}
-
-/* ---------- hjálpartól ---------- */
-function dataUrlIArrayBuffer(dataUrl){
-  const base64 = dataUrl.split(",")[1];
-  const bin = atob(base64);
-  const buf = new ArrayBuffer(bin.length);
-  const view = new Uint8Array(buf);
-  for(let i=0;i<bin.length;i++) view[i] = bin.charCodeAt(i);
-  return buf;
-}
-function veljaSkra(accept, cb){
-  /* eldri Safari opnar ekki valmyndina nema reiturinn sé í skjalinu sjálfu */
-  const inn = document.createElement("input");
-  inn.type = "file";
-  inn.accept = accept;
-  inn.className = "hulinn";
-  document.body.appendChild(inn);
-  inn.addEventListener("change", function(){
-    const f = inn.files && inn.files[0];
-    setTimeout(function(){ if(inn.parentNode) inn.parentNode.removeChild(inn); }, 0);
-    if(f) cb(f);
+  list.forEach(function(b){
+    var damp = Math.pow(0.6, dt);
+    b.vx *= damp; b.vy *= damp;
+    var max = 38*sp, v = Math.sqrt(b.vx*b.vx+b.vy*b.vy);
+    if (v > max){ b.vx *= max/v; b.vy *= max/v; }
+    b.x += b.vx*dt; b.y += b.vy*dt;
+    var maxX = W - b.sz - 6, maxY = H - b.sz - 34;
+    if (b.x < 6){ b.x = 6; b.vx = Math.abs(b.vx); }
+    if (b.x > maxX){ b.x = Math.max(6, maxX); b.vx = -Math.abs(b.vx); }
+    if (b.y < 6){ b.y = 6; b.vy = Math.abs(b.vy); }
+    if (b.y > maxY){ b.y = Math.max(6, maxY); b.vy = -Math.abs(b.vy); }
+    b.el.style.transform = 'translate(' + b.x.toFixed(1) + 'px,' + b.y.toFixed(1) + 'px)';
   });
-  inn.click();
 }
 
-/* Myndir úr iPad-myndavél eru 8–12 megapixlar. Eldri tæki ráða ekki við
-   að halda mörgum slíkum í minni, svo við minnkum þær strax. */
-function minnkaMynd(file, hamark){
-  return new Promise(function(res){
-    lesaSemDataUrl(file).then(function(dataUrl){
-      const img = new Image();
-      img.onload = function(){
-        try{
-          let bw = img.naturalWidth || img.width;
-          let bh = img.naturalHeight || img.height;
-          if(!bw || !bh){ res(dataUrl); return; }
-          if(Math.max(bw,bh) <= hamark && dataUrl.length < 500000){ res(dataUrl); return; }
-          const gegnsaett = /png|gif|webp/i.test(file.type || "");
-          /* helmingum í þrepum — eldri iOS teiknar risamyndir skakkt í einu skrefi */
-          let cnv = document.createElement("canvas");
-          let w = bw, h = bh, heimild = img;
-          while(Math.max(w,h) > hamark*2){
-            const nw = Math.max(1, Math.round(w/2)), nh = Math.max(1, Math.round(h/2));
-            const millicnv = document.createElement("canvas");
-            millicnv.width = nw; millicnv.height = nh;
-            millicnv.getContext("2d").drawImage(heimild, 0, 0, nw, nh);
-            heimild = millicnv; w = nw; h = nh;
-          }
-          const skali = Math.min(1, hamark/Math.max(w,h));
-          cnv.width = Math.max(1, Math.round(w*skali));
-          cnv.height = Math.max(1, Math.round(h*skali));
-          const g = cnv.getContext("2d");
-          if(!gegnsaett){ g.fillStyle = "#ffffff"; g.fillRect(0,0,cnv.width,cnv.height); }
-          g.drawImage(heimild, 0, 0, cnv.width, cnv.height);
-          res(cnv.toDataURL(gegnsaett ? "image/png" : "image/jpeg", 0.85));
-        }catch(e){
-          res(dataUrl);
-        }
+/* ================= Rings UI ================= */
+var ringEls = [];
+var ROT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 01-13.7 5.6"/><path d="M4 12a8 8 0 0113.7-5.6"/><path d="M17.7 2.5v4h-4"/><path d="M6.3 21.5v-4h4"/></svg>';
+function trackSVG(ri){            // wobbly, hand-drawn circle under the slots
+  function path(seed, dx, dy){
+    var d = '', p1 = seed*1.7, p2 = seed*2.9;
+    for (var i=0;i<=72;i++){
+      var a = i/72*Math.PI*2, r = 31.2;
+      d += (i ? 'L' : 'M') + (50 + dx + Math.sin(a)*r).toFixed(2) + ' ' + (50 + dy - Math.cos(a)*r).toFixed(2);
+    }
+    return d;
+  }
+  return '<svg class="track" viewBox="0 0 100 100" aria-hidden="true"><path class="t1" d="' + path(ri+1, 0.9, 1.1) + '"/><path class="t2" d="' + path(ri+1.4, 0, 0) + '"/></svg>';
+}
+function buildRings(){
+  var wrap = $('#rings'); wrap.innerHTML = ''; ringEls = [];
+  S.rings.forEach(function(r, ri){
+    var card = document.createElement('div');
+    card.className = 'ringcard k' + ri;
+    card.innerHTML = '<h3>' + RING_NAMES[ri] + '</h3><div class="ring"><div class="ring-in">' + trackSVG(ri) + '<div class="phwrap"><span class="ph"></span></div><div class="rotor"><div class="hub">' + ROT_ICON + '</div></div></div></div>' +
+      '<div class="rctl"><div class="seg"><button data-sp="0.5">Hægt</button><button data-sp="1">Mið</button><button data-sp="2">Hratt</button></div>' +
+      '<div class="steps"><button data-d="-1" aria-label="Færri hólf">−</button><span><b class="lenv">8</b> hólf</span><button data-d="1" aria-label="Fleiri hólf">+</button></div>' +
+      '<button class="mute" aria-pressed="false">Þagga</button></div>';
+    var rotor = card.querySelector('.rotor'), ring = card.querySelector('.ring'), slots = [];
+    for (var i=0;i<8;i++){
+      var sl = document.createElement('div'); sl.className = 'slot';
+      sl.dataset.ring = ri; sl.dataset.slot = i;
+      sl.innerHTML = '<div class="si"></div>';
+      rotor.appendChild(sl); slots.push(sl);
+    }
+    ringEls.push({card:card, rotor:rotor, ring:ring, slots:slots, ph:card.querySelector('.phwrap')});
+    wrap.appendChild(card);
+
+    ring.addEventListener('pointerdown', function(e){
+      var filled = e.target.closest('.slot.filled');
+      if (filled){ beginDrag(e, {id:r.slots[+filled.dataset.slot].id, from:{k:'ring', ri:ri, si:+filled.dataset.slot}}, filled); return; }
+      e.preventDefault(); ensureCtx();
+      var rc = ring.getBoundingClientRect(), cx = rc.left + rc.width/2, cy = rc.top + rc.height/2;
+      var ang = function(x,y){ return Math.atan2(x-cx, -(y-cy))*180/Math.PI; };
+      var a0 = ang(e.clientX, e.clientY);
+      rotor.classList.add('drag');
+      try { ring.setPointerCapture(e.pointerId); } catch(err){}
+      var mv = function(ev){
+        var a = ang(ev.clientX, ev.clientY), d = a - a0;
+        if (d > 180) d -= 360; if (d < -180) d += 360;
+        a0 = a; r.rot += d; applyRot(ri);
       };
-      img.onerror = function(){ res(dataUrl); };
-      img.src = dataUrl;
-    }).catch(function(){
-      alert("Ekki tókst að lesa myndina. Prófaðu aðra mynd eða minni skrá.");
-      res(null);
+      var up = function(){
+        ring.removeEventListener('pointermove', mv); ring.removeEventListener('pointerup', up); ring.removeEventListener('pointercancel', up);
+        rotor.classList.remove('drag');
+        r.rot = Math.round(r.rot/stepDeg(r))*stepDeg(r); applyRot(ri); saveState();
+      };
+      ring.addEventListener('pointermove', mv); ring.addEventListener('pointerup', up); ring.addEventListener('pointercancel', up);
+    });
+    card.querySelectorAll('.seg button').forEach(function(b){
+      b.addEventListener('click', function(){ r.speed = parseFloat(b.dataset.sp); renderRings(); saveState(); });
+    });
+    card.querySelectorAll('.steps button').forEach(function(b){
+      b.addEventListener('click', function(){
+        var steps = rotSteps(r), nl = clamp(r.len + parseInt(b.dataset.d, 10), 3, 8);
+        if (nl === r.len) return;
+        r.len = nl; r.rot = steps % nl * (360/nl);
+        renderRings(); saveState();
+      });
+    });
+    card.querySelector('.mute').addEventListener('click', function(){
+      r.mute = !r.mute; if (r.mute && ctx) choke(lastVoices[ri], ctx.currentTime); renderRings(); saveState();
+    });
+  });
+  renderRings();
+}
+function applyRot(ri){
+  var r = S.rings[ri], RE = ringEls[ri];
+  RE.rotor.style.transform = 'rotate(' + r.rot + 'deg)';
+  RE.slots.forEach(function(sl){ sl.firstChild.style.transform = 'rotate(' + (-r.rot) + 'deg)'; });
+}
+function renderRings(){
+  if (typeof renderPartsSoon === 'function') renderPartsSoon();
+  S.rings.forEach(function(r, ri){
+    var RE = ringEls[ri]; if (!RE) return;
+    r.slots.forEach(function(slot, si){
+      var el = RE.slots[si], s = slot && S.sounds.get(slot.id);
+      if (slot && !s){ r.slots[si] = null; slot = null; }
+      if (si >= r.len){ el.style.display = 'none'; return; }
+      el.style.display = '';
+      var a = si*Math.PI*2/r.len;
+      el.style.left = (50 + 38*Math.sin(a)) + '%'; el.style.top = (50 - 38*Math.cos(a)) + '%';
+      el.className = 'slot' + (s ? ' filled' : '');
+      var html = '';
+      if (s){
+        html = miniHTML(s);
+        if (ri > 0 || slot.deg !== 0) html += '<span class="deg">' + (slot.deg > 0 ? '+' : '') + slot.deg + '</span>';
+      }
+      el.firstChild.innerHTML = html;
+    });
+    applyRot(ri);
+    RE.card.querySelector('.lenv').textContent = r.len;
+    RE.card.classList.toggle('muted', r.mute);
+    var mb = RE.card.querySelector('.mute');
+    mb.setAttribute('aria-pressed', r.mute ? 'true' : 'false'); mb.textContent = r.mute ? 'Kveikja' : 'Þagga';
+    RE.card.querySelectorAll('.seg button').forEach(function(b){ b.classList.toggle('on', parseFloat(b.dataset.sp) === r.speed); });
+  });
+}
+function renderAmb(){
+  var wrap = $('#aslots'); wrap.innerHTML = '';
+  S.amb.forEach(function(a, i){
+    var s = a && S.sounds.get(a.id); if (a && !s) S.amb[i] = null;
+    var el = document.createElement('div');
+    el.className = 'aslot' + (s ? ' filled' : '') + (s && playing ? ' live' : '');
+    el.dataset.i = i;
+    if (s){ el.innerHTML = miniHTML(s) + '<span></span>'; el.lastChild.textContent = s.name; }
+    else el.textContent = 'Dragðu umhverfishljóð hingað';
+    if (s) el.addEventListener('pointerdown', function(e){ beginDrag(e, {id:s.id, from:{k:'amb', i:i}}, el); });
+    wrap.appendChild(el);
+  });
+}
+function renderTray(){
+  var tray = $('#tray'); tray.innerHTML = '';
+  var list = Array.from(S.sounds.values()).sort(function(a,b){ return ORDER.indexOf(a.type)-ORDER.indexOf(b.type) || a.t-b.t; });
+  if (!list.length){ tray.innerHTML = '<p class="empty">Engin hljóð enn. Farðu í Safna hljóðum og taktu upp nokkur hljóð.</p>'; return; }
+  list.forEach(function(s){
+    var c = document.createElement('div'); c.className = 'chip'; c.dataset.id = s.id;
+    c.innerHTML = miniHTML(s) + '<span></span>'; c.lastChild.textContent = s.name;
+    c.addEventListener('pointerdown', function(e){ beginDrag(e, {id:s.id, from:null}, c); });
+    tray.appendChild(c);
+  });
+}
+
+/* ---------- Drag & drop ---------- */
+var dragSt = null;
+function beginDrag(e, payload, el){
+  e.preventDefault(); ensureCtx();
+  dragSt = {p:payload, x0:e.clientX, y0:e.clientY, el:el, ghost:null, over:null, pid:e.pointerId};
+  window.addEventListener('pointermove', dMove, {passive:false});
+  window.addEventListener('pointerup', dUp);
+  window.addEventListener('pointercancel', dCancel);
+}
+function endListeners(){
+  window.removeEventListener('pointermove', dMove);
+  window.removeEventListener('pointerup', dUp);
+  window.removeEventListener('pointercancel', dCancel);
+}
+function dMove(e){
+  var d = dragSt; if (!d || e.pointerId !== d.pid) return;
+  e.preventDefault();
+  if (!d.ghost){
+    if (Math.hypot(e.clientX-d.x0, e.clientY-d.y0) < 8) return;
+    var s = S.sounds.get(d.p.id);
+    d.ghost = document.createElement('div'); d.ghost.className = 'ghost'; d.ghost.innerHTML = miniHTML(s);
+    document.body.appendChild(d.ghost);
+    if (d.p.from) d.el.style.opacity = '.3';
+  }
+  d.ghost.style.transform = 'translate(' + (e.clientX-32) + 'px,' + (e.clientY-32) + 'px)';
+  var hit = document.elementFromPoint(e.clientX, e.clientY);
+  var t = hit ? hit.closest('.slot,.aslot') : null;
+  if (t !== d.over){ if (d.over) d.over.classList.remove('over'); d.over = t; if (t) t.classList.add('over'); }
+}
+function dCancel(){ var d = dragSt; dragSt = null; endListeners(); if (d){ if (d.ghost) d.ghost.remove(); if (d.over) d.over.classList.remove('over'); d.el.style.opacity = ''; } }
+function dUp(e){
+  var d = dragSt; if (!d || e.pointerId !== d.pid) return;
+  dragSt = null; endListeners();
+  if (!d.ghost){ onTap(d.p, d.el); return; }
+  d.ghost.remove(); d.el.style.opacity = '';
+  if (d.over){ d.over.classList.remove('over'); placeAt(d.p, d.over); }
+  else if (d.p.from){ removeFrom(d.p.from); }
+}
+function placeAt(p, t){
+  var s = S.sounds.get(p.id); if (!s) return;
+  var from = p.from, ambChanged = !!(from && from.k === 'amb');
+  if (t.classList.contains('slot')){
+    var ri = +t.dataset.ring, si = +t.dataset.slot, ring = S.rings[ri], prev = ring.slots[si];
+    if (from && from.k === 'ring'){
+      if (from.ri === ri && from.si === si) return;
+      var moving = S.rings[from.ri].slots[from.si];
+      S.rings[from.ri].slots[from.si] = prev;           // swap
+      ring.slots[si] = moving;
+    } else {
+      if (from && from.k === 'amb') S.amb[from.i] = null;
+      ring.slots[si] = {id:p.id, deg:PAT[ri][si]};
+    }
+    preview(s, deg2semi(ring.slots[si].deg), ri === 0 ? 'perc' : 'tone');
+  } else {
+    var i = +t.dataset.i, prevA = S.amb[i];
+    if (from && from.k === 'amb'){ S.amb[i] = S.amb[from.i]; S.amb[from.i] = prevA; }
+    else { if (from && from.k === 'ring') S.rings[from.ri].slots[from.si] = null; S.amb[i] = {id:p.id}; }
+    ambChanged = true;
+    preview(s, 0, 'amb');
+  }
+  renderRings(); renderAmb(); saveState();
+  if (ambChanged && playing) startAmb();
+}
+function removeFrom(from){
+  if (from.k === 'ring') S.rings[from.ri].slots[from.si] = null;
+  else { S.amb[from.i] = null; if (playing) startAmb(); }
+  renderRings(); renderAmb(); saveState();
+}
+function onTap(p, el){
+  var s = S.sounds.get(p.id); if (!s) return;
+  if (!p.from){ preview(s); el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping'); return; }
+  openPop(p.from, el);
+}
+
+/* ---------- Slot popover ---------- */
+var popFrom = null;
+function openPop(from, el){
+  popFrom = from;
+  var pop = $('#pop'), slot = from.k === 'ring' ? S.rings[from.ri].slots[from.si] : S.amb[from.i];
+  var s = S.sounds.get(slot.id);
+  $('#popName').textContent = s.name;
+  $('#popPitch').style.display = from.k === 'ring' ? '' : 'none';
+  updatePop();
+  if (from.k === 'ring') preview(s, deg2semi(slot.deg), from.ri === 0 ? 'perc' : 'tone'); else preview(s, 0, 'amb');
+  pop.classList.add('on'); $('#popScrim').classList.add('on');
+  var r = el.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  var left = clamp(r.left + r.width/2 - pw/2, 8, innerWidth - pw - 8);
+  var top = r.bottom + 10; if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 10);
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+}
+function updatePop(){
+  if (!popFrom || popFrom.k !== 'ring') return;
+  var d = S.rings[popFrom.ri].slots[popFrom.si].deg;
+  $('#pVal').textContent = (d > 0 ? '+' : '') + d;
+}
+function closePop(){ popFrom = null; $('#pop').classList.remove('on'); $('#popScrim').classList.remove('on'); }
+function nudgePitch(dir){
+  if (!popFrom || popFrom.k !== 'ring') return;
+  var slot = S.rings[popFrom.ri].slots[popFrom.si];
+  slot.deg = clamp(slot.deg + dir, -8, 9);
+  updatePop(); renderRings(); saveState();
+  preview(S.sounds.get(slot.id), deg2semi(slot.deg), popFrom.ri === 0 ? 'perc' : 'tone');
+}
+$('#pUp').addEventListener('click', function(){ nudgePitch(1); });
+$('#pDown').addEventListener('click', function(){ nudgePitch(-1); });
+$('#popRm').addEventListener('click', function(){ if (popFrom) removeFrom(popFrom); closePop(); });
+$('#popScrim').addEventListener('click', closePop);
+
+/* ================= Editor ================= */
+var edId = null, wave = $('#wave'), cv = $('#cv'), edDrag = null, delArmed = false;
+function cur(){ return S.sounds.get(edId); }
+function openEditor(id){
+  edId = id; var s = cur();
+  $('#edName').value = s.name;
+  styleEditor(s);
+  delArmed = false; $('#edDel').classList.remove('warn'); $('#edDel').textContent = 'Eyða hljóði';
+  $('#sheet').classList.add('on'); $('#scrim').classList.add('on');
+  requestAnimationFrame(drawWave);
+}
+function styleEditor(s){
+  var c = colorFor(s);
+  $('#sheet').style.setProperty('--c', c);
+  $('#edMini').innerHTML = shapeSVG(s.type, s.v||0, mode(), c);
+  document.querySelectorAll('#edTypes button').forEach(function(b){ b.classList.toggle('on', b.dataset.type === s.type); });
+  updateTuneUI();
+}
+function updateTuneUI(){
+  var s = cur(), box = $('#edTune');
+  if (!s || s.type !== 'tone'){ box.style.display = 'none'; return; }
+  box.style.display = '';
+  $('#tuneChk').checked = s.autotune !== false;
+  if (!s.f0){ $('#tuneTxt').textContent = 'Fann engan skýran tón. Prófaðu að velja stöðugri hluta hljóðsins.'; return; }
+  var midi = 69 + 12*Math.log(s.f0/440)/Math.LN2, pc = ((Math.round(midi) % 12) + 12) % 12;
+  $('#tuneTxt').textContent = 'Tónninn er nálægt ' + NOTE_NAMES[pc] + (s.autotune !== false ? ' og er stilltur á ' + NOTE_NAMES[S.root] + '.' : '.');
+}
+$('#tuneChk').addEventListener('change', function(e){ var s = cur(); if (!s) return; s.autotune = e.target.checked; updateTuneUI(); dbPut(s); preview(s, 0, 'tone'); });
+function closeEditor(){
+  var s = cur();
+  if (s){
+    s.name = $('#edName').value.trim() || s.name;
+    refreshBlob(s); dbPut(s); renderTray(); renderRings(); renderAmb();
+    if (playing && S.amb.some(function(a){ return a && a.id === s.id; })) startAmb();
+  }
+  edId = null;
+  $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on');
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+function drawWave(){
+  var s = cur(); if (!s) return;
+  var w = wave.clientWidth, h = wave.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  var g = cv.getContext('2d'); if (!g){ drawSel(); return; }
+  g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,w,h);
+  var d = s.data, n = d.length, per = n / w, mid = h/2;
+  g.fillStyle = getComputedStyle(document.body).getPropertyValue('--ink').trim() || '#1B2A41';
+  g.globalAlpha = 0.85;
+  for (var x=0;x<w;x++){
+    var a = Math.floor(x*per), b = Math.min(n, Math.floor((x+1)*per)), mn = 0, mx = 0, st = Math.max(1, ((b-a)/48)|0);
+    for (var i=a;i<b;i+=st){ var v = d[i]*s.norm; if (v < mn) mn = v; if (v > mx) mx = v; }
+    var y1 = mid - Math.min(1,mx)*mid*0.92, y2 = mid - Math.max(-1,mn)*mid*0.92;
+    g.fillRect(x, y1, 1, Math.max(1, y2-y1));
+  }
+  drawSel();
+}
+function drawSel(){
+  var s = cur(); if (!s) return;
+  var a = s.start/s.dur*100, b = s.end/s.dur*100;
+  $('#sel').style.left = a + '%'; $('#sel').style.width = (b-a) + '%';
+  $('#hS').style.left = a + '%'; $('#hE').style.left = b + '%';
+  $('#lblStart').textContent = 'Byrjar á ' + fmt(s.start) + ' s';
+  $('#lblLen').textContent = 'Lengd ' + fmt(s.end - s.start) + ' s';
+}
+wave.addEventListener('pointerdown', function(e){
+  var s = cur(); if (!s) return;
+  e.preventDefault();
+  var rc = wave.getBoundingClientRect(), px = e.clientX - rc.left;
+  var sx = s.start/s.dur*rc.width, ex = s.end/s.dur*rc.width, md;
+  var ds = Math.abs(px-sx), de = Math.abs(px-ex);
+  if (ds < 30 && ds <= de) md = 's';
+  else if (de < 30) md = 'e';
+  else if (px > sx && px < ex) md = 'm';
+  else md = px < sx ? 's' : 'e';
+  edDrag = {mode:md, x0:e.clientX, s0:s.start, e0:s.end, rc:rc};
+  try { wave.setPointerCapture(e.pointerId); } catch(err){}
+  if (md !== 'm') edMove(e);
+});
+function edMove(e){
+  var s = cur(); if (!edDrag || !s) return;
+  var rc = edDrag.rc, MIN = 0.03;
+  var t = clamp((e.clientX - rc.left)/rc.width, 0, 1) * s.dur;
+  if (edDrag.mode === 's') s.start = clamp(t, 0, s.end - MIN);
+  else if (edDrag.mode === 'e') s.end = clamp(t, s.start + MIN, s.dur);
+  else { var len = edDrag.e0 - edDrag.s0, dt = (e.clientX - edDrag.x0)/rc.width*s.dur;
+    s.start = clamp(edDrag.s0 + dt, 0, s.dur - len); s.end = s.start + len; }
+  drawSel();
+}
+wave.addEventListener('pointermove', edMove);
+wave.addEventListener('pointerup', function(){
+  if (!edDrag) return; edDrag = null;
+  var s = cur(); if (!s) return;
+  if (s.type === 'tone'){ s.f0 = detectPitch(s); updateTuneUI(); }
+  listen(); refreshBlob(s); dbPut(s);
+});
+wave.addEventListener('pointercancel', function(){ edDrag = null; });
+
+var plRaf = 0;
+function listen(){
+  var s = cur(); if (!s) return;
+  preview(s);
+  var pl = $('#pl'), t0 = performance.now(), dur = (s.end - s.start)*1000/Math.pow(2, (s.type === 'tone' ? tuneOf(s) : 0)/12);
+  cancelAnimationFrame(plRaf); pl.style.display = 'block';
+  var step = function(now){
+    var f = (now - t0)/dur, cs = cur();
+    if (f >= 1 || !cs){ pl.style.display = 'none'; return; }
+    pl.style.left = ((cs.start + f*(cs.end-cs.start))/cs.dur*100) + '%';
+    plRaf = requestAnimationFrame(step);
+  };
+  plRaf = requestAnimationFrame(step);
+}
+$('#edPlay').addEventListener('click', listen);
+$('#edDone').addEventListener('click', closeEditor);
+$('#edName').addEventListener('keydown', function(e){ if (e.key === 'Enter') closeEditor(); });
+document.querySelectorAll('#edTypes button').forEach(function(b){
+  b.addEventListener('click', function(){
+    var s = cur(); if (!s || s.type === b.dataset.type) return;
+    s.type = b.dataset.type; s.v = counter[s.type]++;
+    if (s.type === 'tone' && !s.f0) s.f0 = detectPitch(s);
+    styleEditor(s); refreshBlob(s); renderTray(); renderRings(); renderAmb(); dbPut(s);
+  });
+});
+$('#edDel').addEventListener('click', function(){
+  var btn = $('#edDel');
+  if (!delArmed){ delArmed = true; btn.classList.add('warn'); btn.textContent = 'Ýttu aftur til að eyða'; return; }
+  var s = cur(); if (!s) return;
+  S.sounds.delete(s.id);
+  var b = blobs.get(s.id); if (b){ b.el.remove(); blobs.delete(s.id); }
+  S.rings.forEach(function(r){ r.slots = r.slots.map(function(x){ return x && x.id === s.id ? null : x; }); });
+  PARTS.forEach(function(k){ var P = S.parts[k];
+    P.rings.forEach(function(r){ r.slots = r.slots.map(function(x){ return x && x.id === s.id ? null : x; }); });
+    P.amb = P.amb.map(function(a){ return a && a.id === s.id ? null : a; }); });
+  var wasAmb = S.amb.some(function(a){ return a && a.id === s.id; });
+  S.amb = S.amb.map(function(a){ return a && a.id === s.id ? null : a; });
+  dbDel(s.id); edId = null; closeEditor();
+  renderTray(); renderRings(); renderAmb(); saveState();
+  if (wasAmb && playing) startAmb();
+  if (!blobs.size) $('#pondEmpty').style.display = '';
+});
+
+/* ================= Recording the song ================= */
+var songRec = null, songBlob = null, songURL = null, songExt = 'mp4', dl = null;
+try { if (window.claude && typeof window.claude.use === 'function') window.claude.use('downloads').then(function(ns){ dl = ns; }, function(){}); } catch(e){}
+function pickMime(){
+  if (!window.MediaRecorder) return null;
+  var c = ['audio/mp4','audio/webm;codecs=opus','audio/webm'];
+  if (typeof MediaRecorder.isTypeSupported !== 'function') return '';
+  for (var i=0;i<c.length;i++) if (MediaRecorder.isTypeSupported(c[i])) return c[i];
+  return '';
+}
+function setRecUI(on, txt){
+  document.querySelectorAll('.songrec').forEach(function(b){ b.classList.toggle('on', on); b.querySelector('.rtxt').textContent = on ? txt : b.dataset.label; });
+}
+function startSong(starter){
+  ensureCtx();
+  var mime = pickMime();
+  if (mime === null || typeof ctx.createMediaStreamDestination !== 'function'){ toast('Þessi vafri getur ekki tekið upp lagið.'); return; }
+  if (!N.recDest) N.recDest = ctx.createMediaStreamDestination();
+  N.final.connect(N.recDest);
+  var mr;
+  try { mr = mime ? new MediaRecorder(N.recDest.stream, {mimeType:mime}) : new MediaRecorder(N.recDest.stream); }
+  catch(e){ try { N.final.disconnect(N.recDest); } catch(er){} toast('Ekki tókst að byrja upptöku á laginu.'); return; }
+  var chunks = [];
+  mr.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = function(){
+    try { N.final.disconnect(N.recDest); } catch(e){}
+    var type = mr.mimeType || mime || 'audio/webm';
+    if (!chunks.length){ toast('Upptakan tókst ekki. Prófaðu aftur.'); return; }
+    openSong(new Blob(chunks, {type:type}), /mp4/.test(type) ? 'mp4' : 'webm');
+  };
+  mr.start(250);
+  songRec = {mr:mr, t0:performance.now()};
+  songRec.iv = setInterval(function(){
+    if (!songRec) return;
+    var s = (performance.now() - songRec.t0)/1000;
+    setRecUI(true, 'Stoppa upptöku ' + mmss(s));
+    if (s > 300) stopSong();
+  }, 250);
+  setRecUI(true, 'Stoppa upptöku 0:00');
+  if (!playing) (starter || play)();
+}
+function stopSong(){
+  if (!songRec) return;
+  var r = songRec; songRec = null; clearInterval(r.iv);
+  setRecUI(false);
+  try { r.mr.stop(); } catch(e){}
+}
+function openSong(blob, ext){
+  if (songURL) URL.revokeObjectURL(songURL);
+  songBlob = blob; songExt = ext; songURL = URL.createObjectURL(blob);
+  $('#songAudio').src = songURL;
+  var share = $('#songShare'); share.classList.add('hidden');
+  try {
+    var f = new File([blob], 'lag.' + ext, {type:blob.type});
+    if (navigator.canShare && navigator.canShare({files:[f]})) share.classList.remove('hidden');
+  } catch(e){}
+  $('#songSheet').classList.add('on'); $('#scrim').classList.add('on');
+}
+function closeSong(){ $('#songSheet').classList.remove('on'); $('#scrim').classList.remove('on'); try { $('#songAudio').pause(); } catch(e){} }
+function songFilename(){ return (($('#songName').value.trim() || 'Lagið okkar').replace(/[\\\/:*?"<>|]+/g, '').slice(0, 60) || 'Lagið okkar') + '.' + songExt; }
+function anchorSave(fn){ var a = document.createElement('a'); a.href = songURL; a.download = fn; document.body.appendChild(a); a.click(); a.remove(); }
+async function saveSong(){
+  if (!songBlob) return;
+  var fn = songFilename();
+  if (dl){
+    try { await dl.save({filename:fn, data:songBlob}); toast('Lagið var vistað.'); }
+    catch(e){
+      var c = e && e.code;
+      if (c === 'declined') return;
+      if (c === 'rate_limited'){ toast('Bíddu andartak og reyndu aftur.'); return; }
+      if (c === 'unavailable' || c === 'not_granted' || c === 'capability_disabled' || c === 'capability_removed'){ dl = null; anchorSave(fn); return; }
+      toast('Ekki tókst að vista lagið.');
+    }
+    return;
+  }
+  anchorSave(fn);
+}
+$('#songRec').addEventListener('click', function(){ songRec ? stopSong() : startSong(); });
+$('#songRec2').addEventListener('click', function(){
+  if (songRec){ stopSong(); return; }
+  commitCur();
+  if (!S.song.length){ toast('Raðið fyrst pörtum í lagið.'); return; }
+  if (playing) stop();
+  startSong(playSongMode);
+});
+$('#songSave').addEventListener('click', saveSong);
+$('#songShare').addEventListener('click', function(){
+  if (!songBlob) return;
+  var f = new File([songBlob], songFilename(), {type:songBlob.type});
+  navigator.share({files:[f], title:$('#songName').value || 'Lagið okkar'}).catch(function(){});
+});
+$('#songClose').addEventListener('click', closeSong);
+$('#scrim').addEventListener('click', function(){
+  if ($('#songSheet').classList.contains('on')) closeSong();
+  else if ($('#groupSheet').classList.contains('on')) closeGroups();
+  else closeEditor();
+});
+
+/* ================= Storage: groups (projects) on this iPad ================= */
+var db = null, saveT = 0, curProj = null, projects = [];
+function newId(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5); }
+function dbOpen(){
+  return new Promise(function(res){
+    try {
+      var rq = indexedDB.open('hljodhringir', 2);
+      rq.onupgradeneeded = function(){
+        var d = rq.result, t = rq.transaction;
+        var snd = d.objectStoreNames.contains('sounds') ? t.objectStore('sounds') : d.createObjectStore('sounds', {keyPath:'id'});
+        if (!snd.indexNames.contains('proj')) snd.createIndex('proj', 'proj');
+        if (!d.objectStoreNames.contains('state')) d.createObjectStore('state');
+        if (!d.objectStoreNames.contains('projects')) d.createObjectStore('projects', {keyPath:'id'});
+      };
+      rq.onsuccess = function(){ db = rq.result; res(db); };
+      rq.onerror = function(){ res(null); };
+      rq.onblocked = function(){ res(null); };
+    } catch(e){ res(null); }
+  });
+}
+function tx(store, md, fn){
+  if (!db) return Promise.resolve(null);
+  return new Promise(function(res){
+    try {
+      var t = db.transaction(store, md), r = fn(t.objectStore(store));
+      t.oncomplete = function(){ res(r && r.result); };
+      t.onerror = function(){ res(null); }; t.onabort = function(){ res(null); };
+    } catch(e){ res(null); }
+  });
+}
+function dbPut(s){
+  s.proj = curProj;
+  tx('sounds','readwrite', function(st){ return st.put({id:s.id,proj:s.proj,type:s.type,name:s.name,data:s.data,sr:s.sr,start:s.start,end:s.end,norm:s.norm,v:s.v,t:s.t,f0:s.f0||0,autotune:s.autotune!==false}); });
+}
+function dbDel(id){ tx('sounds','readwrite', function(st){ return st.delete(id); }); }
+function deleteProjSounds(id){
+  return tx('sounds','readwrite', function(st){
+    var rq = st.index('proj').openCursor(IDBKeyRange.only(id));
+    rq.onsuccess = function(){ var c = rq.result; if (c){ c.delete(); c.continue(); } };
+    return null;
+  });
+}
+function stateObj(){
+  commitCur();
+  return {parts:S.parts, cur:S.cur, song:S.song, partsOn:S.partsOn, ambVol:S.ambVol, bpm:S.bpm, root:S.root, world:S.world, swing:S.swing};
+}
+function writeState(){
+  if (!curProj) return Promise.resolve();
+  var p = projects.filter(function(x){ return x.id === curProj; })[0];
+  if (p){ p.updated = Date.now(); tx('projects','readwrite', function(st){ return st.put(p); }); }
+  return tx('state','readwrite', function(st){ return st.put(stateObj(), 'p:' + curProj); });
+}
+function saveState(){ clearTimeout(saveT); saveT = setTimeout(writeState, 300); }
+function flushState(){ clearTimeout(saveT); return writeState(); }
+
+function clearWorkspace(){
+  if (rec) stopRec();
+  if (songRec) stopSong();
+  if (playing) stop();
+  if (magicTarget > 0.5) setWorld(null, true);
+  closePop(); closeWorldMenu();
+  if (edId){ edId = null; $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+  S.sounds.clear(); blobs.forEach(function(b){ b.el.remove(); }); blobs.clear();
+  S.rings.forEach(function(r){ var n = newRing(); for (var k in n) r[k] = n[k]; });
+  S.amb = [null,null]; S.ambVol = 0.7; S.bpm = 100; S.root = 0; S.swing = 0;
+  S.parts = emptyParts(); S.cur = 'A'; S.song = []; S.partsOn = false;
+  counter = {perc:0,tone:0,amb:0};
+}
+function syncControls(){
+  $('#bpm').value = S.bpm; $('#bpmOut').textContent = S.bpm;
+  $('#swing').value = Math.round(S.swing*100); $('#swingOut').textContent = Math.round(S.swing*100);
+  $('#ambVol').value = S.ambVol; $('#root').value = String(S.root);
+  var p = projects.filter(function(x){ return x.id === curProj; })[0];
+  $('#groupName').textContent = p ? p.name : 'Hópur';
+  $('#pondEmpty').style.display = blobs.size ? 'none' : '';
+}
+async function openProject(id){
+  if (curProj) await flushState();
+  clearWorkspace();
+  curProj = id;
+  tx('state','readwrite', function(st){ return st.put({current:id}, 'meta'); });
+  var list = await tx('sounds','readonly', function(st){ return st.index('proj').getAll(id); }) || [];
+  list.sort(function(a,b){ return a.t - b.t; });
+  list.forEach(function(o){
+    if (!o || !o.data) return;
+    o.dur = o.data.length / o.sr;
+    if (typeof o.v !== 'number') o.v = counter[o.type];
+    counter[o.type] = Math.max(counter[o.type], o.v + 1);
+    if (o.type === 'tone' && o.f0 === undefined){ o.f0 = detectPitch(o); o.autotune = true; dbPut(o); }
+    S.sounds.set(o.id, o);
+    spawnBlob(o, false);
+  });
+  var st = await tx('state','readonly', function(s){ return s.get('p:' + id); });
+  if (st){
+    if (st.parts){
+      PARTS.forEach(function(k){ var P = st.parts[k];
+        S.parts[k] = P ? {rings:(P.rings||[]).concat([newRing(),newRing(),newRing()]).slice(0,3).map(normRing), amb:P.amb || [null,null], world:P.world || null, bars:P.bars || 4} : emptyPart(); });
+      S.cur = PARTS.indexOf(st.cur) >= 0 ? st.cur : 'A';
+      S.song = (st.song || []).filter(function(k){ return PARTS.indexOf(k) >= 0; });
+    } else if (st.rings){           // older single-part save -> part A
+      S.parts.A = {rings:st.rings.map(normRing), amb:st.amb || [null,null], world:null, bars:4};
+    }
+    if (typeof st.ambVol === 'number') S.ambVol = st.ambVol;
+    if (st.bpm) S.bpm = st.bpm;
+    if (typeof st.root === 'number') S.root = st.root;
+    if (st.world && WORLDS[st.world]) S.world = st.world;
+    if (typeof st.swing === 'number') S.swing = st.swing;
+  }
+  loadPart(S.cur);
+  S.partsOn = (st && typeof st.partsOn === 'boolean') ? st.partsOn
+    : (S.song.length > 0 || ['B','C','D'].some(function(k){ return partUsed(k); }));
+  if (!S.partsOn && S.cur !== 'A'){ S.cur = 'A'; loadPart('A'); }
+  if (S.parts[S.cur].world) setWorld(S.parts[S.cur].world, true);
+  syncControls(); renderRings(); renderAmb(); renderTray(); renderParts(); renderSong();
+}
+async function loadAll(){
+  await dbOpen();
+  if (!db){ projects = [{id:'local', name:'Hópur 1', t:Date.now(), updated:Date.now()}]; curProj = 'local'; syncControls(); return; }
+  projects = await tx('projects','readonly', function(st){ return st.getAll(); }) || [];
+  if (!projects.length){
+    var p = {id:newId(), name:'Hópur 1', t:Date.now(), updated:Date.now()};
+    await tx('projects','readwrite', function(st){ return st.put(p); });
+    projects = [p];
+    // move sounds and settings from the single-group version into "Hópur 1"
+    var all = await tx('sounds','readonly', function(st){ return st.getAll(); }) || [];
+    var loose = all.filter(function(o){ return o && !o.proj; });
+    if (loose.length) await tx('sounds','readwrite', function(st){ loose.forEach(function(o){ o.proj = p.id; st.put(o); }); return null; });
+    var old = await tx('state','readonly', function(st){ return st.get('main'); });
+    if (old) await tx('state','readwrite', function(st){ return st.put(old, 'p:' + p.id); });
+  }
+  var meta = await tx('state','readonly', function(st){ return st.get('meta'); });
+  var id = meta && projects.some(function(x){ return x.id === meta.current; }) ? meta.current
+    : projects.slice().sort(function(a,b){ return (b.updated||0) - (a.updated||0); })[0].id;
+  await openProject(id);
+}
+
+/* ---------- Group sheet ---------- */
+var gDelArmed = false;
+function fmtDate(ms){
+  try { return new Date(ms).toLocaleDateString('is-IS', {day:'numeric', month:'short'}); } catch(e){ return ''; }
+}
+async function renderGroups(){
+  var cur = projects.filter(function(x){ return x.id === curProj; })[0];
+  $('#gName').value = cur ? cur.name : '';
+  var counts = await Promise.all(projects.map(function(p){
+    return db ? tx('sounds','readonly', function(st){ return st.index('proj').count(p.id); }) : Promise.resolve(S.sounds.size);
+  }));
+  var list = $('#gList'); list.innerHTML = '';
+  projects.map(function(p, i){ return {p:p, n:counts[i]||0}; })
+    .sort(function(a,b){ return (b.p.updated||0) - (a.p.updated||0); })
+    .forEach(function(o){
+      var b = document.createElement('button'), on = o.p.id === curProj;
+      b.className = 'grow' + (on ? ' on' : '');
+      b.innerHTML = '<b></b><small></small>';
+      b.firstChild.textContent = o.p.name;
+      b.lastChild.textContent = (on ? 'Opinn núna. ' : '') + o.n + (o.n === 1 ? ' hljóð' : ' hljóð') + (o.p.updated ? ', síðast ' + fmtDate(o.p.updated) : '');
+      if (!on) b.addEventListener('click', async function(){ closeGroups(); await openProject(o.p.id); toast('Opnaði ' + o.p.name + '.'); });
+      list.appendChild(b);
+    });
+}
+function openGroups(){
+  gDelArmed = false; $('#gDel').classList.remove('warn'); $('#gDel').textContent = 'Eyða hópnum';
+  $('#gNewName').value = '';
+  renderGroups();
+  $('#groupSheet').classList.add('on'); $('#scrim').classList.add('on');
+}
+function closeGroups(){
+  $('#groupSheet').classList.remove('on'); $('#scrim').classList.remove('on');
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+}
+function renameCurrent(){
+  var p = projects.filter(function(x){ return x.id === curProj; })[0], v = $('#gName').value.trim();
+  if (!p || !v || v === p.name) return;
+  p.name = v; tx('projects','readwrite', function(st){ return st.put(p); });
+  $('#groupName').textContent = v; renderGroups();
+}
+$('#groupBtn').addEventListener('click', openGroups);
+$('#gClose').addEventListener('click', function(){ renameCurrent(); closeGroups(); });
+$('#gName').addEventListener('change', renameCurrent);
+$('#gName').addEventListener('keydown', function(e){ if (e.key === 'Enter') e.target.blur(); });
+$('#gNew').addEventListener('click', async function(){
+  if (!db){ toast('Ekki er hægt að vista hópa í þessum vafra.'); return; }
+  var name = $('#gNewName').value.trim() || ('Hópur ' + (projects.length + 1));
+  var p = {id:newId(), name:name, t:Date.now(), updated:Date.now()};
+  await tx('projects','readwrite', function(st){ return st.put(p); });
+  projects.push(p);
+  closeGroups();
+  await openProject(p.id);
+  showPage('safna');
+  toast('Nýr hópur: ' + name + '.');
+});
+$('#gNewName').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('#gNew').click(); });
+$('#gDel').addEventListener('click', async function(){
+  var btn = $('#gDel');
+  if (!gDelArmed){ gDelArmed = true; btn.classList.add('warn'); btn.textContent = 'Ýttu aftur til að eyða hópnum og hljóðum hans'; return; }
+  gDelArmed = false;
+  var id = curProj, gone = projects.filter(function(x){ return x.id === id; })[0];
+  clearTimeout(saveT);
+  await deleteProjSounds(id);
+  await tx('state','readwrite', function(st){ return st.delete('p:' + id); });
+  await tx('projects','readwrite', function(st){ return st.delete(id); });
+  projects = projects.filter(function(x){ return x.id !== id; });
+  curProj = null;
+  if (!projects.length){
+    var p = {id:newId(), name:'Hópur 1', t:Date.now(), updated:Date.now()};
+    await tx('projects','readwrite', function(st){ return st.put(p); });
+    projects = [p];
+  }
+  var next = projects.slice().sort(function(a,b){ return (b.updated||0) - (a.updated||0); })[0];
+  closeGroups();
+  await openProject(next.id);
+  toast((gone ? gone.name : 'Hópnum') + ' var eytt. ' + next.name + ' er opinn.');
+});
+
+var resetArmed = false;
+$('#resetBtn').addEventListener('click', async function(){
+  var btn = $('#resetBtn');
+  if (!resetArmed){ resetArmed = true; btn.classList.add('warn'); btn.textContent = 'Ýttu aftur til að eyða öllum hljóðum þessa hóps';
+    setTimeout(function(){ resetArmed = false; btn.classList.remove('warn'); btn.textContent = 'Byrja upp á nýtt'; }, 4000); return; }
+  resetArmed = false; btn.classList.remove('warn'); btn.textContent = 'Byrja upp á nýtt';
+  clearWorkspace();
+  await deleteProjSounds(curProj);
+  saveState(); syncControls(); renderRings(); renderAmb(); renderTray();
+});
+
+/* ================= Parts (A–D) ================= */
+var rpT = 0;
+function renderPartsSoon(){ clearTimeout(rpT); rpT = setTimeout(renderParts, 60); }
+function normRing(r){ var n = newRing(); if (!r) return n;
+  n.slots = (r.slots || n.slots).concat([null,null,null,null,null,null,null,null]).slice(0,8);
+  n.rot = r.rot||0; n.speed = r.speed||1; n.mute = !!r.mute; n.len = r.len||8; return n; }
+function copyJSON(x){ return JSON.parse(JSON.stringify(x)); }
+function commitCur(){
+  var P = S.parts[S.cur];
+  P.rings = S.rings.map(function(r){ return copyJSON({slots:r.slots, rot:r.rot, speed:r.speed, mute:r.mute, len:r.len}); });
+  P.amb = copyJSON(S.amb);
+}
+function loadPart(k){
+  var P = S.parts[k];
+  S.rings.forEach(function(r, i){ var src = normRing(copyJSON(P.rings[i])); for (var f in src) r[f] = src[f]; });
+  S.amb = copyJSON(P.amb);
+}
+function partUsed(k){
+  var P = k === S.cur ? {rings:S.rings, amb:S.amb} : S.parts[k];
+  return P.rings.some(function(r){ return r.slots.some(Boolean); }) || P.amb.some(Boolean);
+}
+function selectPart(k){
+  if (k === S.cur) return;
+  commitCur(); S.cur = k; loadPart(k);
+  renderRings(); renderAmb(); renderParts();
+  var w = S.parts[k].world || null, cw = magicTarget > 0.5 ? S.world : null;
+  if (w !== cw) setWorld(w, true);
+  if (playing && !songMode) startAmb();
+  saveState();
+}
+function toggleParts(){
+  S.partsOn = !S.partsOn;
+  if (!S.partsOn && S.cur !== 'A') selectPart('A');
+  renderParts(); saveState();
+  if (S.partsOn) toast('Nú getið þið búið til erindi, viðlag, brú og endi og raðað þeim saman undir Lagið.');
+}
+function renderParts(){
+  var bar = $('#partbar'); if (!bar) return;
+  var html = '<button class="ptoggle" id="ptoggle" aria-pressed="' + (S.partsOn ? 'true' : 'false') + '"><span class="pdots" aria-hidden="true"><i style="background:#FF48B0"></i><i style="background:#FFE800"></i><i style="background:#5EC8E5"></i><i style="background:#00A95C"></i></span>Partar</button>';
+  document.querySelector('.tabs [data-page="lag"]').style.display = S.partsOn ? '' : 'none';
+  if (!S.partsOn){
+    html += '<span class="pempty">Dragðu hljóð í hólfin og snúðu hring til að breyta hvar hann byrjar.</span>';
+    bar.innerHTML = html;
+    $('#ptoggle').addEventListener('click', toggleParts);
+    return;
+  }
+  PARTS.forEach(function(k){
+    html += '<button class="ptab' + (k === S.cur ? ' on' : '') + (partUsed(k) ? ' used' : '') + '" data-p="' + k + '" style="--pc:' + PART_COL[k] + '"><span class="plt">' + k + '</span><span class="pn">' + PART_NAME[k] + '</span></button>';
+  });
+  html += '<button class="pcopy" id="pcopy">Afrita…</button>';
+  if (!partUsed(S.cur)) html += '<span class="pempty">' + PART_NAME[S.cur] + ' er tómt. Dragðu hljóð í hringina eða afritaðu annan part.</span>';
+  else html += '<span class="pempty">Dragðu hljóð í hólfin og snúðu hring til að breyta hvar hann byrjar.</span>';
+  bar.innerHTML = html;
+  bar.querySelectorAll('.ptab').forEach(function(b){ b.addEventListener('click', function(){ selectPart(b.dataset.p); }); });
+  $('#ptoggle').addEventListener('click', toggleParts);
+  $('#pcopy').addEventListener('click', function(e){ openCopyMenu(e.currentTarget); });
+}
+function openPartPop(anchor, html, bind){
+  var pop = $('#partPop'); pop.innerHTML = html; bind(pop);
+  pop.classList.add('on'); $('#partScrim').classList.add('on');
+  var r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  pop.style.left = clamp(r.left + r.width/2 - pw/2, 8, innerWidth - pw - 8) + 'px';
+  var top = r.bottom + 10; if (top + ph > innerHeight - 8) top = Math.max(8, r.top - ph - 10);
+  pop.style.top = top + 'px';
+}
+function closePartPop(){ $('#partPop').classList.remove('on'); $('#partScrim').classList.remove('on'); }
+$('#partScrim').addEventListener('click', closePartPop);
+function openCopyMenu(anchor){
+  commitCur();
+  var others = PARTS.filter(function(k){ return k !== S.cur && partUsed(k); });
+  var html = '<div class="pname">Afrita í ' + PART_NAME[S.cur] + ' (' + S.cur + ')</div>';
+  if (!others.length) html += '<p class="pmsg">Enginn annar partur er tilbúinn enn.</p>';
+  others.forEach(function(k){ html += '<button class="rm pc-row" data-from="' + k + '"><span class="plt" style="--pc:' + PART_COL[k] + '">' + k + '</span> Afrita ' + PART_NAME[k] + '</button>'; });
+  if (partUsed(S.cur)) html += '<button class="rm pc-row warnrow" data-clear="1">Hreinsa ' + PART_NAME[S.cur] + '</button>';
+  openPartPop(anchor, html, function(pop){
+    pop.querySelectorAll('[data-from]').forEach(function(b){ b.addEventListener('click', function(){
+      var from = b.dataset.from, P = S.parts[from];
+      S.parts[S.cur] = {rings:copyJSON(P.rings), amb:copyJSON(P.amb), world:P.world, bars:P.bars};
+      loadPart(S.cur); renderRings(); renderAmb(); renderParts(); closePartPop(); saveState();
+      if (playing && !songMode) startAmb();
+      toast('Afritaði ' + PART_NAME[from] + ' í ' + PART_NAME[S.cur] + '. Nú má breyta.');
+    }); });
+    var c = pop.querySelector('[data-clear]');
+    if (c) c.addEventListener('click', function(){
+      S.parts[S.cur] = emptyPart(); loadPart(S.cur); renderRings(); renderAmb(); renderParts(); closePartPop(); saveState();
+      if (playing && !songMode) startAmb();
     });
   });
 }
 
-function lesaSemDataUrl(file){
-  return new Promise((res,rej)=>{
-    const fr = new FileReader();
-    fr.onload = ()=>res(fr.result);
-    fr.onerror = ()=>rej(new Error("Ekki tókst að lesa skrána"));
-    fr.readAsDataURL(file);
+/* ================= Song arrangement ================= */
+function songSeconds(){ var td = 60 / S.bpm / 4, n = 0; S.song.forEach(function(k){ n += S.parts[k].bars*16; }); return n*td; }
+function renderSong(){
+  var pal = $('#palette'); if (!pal) return;
+  commitCur();
+  pal.innerHTML = '';
+  PARTS.forEach(function(k){
+    var P = S.parts[k], used = partUsed(k), d = document.createElement('div');
+    d.className = 'ptile' + (used ? '' : ' empty');
+    d.innerHTML = '<button class="padd" style="--pc:' + PART_COL[k] + '"><b>' + k + '</b><span>' + PART_NAME[k] + '</span><small>' + (used ? (P.world ? WORLDS[P.world].icon + ' ' : '') + 'Tilbúið' : 'Tómt') + '</small></button>' +
+      '<div class="pctl"><button class="pbars">' + P.bars + ' taktar</button><button class="pedit">Breyta</button></div>';
+    d.querySelector('.padd').addEventListener('click', function(){
+      if (S.song.length >= 24){ toast('Lagið er orðið nógu langt.'); return; }
+      S.song.push(k); renderSong(); saveState();
+      if (!used) toast(PART_NAME[k] + ' er tómt, það verður þögn þar.');
+    });
+    d.querySelector('.pbars').addEventListener('click', function(){
+      var opts = [2,4,8]; P.bars = opts[(opts.indexOf(P.bars) + 1) % opts.length]; renderSong(); saveState();
+    });
+    d.querySelector('.pedit').addEventListener('click', function(){ showPage('rada'); selectPart(k); });
+    pal.appendChild(d);
+  });
+  var strip = $('#strip'); strip.innerHTML = '';
+  if (!S.song.length) strip.innerHTML = '<p class="empty">Ýttu á partana til vinstri til að raða þeim í lag, eða prófið eitt af formunum hér fyrir neðan.</p>';
+  S.song.forEach(function(k, i){
+    var b = document.createElement('button');
+    b.className = 'stile'; b.style.setProperty('--pc', PART_COL[k]); b.dataset.i = i;
+    b.innerHTML = '<b>' + k + '</b><small>' + (i+1) + '</small>';
+    b.addEventListener('click', function(){ openStripPop(b, i); });
+    strip.appendChild(b);
+  });
+  var sec = songSeconds();
+  $('#songLen').textContent = S.song.length ? 'Lengd ' + mmss(sec) : '';
+}
+function markStrip(i){
+  document.querySelectorAll('.stile').forEach(function(b){ b.classList.toggle('now', +b.dataset.i === i); });
+}
+function openStripPop(anchor, i){
+  var k = S.song[i];
+  var html = '<div class="pname">' + (i+1) + '. ' + PART_NAME[k] + '</div><div class="pitch"><button data-m="-1" aria-label="Færa fyrr">←</button><div><b>' + k + '</b><small>færa</small></div><button data-m="1" aria-label="Færa seinna">→</button></div><button class="rm" data-x="1">Taka úr laginu</button>';
+  openPartPop(anchor, html, function(pop){
+    pop.querySelectorAll('[data-m]').forEach(function(b){ b.addEventListener('click', function(){
+      var j = i + (+b.dataset.m); if (j < 0 || j >= S.song.length) return;
+      var t = S.song[i]; S.song[i] = S.song[j]; S.song[j] = t; i = j;
+      renderSong(); saveState();
+      var nb = document.querySelector('.stile[data-i="' + j + '"]'); if (nb){ closePartPop(); openStripPop(nb, j); }
+    }); });
+    pop.querySelector('[data-x]').addEventListener('click', function(){ S.song.splice(i, 1); closePartPop(); renderSong(); saveState(); });
   });
 }
-function lesaSemTexta(file){
-  return new Promise((res,rej)=>{
-    const fr = new FileReader();
-    fr.onload = ()=>res(fr.result);
-    fr.onerror = ()=>rej(new Error("Ekki tókst að lesa skrána"));
-    fr.readAsText(file);
+document.querySelectorAll('[data-form]').forEach(function(b){
+  b.addEventListener('click', function(){
+    S.song = b.dataset.form.split(''); renderSong(); saveState();
+    var empty = S.song.filter(function(k, i, a){ return a.indexOf(k) === i && !partUsed(k); });
+    if (empty.length) toast('Athugið: ' + empty.map(function(k){ return PART_NAME[k]; }).join(' og ') + ' er enn tómt.');
   });
+});
+$('#stripClear').addEventListener('click', function(){ if (playing && songMode) stop(); S.song = []; renderSong(); saveState(); });
+$('#songPlay').addEventListener('click', function(){ if (playing && songMode) stop(); else playSongMode(); });
+
+/* ================= Wiring ================= */
+function showPage(name){
+  if (rec) stopRec();
+  if (playing && ((name === 'lag') !== songMode)) stop();
+  closePartPop();
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.toggle('on', p.id === 'page-' + name); });
+  document.querySelectorAll('.tabs button').forEach(function(b){ b.classList.toggle('on', b.dataset.page === name); });
+  if (name === 'rada'){ renderTray(); renderParts(); }
+  if (name === 'lag') renderSong();
 }
-function afkodaHljod(dataUrl){
-  raesaHljod();
-  return new Promise(function(res){
-    let lokid = false;
-    const takist = function(b){ if(!lokid){ lokid = true; res(b); } };
-    const mistakist = function(){ if(!lokid){ lokid = true; res(null); } };
-    try{
-      const svar = ac.decodeAudioData(dataUrlIArrayBuffer(dataUrl), takist, mistakist);
-      if(svar && svar.then) svar.then(takist, mistakist);
-    }catch(e){ mistakist(); }
+document.querySelectorAll('.tabs button').forEach(function(b){ b.addEventListener('click', function(){ showPage(b.dataset.page); }); });
+document.querySelector('[data-goto="rada"]').addEventListener('click', function(){ showPage('rada'); });
+
+document.querySelectorAll('.rec').forEach(function(card){
+  var type = card.dataset.type;
+  card.querySelector('.rec-btn').addEventListener('click', function(){
+    if (rec){ var same = rec.card === card; stopRec(); if (same) return; }
+    startRec(type, card);
   });
-}
+  card.querySelector('.file').addEventListener('click', function(){ uploadType = type; $('#fileIn').click(); });
+});
+$('#fileIn').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; if (f) loadFile(f, uploadType); e.target.value = '';
+});
+$('#playBtn').addEventListener('click', function(){ playing ? stop() : play(); });
+$('#swing').addEventListener('input', function(e){ S.swing = +e.target.value/100; $('#swingOut').textContent = e.target.value; saveState(); });
+$('#bpm').addEventListener('input', function(e){ S.bpm = +e.target.value; $('#bpmOut').textContent = S.bpm; if ($('#songLen')) renderSong(); syncDelays(); applyMagic(); saveState(); });
+$('#ambVol').addEventListener('input', function(e){ S.ambVol = +e.target.value; updateAmbGain(); saveState(); });
+$('#root').addEventListener('change', function(e){ S.root = +e.target.value; saveState(); if (edId) updateTuneUI(); });
 
-/* ---------- gögn ---------- */
-function nyrPadd(){
-  return {id:naestaId++, nafn:"Hljóð "+(paddar.length+1), kyrr:null, virk:null,
-          hljod:null, buffer:null, mynstur:new Array(16).fill(false),
-          tonn:0, upphaf:0, endir:null};
-}
-function finna(id){ return paddar.find(p=>p.id===id); }
-
-/* ---------- uppsetningarsýn ---------- */
-const spjaldalisti = document.getElementById("spjaldalisti");
-
-const styðurUpptoku = !!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-
-function teiknaUppsetningu(){
-  spjaldalisti.innerHTML = "";
-  paddar.forEach((p,i)=>{
-    const spjald = document.createElement("div");
-    spjald.className = "spjald";
-    spjald.innerHTML = `
-      <button class="eyda" title="Eyða takka" data-eyda="${p.id}">&times;</button>
-      <div class="spjaldhaus">
-        <span class="numer">${i+1}</span>
-        <input class="nafn" value="${p.nafn.replace(/"/g,"&quot;")}" data-nafn="${p.id}" aria-label="Nafn takka">
-      </div>
-      <div class="reitir">
-        <div class="reitarammi">
-          <div class="reitur" data-mynd="kyrr" data-id="${p.id}" tabindex="0" role="button" aria-label="Kyrr mynd">
-            ${p.kyrr ? `<img src="${p.kyrr}" alt="">` : `<span class="merki">Smelltu eða dragðu mynd hingað</span>`}
-          </div>
-          <span class="reitmerki">Kyrr mynd</span>
-        </div>
-        <div class="reitarammi">
-          <div class="reitur" data-mynd="virk" data-id="${p.id}" tabindex="0" role="button" aria-label="Mynd á hreyfingu">
-            ${p.virk ? `<img src="${p.virk}" alt="">` : `<span class="merki">Myndin sem hristist</span>`}
-          </div>
-          <span class="reitmerki">Mynd á hreyfingu</span>
-        </div>
-      </div>
-      <div class="hljodrod">
-        <span class="hljodstada ${p.buffer?"tilbuid":""}">${p.buffer ? "Hljóð tilbúið" : "Ekkert hljóð"}${
-          p.buffer && p.tonn ? `<span class="merkitakki">${p.tonn>0?"+":""}${p.tonn}</span>` : ""}${
-          p.buffer && (p.upphaf > 0.001 || p.endir !== null) ? `<span class="merkitakki">klippt</span>` : ""}</span>
-        ${styðurUpptoku ? `<button class="smatakki rautt" data-upptaka="${p.id}">Taka upp</button>` : ""}
-        <button class="smatakki ljos" data-hlada="${p.id}">Hljóðskrá</button>
-        <button class="smatakki ljos" data-profa="${p.id}">Prófa</button>
-        ${p.buffer ? `<button class="smatakki" data-klippa="${p.id}">Klippa &amp; tónhæð</button>` : ""}
-      </div>
-    `;
-    spjaldalisti.appendChild(spjald);
-  });
-}
-
-spjaldalisti.addEventListener("input", e=>{
-  const id = e.target.dataset.nafn;
-  if(id){ finna(+id).nafn = e.target.value; }
+// iOS needs audio to be unlocked inside a gesture
+['pointerdown','touchend','click'].forEach(function(ev){
+  document.addEventListener(ev, function(){ if (ctx && ctx.state !== 'running') ctx.resume(); }, {passive:true});
 });
 
-spjaldalisti.addEventListener("click", async e=>{
-  const t = e.target;
 
-  if(t.dataset.eyda){
-    paddar = paddar.filter(p=>p.id !== +t.dataset.eyda);
-    teiknaUppsetningu(); return;
+/* ---------- Floating dust & bubbles in the pond ---------- */
+var dust = $('#dust'), dctx = dust.getContext ? dust.getContext('2d') : null, motes = [], dustW = 0, dustH = 0;
+var DUST_COL = {base:'255,255,255', tofrar:'255,72,176', haf:'255,255,255', geimur:'255,232,0', robot:'255,108,47'};
+function newMote(atBottom){
+  var bubble = false;            // dust only
+  return {x:Math.random()*dustW, y:atBottom ? dustH + 10 : Math.random()*dustH,
+    r:bubble ? 2.5 + Math.random()*5 : 0.7 + Math.random()*1.8, b:bubble,
+    vy:-(bubble ? 7 + Math.random()*12 : 2 + Math.random()*5), ph:Math.random()*6.28, wf:0.4 + Math.random()*0.9, a:0.3 + Math.random()*0.45};
+}
+function sizeDust(){
+  var w = pond.clientWidth, h = pond.clientHeight;
+  if (!w || !dctx) return false;
+  if (w !== dustW || h !== dustH){
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    dustW = w; dustH = h; dust.width = Math.round(w*dpr); dust.height = Math.round(h*dpr);
+    dctx.setTransform(dpr,0,0,dpr,0,0);
+    var want = clamp(Math.round(w*h/9000), 24, 70);
+    while (motes.length < want) motes.push(newMote(false));
+    motes.length = want;
   }
-  const reitur = t.closest("[data-mynd]");
-  if(reitur){ veljaMynd(+reitur.dataset.id, reitur.dataset.mynd); return; }
-
-  if(t.dataset.hlada){ veljaHljod(+t.dataset.hlada); return; }
-  if(t.dataset.profa){ spila(finna(+t.dataset.profa)); return; }
-  if(t.dataset.klippa){ opnaKlippi(+t.dataset.klippa); return; }
-  if(t.dataset.upptaka){ taktuUpp(+t.dataset.upptaka, t); return; }
-});
-
-/* drag og drop á myndareiti */
-spjaldalisti.addEventListener("dragover", e=>{
-  const r = e.target.closest("[data-mynd]");
-  if(r){ e.preventDefault(); r.classList.add("yfir"); }
-});
-spjaldalisti.addEventListener("dragleave", e=>{
-  const r = e.target.closest("[data-mynd]");
-  if(r) r.classList.remove("yfir");
-});
-spjaldalisti.addEventListener("drop", async e=>{
-  const r = e.target.closest("[data-mynd]");
-  if(!r) return;
-  e.preventDefault(); r.classList.remove("yfir");
-  const file = e.dataTransfer.files[0];
-  if(!file || file.type.indexOf("image/") !== 0) return;
-  const mynd = await minnkaMynd(file, 640);
-  if(!mynd) return;
-  finna(+r.dataset.id)[r.dataset.mynd] = mynd;
-  teiknaUppsetningu();
-  teiknaTakt();
-});
-
-function veljaMynd(id, hvor){
-  veljaSkra("image/*", async function(file){
-    const mynd = await minnkaMynd(file, 640);
-    if(!mynd) return;
-    finna(id)[hvor] = mynd;
-    teiknaUppsetningu();
-    teiknaTakt();
-  });
+  return true;
 }
-
-function veljaHljod(id){
-  veljaSkra("audio/*", async function(file){
-    const p = finna(id);
-    p.hljod = await lesaSemDataUrl(file);
-    p.buffer = await afkodaHljod(p.hljod);
-    if(!p.buffer) alert("Vafrinn ræður ekki við þetta hljóðsnið. Prófaðu m4a, mp3 eða wav.");
-    teiknaUppsetningu();
-  });
-}
-
-/* ---------- upptaka ---------- */
-let virkUpptaka = null;
-async function taktuUpp(id, takki){
-  if(virkUpptaka && virkUpptaka.id === id){ virkUpptaka.rec.stop(); return; }
-  if(virkUpptaka){ virkUpptaka.rec.stop(); }
-  try{
-    const straumur = await navigator.mediaDevices.getUserMedia({audio:true});
-    const rec = new MediaRecorder(straumur);
-    const bitar = [];
-    rec.ondataavailable = e=>bitar.push(e.data);
-    rec.onstop = async ()=>{
-      straumur.getTracks().forEach(t=>t.stop());
-      virkUpptaka = null;
-      const blob = new Blob(bitar, {type: rec.mimeType || "audio/webm"});
-      const p = finna(id);
-      p.hljod = await lesaSemDataUrl(blob);
-      p.buffer = await afkodaHljod(p.hljod);
-      teiknaUppsetningu();
-    };
-    rec.start();
-    virkUpptaka = {id, rec};
-    takki.textContent = "Stöðva";
-    takki.classList.add("tekurupp");
-  }catch(err){
-    alert("Vafrinn fékk ekki aðgang að hljóðnemanum. Takið hljóðið upp í Raddupptöku og setjið það inn með „Hljóðskrá“ í staðinn.");
-  }
-}
-
-/* ---------- spilun ---------- */
-const spilborð = document.getElementById("spilborð");
-const tomtSkilabod = document.getElementById("tomtSkilabod");
-
-function teiknaSpilbord(){
-  spilborð.innerHTML = "";
-  tomtSkilabod.classList.toggle("falid", paddar.length > 0);
-  paddar.forEach((p,i)=>{
-    const b = document.createElement("button");
-    b.className = "padd";
-    b.style.color = litir[i % litir.length];
-    b.dataset.id = p.id;
-    const kyrr = p.kyrr || p.virk;
-    const virk = p.virk || p.kyrr;
-    b.innerHTML = `
-      <span class="hringur"></span>
-      <span class="mynd">
-        ${kyrr ? `<img class="kyrr" src="${kyrr}" alt="">` : `<img class="kyrr" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
-        ${virk ? `<img class="virk" src="${virk}" alt="">` : `<img class="virk" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
-      </span>
-      <span class="titill">${p.nafn}</span>
-    `;
-    b.addEventListener("pointerdown", ev=>{ ev.preventDefault(); spila(p, b); });
-    spilborð.appendChild(b);
-  });
-}
-function teiknaAuda(i){
-  const litur = encodeURIComponent(litir[i % litir.length]);
-  return encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="none" stroke="${litirRaw(i)}" stroke-width="6" stroke-dasharray="8 7"/></svg>`);
-}
-function litirRaw(i){ return litir[i % litir.length]; }
-
-function hradiPadds(p){ return Math.pow(2, (p.tonn || 0) / 12); }
-function upphafPadds(p){
-  return Math.max(0, Math.min(p.upphaf || 0, p.buffer ? p.buffer.duration - 0.01 : 0));
-}
-function endirPadds(p){
-  if(!p.buffer) return 0;
-  const e = (p.endir === null || p.endir === undefined) ? p.buffer.duration : p.endir;
-  return Math.max(upphafPadds(p) + 0.01, Math.min(e, p.buffer.duration));
-}
-/* hversu lengi hljóðið heyrist í raun, þegar tónhæðin hefur breytt hraðanum */
-function heyranlegLengd(p){
-  if(!p.buffer) return 0.45;
-  return (endirPadds(p) - upphafPadds(p)) / hradiPadds(p);
-}
-
-function raesaBuffer(p, timi){
-  if(!p.buffer) return;
-  const src = ac.createBufferSource();
-  src.buffer = p.buffer;
-  src.playbackRate.value = hradiPadds(p);
-  src.connect(thurr);
-  if(omur) src.connect(omur);
-  const u = upphafPadds(p), e = endirPadds(p);
-  try{
-    src.start(timi || 0, u, e - u);
-  }catch(err){
-    src.start(timi || 0);
-  }
-}
-
-function spila(p, hnappur){
-  raesaHljod();
-  if(ac.state === "suspended") ac.resume();
-  raesaBuffer(p);
-  const b = hnappur || spilborð.querySelector(`[data-id="${p.id}"]`);
-  if(!b) return;
-  b.classList.remove("spilar");
-  void b.offsetWidth;
-  b.classList.add("spilar");
-  const lengd = p.buffer ? Math.min(Math.max(heyranlegLengd(p)*1000, 350), 2200) : 450;
-  clearTimeout(b._timi);
-  b._timi = setTimeout(()=>b.classList.remove("spilar"), lengd);
-}
-
-/* ---------- klippiborð ---------- */
-const klippiborð  = document.getElementById("klippiborð");
-const bylgja      = document.getElementById("bylgja");
-const bylgjaC     = document.getElementById("bylgjaCanvas");
-const handfangU   = document.getElementById("handfangU");
-const handfangE   = document.getElementById("handfangE");
-const skuggiV     = document.getElementById("skuggiV");
-const skuggiH     = document.getElementById("skuggiH");
-const tonnSledi   = document.getElementById("tonnSledi");
-let klippiPadd = null;
-
-function tolustafur(t){ return t.toFixed(2).replace(".", ","); }
-
-function teiknaBylgju(){
-  if(!klippiPadd || !klippiPadd.buffer) return;
-  const breidd = bylgja.clientWidth, haed = bylgja.clientHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  bylgjaC.width  = Math.round(breidd * dpr);
-  bylgjaC.height = Math.round(haed * dpr);
-  const g = bylgjaC.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.clearRect(0, 0, breidd, haed);
-
-  const gogn = klippiPadd.buffer.getChannelData(0);
-  const aSteypu = Math.max(1, Math.floor(gogn.length / breidd));
-  const mid = haed / 2;
-  const stillingar = getComputedStyle(document.documentElement);
-  const bleklitur = (stillingar.getPropertyValue("--ink") || "#27306B").trim();
-  const bylgjulitur = (stillingar.getPropertyValue("--blue") || "#0078BF").trim();
-  g.fillStyle = bylgjulitur;
-  for(let x = 0; x < breidd; x++){
-    let lagst = 1, haest = -1;
-    const byrjun = x * aSteypu;
-    for(let i = 0; i < aSteypu; i++){
-      const v = gogn[byrjun + i];
-      if(v === undefined) break;
-      if(v < lagst) lagst = v;
-      if(v > haest) haest = v;
+function drawDust(dt){
+  if (!sizeDust()) return;
+  var md = mode() || 'base', col = DUST_COL[md], sp = REDUCED ? 0.25 : (md === 'geimur' ? 0.35 : 1);
+  dctx.clearRect(0, 0, dustW, dustH);
+  for (var i=0;i<motes.length;i++){
+    var m = motes[i];
+    m.ph += dt*m.wf;
+    m.y += m.vy*dt*sp; m.x += Math.sin(m.ph)*7*dt*sp;
+    if (m.y < -12 || m.x < -12 || m.x > dustW + 12){ motes[i] = m = newMote(true); }
+    var a = m.a;
+    if (md === 'tofrar' || md === 'geimur') a *= 0.55 + 0.45*Math.sin(m.ph*3);
+    if (md === 'robot'){
+      dctx.fillStyle = 'rgba(' + col + ',' + a.toFixed(3) + ')';
+      var s = m.b ? m.r*1.2 : m.r*1.6; dctx.fillRect(Math.round(m.x), Math.round(m.y), s, s);
+    } else if (m.b){
+      dctx.strokeStyle = 'rgba(' + col + ',' + (a*0.9).toFixed(3) + ')'; dctx.lineWidth = 1.2;
+      dctx.beginPath(); dctx.arc(m.x, m.y, m.r, 0, 6.2832); dctx.stroke();
+      dctx.fillStyle = 'rgba(' + col + ',' + (a*0.8).toFixed(3) + ')';
+      dctx.beginPath(); dctx.arc(m.x - m.r*0.35, m.y - m.r*0.35, m.r*0.22, 0, 6.2832); dctx.fill();
+    } else {
+      dctx.fillStyle = 'rgba(' + col + ',' + a.toFixed(3) + ')';
+      dctx.beginPath(); dctx.arc(m.x, m.y, m.r, 0, 6.2832); dctx.fill();
     }
-    if(lagst > haest){ lagst = 0; haest = 0; }
-    const y1 = mid + lagst * mid * 0.92;
-    const y2 = mid + haest * mid * 0.92;
-    g.fillRect(x, y1, 1, Math.max(1, y2 - y1));
-  }
-  g.fillStyle = bleklitur;
-  g.globalAlpha = .25;
-  g.fillRect(0, mid, breidd, 1);
-  g.globalAlpha = 1;
-  faeraHandfong();
-}
-
-function faeraHandfong(){
-  if(!klippiPadd || !klippiPadd.buffer) return;
-  const lengd = klippiPadd.buffer.duration;
-  const u = upphafPadds(klippiPadd), e = endirPadds(klippiPadd);
-  const pu = (u / lengd) * 100, pe = (e / lengd) * 100;
-  handfangU.style.left  = pu + "%";
-  handfangE.style.left  = pe + "%";
-  skuggiV.style.left = "0"; skuggiV.style.width = pu + "%";
-  skuggiH.style.left = pe + "%"; skuggiH.style.width = (100 - pe) + "%";
-  document.getElementById("merkiU").textContent = "Byrjar: " + tolustafur(u) + " s";
-  document.getElementById("merkiE").textContent = "Endar: " + tolustafur(e) + " s";
-}
-
-/* snerting og mús — pointer-atburðir vantar á eldri iPada */
-function saekjaX(ev){
-  if(ev.touches && ev.touches.length) return ev.touches[0].clientX;
-  if(ev.changedTouches && ev.changedTouches.length) return ev.changedTouches[0].clientX;
-  return ev.clientX;
-}
-let dregur = null;
-function bylgjaNidur(ev){
-  if(!klippiPadd || !klippiPadd.buffer) return;
-  ev.preventDefault();
-  const kassi = bylgja.getBoundingClientRect();
-  const hlutfall = Math.max(0, Math.min(1, (saekjaX(ev) - kassi.left) / kassi.width));
-  const timi = hlutfall * klippiPadd.buffer.duration;
-  /* færum það merki sem er nær */
-  dregur = Math.abs(timi - upphafPadds(klippiPadd)) <= Math.abs(timi - endirPadds(klippiPadd)) ? "u" : "e";
-  bylgjaHreyfing(ev);
-}
-function bylgjaHreyfing(ev){
-  if(!dregur || !klippiPadd || !klippiPadd.buffer) return;
-  ev.preventDefault();
-  const kassi = bylgja.getBoundingClientRect();
-  const hlutfall = Math.max(0, Math.min(1, (saekjaX(ev) - kassi.left) / kassi.width));
-  const timi = hlutfall * klippiPadd.buffer.duration;
-  if(dregur === "u") klippiPadd.upphaf = Math.min(timi, endirPadds(klippiPadd) - 0.02);
-  else               klippiPadd.endir  = Math.max(timi, upphafPadds(klippiPadd) + 0.02);
-  faeraHandfong();
-}
-function bylgjaUpp(){
-  if(dregur){ dregur = null; teiknaUppsetningu(); }
-}
-if(window.PointerEvent){
-  bylgja.addEventListener("pointerdown", bylgjaNidur);
-  document.addEventListener("pointermove", bylgjaHreyfing);
-  document.addEventListener("pointerup", bylgjaUpp);
-}else{
-  bylgja.addEventListener("touchstart", bylgjaNidur, {passive:false});
-  document.addEventListener("touchmove", bylgjaHreyfing, {passive:false});
-  document.addEventListener("touchend", bylgjaUpp);
-  bylgja.addEventListener("mousedown", bylgjaNidur);
-  document.addEventListener("mousemove", bylgjaHreyfing);
-  document.addEventListener("mouseup", bylgjaUpp);
-}
-
-function opnaKlippi(id){
-  klippiPadd = finna(id);
-  if(!klippiPadd || !klippiPadd.buffer) return;
-  document.getElementById("klippiNafn").textContent = klippiPadd.nafn;
-  tonnSledi.value = klippiPadd.tonn || 0;
-  syniTon();
-  klippiborð.classList.remove("falid");
-  setTimeout(teiknaBylgju, 30);
-}
-function lokaKlippi(){
-  klippiborð.classList.add("falid");
-  klippiPadd = null;
-  teiknaUppsetningu();
-}
-document.getElementById("klippiLoka").onclick = lokaKlippi;
-klippiborð.addEventListener("click", e=>{ if(e.target === klippiborð) lokaKlippi(); });
-window.addEventListener("resize", ()=>{ if(klippiPadd) teiknaBylgju(); });
-
-function syniTon(){
-  const t = +tonnSledi.value;
-  document.getElementById("tonnTala").textContent = (t > 0 ? "+" : "") + t;
-}
-tonnSledi.oninput = function(){
-  syniTon();
-  if(klippiPadd) klippiPadd.tonn = +this.value;
-};
-tonnSledi.onchange = function(){ if(klippiPadd) spila(klippiPadd); };
-
-document.getElementById("klippiSpila").onclick = ()=>{ if(klippiPadd) spila(klippiPadd); };
-
-document.getElementById("finnaUpphaf").onclick = ()=>{
-  if(!klippiPadd || !klippiPadd.buffer) return;
-  const b = klippiPadd.buffer, d = b.getChannelData(0);
-  let topp = 0;
-  for(let i = 0; i < d.length; i += 16){ const v = Math.abs(d[i]); if(v > topp) topp = v; }
-  const mork = Math.max(0.012, topp * 0.1);
-  let u = 0, e = d.length - 1;
-  for(let i = 0; i < d.length; i++){ if(Math.abs(d[i]) > mork){ u = i; break; } }
-  for(let i = d.length - 1; i >= 0; i--){ if(Math.abs(d[i]) > mork){ e = i; break; } }
-  klippiPadd.upphaf = Math.max(0, u / b.sampleRate - 0.02);
-  klippiPadd.endir  = Math.min(b.duration, e / b.sampleRate + 0.08);
-  faeraHandfong();
-  spila(klippiPadd);
-};
-
-document.getElementById("nullstilla").onclick = ()=>{
-  if(!klippiPadd) return;
-  klippiPadd.upphaf = 0;
-  klippiPadd.endir = null;
-  klippiPadd.tonn = 0;
-  tonnSledi.value = 0;
-  syniTon();
-  faeraHandfong();
-};
-
-/* ---------- taktur ---------- */
-const taktbord = document.getElementById("taktbord");
-const tomtTaktur = document.getElementById("tomtTaktur");
-let bpm = 100, skrefFjoldi = 8, taktGengur = false, naestaSkref = 0, naestiTimi = 0, taktTimari = null;
-let sjonRod = [];
-
-function teiknaTakt(){
-  taktbord.innerHTML = "";
-  tomtTaktur.classList.toggle("falid", paddar.length > 0);
-  if(!paddar.length) return;
-
-  const breitt = window.innerWidth > 620;
-  const nafnbreidd = breitt ? "minmax(96px,150px)" : (skrefFjoldi === 16 ? "56px" : "72px");
-  const bil = skrefFjoldi === 16 ? (breitt ? "6px" : "3px") : (breitt ? "8px" : "5px");
-  const stillaRod = rod=>{
-    rod.style.gridTemplateColumns = nafnbreidd + " repeat(" + skrefFjoldi + ",1fr)";
-    rod.style.gap = bil;
-  };
-
-  const numer = [];
-  for(let n = 1; n <= skrefFjoldi; n++) numer.push(n);
-
-  const haus = document.createElement("div");
-  haus.className = "taktrod";
-  stillaRod(haus);
-  haus.innerHTML = "<span></span>" + numer.map(n=>
-    `<span class="skrefhaus ${(n-1)%4===0?"thungt":""}">${n}</span>`).join("");
-  taktbord.appendChild(haus);
-
-  paddar.forEach((p,i)=>{
-    const rod = document.createElement("div");
-    rod.className = "taktrod";
-    rod.style.color = litir[i % litir.length];
-    const mynd = p.kyrr || p.virk;
-    rod.innerHTML = `
-      <span class="taktnafn" data-nafnrod="${p.id}">
-        ${mynd ? `<img class="thumbi" src="${mynd}" alt="">`
-               : `<span class="thumbi" style="background:${litir[i%litir.length]};border-radius:8px"></span>`}
-        <span class="heiti">${p.nafn}</span>
-      </span>
-      ${p.mynstur.slice(0, skrefFjoldi).map((a,s)=>
-        `<button class="skref ${s%4===0?"thungt":""}" aria-pressed="${a}"
-                 data-padd="${p.id}" data-skref="${s}"
-                 aria-label="${p.nafn}, slag ${s+1}"></button>`).join("")}
-    `;
-    stillaRod(rod);
-    taktbord.appendChild(rod);
-  });
-}
-
-taktbord.addEventListener("click", e=>{
-  const t = e.target.closest("[data-skref]");
-  if(!t) return;
-  const p = finna(+t.dataset.padd);
-  const s = +t.dataset.skref;
-  p.mynstur[s] = !p.mynstur[s];
-  t.setAttribute("aria-pressed", String(p.mynstur[s]));
-  if(p.mynstur[s] && !taktGengur) spila(p);
-});
-
-function radaSkrefi(skref, timi){
-  paddar.forEach(p=>{ if(p.mynstur[skref]) raesaBuffer(p, timi); });
-  sjonRod.push({skref, timi});
-}
-
-function taktLykkja(){
-  const skreflengd = 60 / bpm;
-  while(naestiTimi < ac.currentTime + 0.12){
-    radaSkrefi(naestaSkref, naestiTimi);
-    naestiTimi += skreflengd;
-    naestaSkref = (naestaSkref + 1) % skrefFjoldi;
   }
 }
 
-let sidastaSyndaSkref = -1;
-function sjonLykkja(){
-  if(taktGengur && ac){
-    while(sjonRod.length && sjonRod[0].timi <= ac.currentTime){
-      const {skref} = sjonRod.shift();
-      if(skref !== sidastaSyndaSkref){
-        sidastaSyndaSkref = skref;
-        taktbord.querySelectorAll(".skref.nuna").forEach(el=>el.classList.remove("nuna"));
-        taktbord.querySelectorAll(`[data-skref="${skref}"]`).forEach(el=>el.classList.add("nuna"));
-        paddar.forEach(p=>{
-          if(!p.mynstur[skref]) return;
-          const merki = taktbord.querySelector(`[data-nafnrod="${p.id}"]`);
-          if(merki){
-            merki.classList.add("slaer");
-            setTimeout(()=>merki.classList.remove("slaer"), 140);
-          }
-          const padd = spilborð.querySelector(`[data-id="${p.id}"]`);
-          if(padd){
-            padd.classList.remove("spilar"); void padd.offsetWidth; padd.classList.add("spilar");
-            clearTimeout(padd._timi);
-            padd._timi = setTimeout(()=>padd.classList.remove("spilar"), 300);
-          }
-        });
+/* ---------- Main animation loop ---------- */
+var lastF = performance.now();
+function frame(now){
+  var dt = Math.min(0.05, (now - lastF)/1000); lastF = now;
+  if ($('#page-safna').classList.contains('on')){ physics(dt); drawDust(dt); }
+  if (ctx && playing){
+    var t = ctx.currentTime;
+    while (vq.length && vq[0].t <= t){
+      var e = vq.shift(), RE = ringEls[e.ri]; if (!RE) continue;
+      RE.ph.style.transform = 'rotate(' + (e.pos*360/e.len) + 'deg)';
+      var sl = RE.slots[e.si];
+      if (sl.classList.contains('filled') && !S.rings[e.ri].mute){
+        sl.classList.add('hit');
+        (function(el){ setTimeout(function(){ el.classList.remove('hit'); }, 130); })(sl);
       }
     }
   }
-  requestAnimationFrame(sjonLykkja);
+  requestAnimationFrame(frame);
 }
-requestAnimationFrame(sjonLykkja);
 
-const taktSpilaTakki = document.getElementById("taktSpila");
-function skiptaTakti(){
-  raesaHljod();
-  if(ac.state === "suspended") ac.resume();
-  taktGengur = !taktGengur;
-  if(taktGengur){
-    naestaSkref = 0;
-    sidastaSyndaSkref = -1;
-    sjonRod = [];
-    naestiTimi = ac.currentTime + 0.06;
-    taktTimari = setInterval(taktLykkja, 25);
-    taktSpilaTakki.textContent = "■ Stöðva";
-    taktSpilaTakki.classList.remove("gulur");
-    taktSpilaTakki.classList.add("raudur");
-  }else{
-    clearInterval(taktTimari);
-    sjonRod = [];
-    taktbord.querySelectorAll(".skref.nuna").forEach(el=>el.classList.remove("nuna"));
-    taktSpilaTakki.textContent = "▶ Spila lykkju";
-    taktSpilaTakki.classList.add("gulur");
-    taktSpilaTakki.classList.remove("raudur");
-  }
-}
-taktSpilaTakki.onclick = skiptaTakti;
-
-document.getElementById("hradi").oninput = function(){
-  bpm = +this.value;
-  document.getElementById("hradiTala").textContent = bpm + " bpm";
-};
-document.getElementById("hreinsaTakt").onclick = ()=>{
-  paddar.forEach(p=>p.mynstur = new Array(16).fill(false));
-  teiknaTakt();
-};
-
-function veljaFjolda(n){
-  skrefFjoldi = n;
-  document.getElementById("val8").setAttribute("aria-pressed", String(n === 8));
-  document.getElementById("val16").setAttribute("aria-pressed", String(n === 16));
-  document.getElementById("tvofalda").style.display = n === 16 ? "" : "none";
-  if(naestaSkref >= skrefFjoldi) naestaSkref = 0;
-  teiknaTakt();
-}
-document.getElementById("val8").onclick  = ()=>veljaFjolda(8);
-document.getElementById("val16").onclick = ()=>veljaFjolda(16);
-document.getElementById("tvofalda").style.display = "none";
-
-/* afritar fyrri helminginn yfir á þann seinni svo lykkjan hljómi eins, tvöfalt löng */
-document.getElementById("tvofalda").onclick = ()=>{
-  paddar.forEach(p=>{
-    for(let i = 0; i < 8; i++) p.mynstur[i+8] = p.mynstur[i];
-  });
-  teiknaTakt();
-};
-
-/* dálkabreiddin er reiknuð eftir skjábreidd — teiknum upp á nýtt við snúning */
-let snuningsTimi = null;
-window.addEventListener("resize", ()=>{
-  if(document.getElementById("taktur").classList.contains("falid")) return;
-  clearTimeout(snuningsTimi);
-  snuningsTimi = setTimeout(teiknaTakt, 150);
-});
-
-/* bil = spila/stöðva lykkjuna */
-document.addEventListener("keydown", e=>{
-  if(e.code === "Space" && !document.getElementById("taktur").classList.contains("falid")
-     && e.target.tagName !== "INPUT"){
-    e.preventDefault(); skiptaTakti();
-  }
-});
-
-/* lyklaborð: 1–9 og 0 */
-document.addEventListener("keydown", e=>{
-  if(document.getElementById("spilun").classList.contains("falid")) return;
-  if(/^[0-9]$/.test(e.key)){
-    const vis = e.key === "0" ? 9 : (+e.key - 1);
-    if(paddar[vis]) spila(paddar[vis]);
-  }
-});
-
-/* ---------- flipar ---------- */
-const flipar = {
-  uppsetning: document.getElementById("flipiUppsetning"),
-  spilun:     document.getElementById("flipiSpila"),
-  taktur:     document.getElementById("flipiTaktur")
-};
-function skipta(hvad){
-  Object.keys(flipar).forEach(k=>{
-    flipar[k].setAttribute("aria-selected", String(k === hvad));
-    document.getElementById(k).classList.toggle("falid", k !== hvad);
-  });
-  document.getElementById("stjornbord").classList.toggle("falid", hvad === "uppsetning");
-  if(hvad === "spilun"){ raesaHljod(); teiknaSpilbord(); }
-  if(hvad === "taktur"){ raesaHljod(); teiknaSpilbord(); teiknaTakt(); }
-}
-flipar.uppsetning.onclick = ()=>skipta("uppsetning");
-flipar.spilun.onclick     = ()=>skipta("spilun");
-flipar.taktur.onclick     = ()=>skipta("taktur");
-
-/* ---------- stjórnborð ---------- */
-document.getElementById("reverbRofi").onclick = function(){
-  raesaHljod();
-  reverbA = !reverbA;
-  this.setAttribute("aria-pressed", String(reverbA));
-  stillaOm();
-};
-document.getElementById("reverbMagn").oninput = stillaOm;
-document.getElementById("hljodstyrkur").oninput = function(){
-  raesaHljod();
-  master.gain.value = this.value/100;
-};
-
-/* ---------- vista og opna ---------- */
-document.getElementById("baetaVid").onclick = ()=>{
-  paddar.push(nyrPadd());
-  teiknaUppsetningu();
-};
-document.getElementById("vistaSkra").onclick = ()=>{
-  const gogn = {
-    utgafa: 4,
-    bpm: bpm,
-    skrefFjoldi: skrefFjoldi,
-    paddar: paddar.map(p=>({nafn:p.nafn, kyrr:p.kyrr, virk:p.virk, hljod:p.hljod,
-                            mynstur:p.mynstur, tonn:p.tonn, upphaf:p.upphaf, endir:p.endir}))
-  };
-  const blob = new Blob([JSON.stringify(gogn)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "hljodfaeri.json";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-};
-document.getElementById("opnaSkra").onclick = ()=>document.getElementById("innSkra").click();
-document.getElementById("innSkra").onchange = async function(){
-  const file = this.files[0];
-  if(!file) return;
-  try{
-    const gogn = JSON.parse(await lesaSemTexta(file));
-    paddar = [];
-    for(const p of gogn.paddar){
-      const nyr = nyrPadd();
-      nyr.nafn = p.nafn; nyr.kyrr = p.kyrr; nyr.virk = p.virk; nyr.hljod = p.hljod;
-      if(Array.isArray(p.mynstur)){
-        /* eldri skrár geyma aðeins 8 slög — fyllum upp í 16 */
-        for(let i = 0; i < 16; i++) nyr.mynstur[i] = Boolean(p.mynstur[i]);
-      }
-      if(typeof p.tonn === "number") nyr.tonn = p.tonn;
-      if(typeof p.upphaf === "number") nyr.upphaf = p.upphaf;
-      if(typeof p.endir === "number") nyr.endir = p.endir;
-      if(p.hljod) nyr.buffer = await afkodaHljod(p.hljod);
-      paddar.push(nyr);
+(function makeGrain(){
+  try {
+    var c = document.createElement('canvas'); c.width = c.height = 140;
+    var g = c.getContext('2d'); if (!g) return;
+    var im = g.createImageData(140, 140), d = im.data;
+    for (var i=0;i<d.length;i+=4){
+      var r = Math.random();
+      if (r < 0.2){ d[i]=30; d[i+1]=32; d[i+2]=60; d[i+3] = 5 + Math.random()*15; }        // ink specks
+      else if (r < 0.25){ d[i]=255; d[i+1]=255; d[i+2]=255; d[i+3] = 15 + Math.random()*25; } // paper fibre
     }
-    if(gogn.bpm){
-      bpm = gogn.bpm;
-      document.getElementById("hradi").value = bpm;
-      document.getElementById("hradiTala").textContent = bpm + " bpm";
-    }
-    veljaFjolda(gogn.skrefFjoldi === 16 ? 16 : 8);
-    teiknaUppsetningu();
-    teiknaTakt();
-  }catch(err){
-    alert("Skráin er ekki hljóðfæraskrá sem forritið les.");
-  }
-  this.value = "";
-};
-
-/* ---------- byrjun ---------- */
-paddar.push(nyrPadd(), nyrPadd(), nyrPadd(), nyrPadd());
-teiknaUppsetningu();
+    g.putImageData(im, 0, 0);
+    document.documentElement.style.setProperty('--grain', 'url(' + c.toDataURL('image/png') + ')');
+  } catch(e){}
+})();
+paintIcons(); buildRings(); renderAmb(); renderTray();
+loadAll();
+requestAnimationFrame(frame);
+window.addEventListener('resize', function(){ if (edId) drawWave(); });
 })();
 </script>
 </body>
