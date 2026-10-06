@@ -497,6 +497,27 @@ body.magic .rec,body.magic .ringcard,body.magic .panel{--sh:color-mix(in srgb,va
 .pdots{display:grid;grid-template-columns:repeat(2,9px);gap:3px}
 .pdots i{width:9px;height:9px;display:block;border-radius:52% 48% 55% 45% / 48% 54% 46% 52%}
 .partbar .ptoggle{margin-right:6px}
+
+/* v15: undo, accents, hold-to-record */
+.undo-btn[disabled]{opacity:.35;box-shadow:none}
+.undo-btn span{white-space:nowrap}
+@media (max-width:900px){ .undo-btn span{display:none} }
+.acc{display:flex;background-color:var(--paper);background-image:var(--grain);border-radius:var(--pill-2);padding:3px;margin-bottom:10px}
+.acc button{flex:1;padding:8px 4px;font-size:14px;border-radius:var(--pill-1);color:var(--ink-soft)}
+.acc button.on{background:var(--ink);color:var(--paper)}
+.slot.acc-hi .si .mini{transform:scale(1.14)}
+.slot.acc-hi::after{content:"";position:absolute;top:-9%;left:-9%;right:-9%;bottom:-9%;border-radius:50%;border:3px solid var(--ink);opacity:.75;pointer-events:none}
+.slot.acc-lo .si{opacity:.5}
+.slot.acc-lo .si .mini{transform:scale(.74)}
+.slot.hit.acc-lo .si .mini{transform:scale(.95)}
+.slot::before{content:"";position:absolute;top:10%;left:10%;right:10%;bottom:10%;border-radius:50%;background:#FF48B0;opacity:0;transform:scale(0);pointer-events:none}
+.slot.pressing::before{opacity:.55;transform:scale(1);transition:transform .45s linear,opacity .45s linear}
+.slot.recording{border:3px solid #FF48B0 !important;background:#FF48B0 !important;transform:scale(var(--rl,1));transition:transform .06s linear}
+.slot.recording::before{opacity:0}
+.slot.recording .si{display:none}
+.slot.recording::after{content:"";position:absolute;left:50%;top:50%;width:28%;height:28%;margin:-14% 0 0 -14%;border-radius:50%;background:#fff;animation:blink 1s steps(2) infinite}
+.aslot.pressing{box-shadow:inset 0 0 0 60px rgba(255,72,176,.35);transition:box-shadow .45s linear}
+.aslot.recording{background:#FF48B0 !important;color:#fff;border-color:#FF48B0;transform:scale(var(--rl,1))}
 </style>
 </head>
 <body>
@@ -507,6 +528,7 @@ body.magic .rec,body.magic .ringcard,body.magic .panel{--sh:color-mix(in srgb,va
     <button data-page="rada">Raða í hringi</button>
     <button data-page="lag">Lagið</button>
   </nav>
+  <button id="undoBtn" class="world-btn undo-btn" disabled aria-label="Afturkalla"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 010 11H11"/></svg><span>Afturkalla</span></button>
   <button id="groupBtn" class="world-btn group-btn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><circle cx="17" cy="9.5" r="2.5"/><path d="M3 19c.6-3.4 3-5.2 6-5.2s5.4 1.8 6 5.2"/><path d="M15.5 14.2c2.6-.3 4.8 1.2 5.5 4.3"/></svg><span id="groupName">Hópur 1</span></button>
   <button id="worldBtn" class="world-btn" aria-haspopup="true" aria-expanded="false"><span class="wi" id="worldIcon">✨</span><span id="worldName">Töfraheimar</span></button>
 </header>
@@ -680,6 +702,9 @@ body.magic .rec,body.magic .ringcard,body.magic .panel{--sh:color-mix(in srgb,va
     <button id="pDown" aria-label="Lægra">−</button>
     <div><b id="pVal">0</b><small>tónhæð</small></div>
     <button id="pUp" aria-label="Hærra">+</button>
+  </div>
+  <div class="acc" id="popAcc">
+    <button data-acc="-1">Veikt</button><button data-acc="0">Venjulegt</button><button data-acc="1">Sterkt</button>
   </div>
   <button class="rm" id="popRm">Taka úr hólfinu</button>
 </div>
@@ -1079,17 +1104,18 @@ function trigger(s, t, semi, vol, ch, echo){
   return playDry(s, t, rate, vol, N.amb.in, 0);
 }
 var prevVoice = null;
-function preview(s, semi, ch){
+function preview(s, semi, ch, vol){
   ensureCtx();
   var t = ctx.currentTime + 0.01;
   ch = ch || s.type;
   choke(prevVoice, t);
-  prevVoice = trigger(s, t, semi||0, 1, ch, false);
+  prevVoice = trigger(s, t, semi||0, vol||1, ch, false);
   if (ch === 'amb' && magicAmt > 0.05 && WP('amb','glitch')) glitch(s, t + beat(), beat()/4);
 }
 
 /* ---------- Sequencer ---------- */
 var playing = false, timer = null, tick = 0, nextT = 0, vq = [], lastVoices = [null,null,null];
+function accMul(a){ return a === 1 ? 1.5 : (a === -1 ? 0.4 : 1); }
 function stepDeg(r){ return 360 / r.len; }
 function rotSteps(r){ return ((Math.round(r.rot/stepDeg(r)) % r.len) + r.len) % r.len; }
 
@@ -1134,7 +1160,7 @@ function schedule(){
       if (!slot || r.mute) continue;
       var s = S.sounds.get(slot.id); if (!s) continue;
       if (ri > 0) choke(lastVoices[ri], tt);
-      var v = trigger(s, tt, deg2semi(slot.deg), ri===0 ? 1 : 0.8, ri===0 ? 'perc' : 'tone', ri===0 && ECHO_SLOTS[si]);
+      var v = trigger(s, tt, deg2semi(slot.deg), (ri===0 ? 1 : 0.8)*accMul(slot.acc), ri===0 ? 'perc' : 'tone', ri===0 && ECHO_SLOTS[si]);
       if (ri > 0) lastVoices[ri] = v;
     }
     ambExtras(nextT, td, tick);
@@ -1283,13 +1309,15 @@ async function getMic(){
   mic = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false, noiseSuppression:false, autoGainControl:false}});
   return mic;
 }
-async function startRec(type, card){
+async function startCapture(type, hooks){
   ensureCtx();
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    toast('Þessi vafri leyfir ekki upptöku. Veldu hljóðskrá í staðinn.'); return;
+    toast('Þessi vafri leyfir ekki upptöku. Veldu hljóðskrá í staðinn.'); return false;
   }
   try { await getMic(); }
-  catch(e){ toast('Fékk ekki aðgang að hljóðnemanum. Leyfðu hljóðnema í stillingum vafrans, eða veldu hljóðskrá.'); return; }
+  catch(e){ toast('Fékk ekki aðgang að hljóðnemanum. Leyfðu hljóðnema í stillingum vafrans, eða veldu hljóðskrá.'); return false; }
+  if (hooks.cancelled && hooks.cancelled()) return 'cancel';      // finger lifted while the permission prompt was up
+  if (rec) stopRec();
   var src = ctx.createMediaStreamSource(mic);
   var proc = ctx.createScriptProcessor(4096, 1, 1);
   var mute = ctx.createGain(); mute.gain.value = 0;
@@ -1300,15 +1328,14 @@ async function startRec(type, card){
   };
   src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
   var t0 = performance.now(), max = TYPES[type].max*1000;
-  var shape = card.querySelector('.rec-btn .shape'), txt = card.querySelector('.txt');
-  rec = {type:type, card:card, src:src, proc:proc, mute:mute, chunks:chunks, txt:txt, orig:txt.textContent, shape:shape};
-  card.classList.add('on');
+  rec = {type:type, src:src, proc:proc, mute:mute, chunks:chunks, hooks:hooks};
+  if (hooks.start) hooks.start();
   rec.iv = setInterval(function(){
     var el = performance.now() - t0;
-    txt.innerHTML = 'Tek upp… <span class="time">' + fmt(Math.max(0,(max-el)/1000)) + ' s</span> eftir. Ýttu til að stoppa.';
-    shape.style.transform = 'scale(' + (1 + Math.min(1, lvl*2)*0.35).toFixed(3) + ')';
+    if (hooks.tick) hooks.tick(Math.max(0, max - el), lvl);
     if (el >= max) stopRec();
   }, 50);
+  return true;
 }
 function stopRec(){
   if (!rec) return;
@@ -1316,12 +1343,56 @@ function stopRec(){
   clearInterval(r.iv);
   try { r.src.disconnect(); r.proc.disconnect(); r.mute.disconnect(); } catch(e){}
   r.proc.onaudioprocess = null;
-  r.card.classList.remove('on'); r.txt.textContent = r.orig; r.shape.style.transform = '';
-  var n = 0; r.chunks.forEach(function(c){ n += c.length; });
-  if (n < ctx.sampleRate*0.2){ toast('Upptakan var of stutt. Haltu áfram aðeins lengur.'); return; }
-  var data = new Float32Array(n), o = 0;
-  r.chunks.forEach(function(c){ data.set(c, o); o += c.length; });
-  addSound(r.type, data, ctx.sampleRate);
+  var n = 0, s = null; r.chunks.forEach(function(c){ n += c.length; });
+  if (n < ctx.sampleRate*0.2) toast('Upptakan var of stutt. Haltu áfram aðeins lengur.');
+  else {
+    var data = new Float32Array(n), o = 0;
+    r.chunks.forEach(function(c){ data.set(c, o); o += c.length; });
+    s = addSound(r.type, data, ctx.sampleRate, r.hooks.opts);
+  }
+  if (r.hooks.done) r.hooks.done(s);
+}
+function startRec(type, card){
+  var shape = card.querySelector('.rec-btn .shape'), txt = card.querySelector('.txt'), orig = txt.textContent;
+  startCapture(type, {
+    card: card,
+    start: function(){ card.classList.add('on'); },
+    tick: function(rem, lvl){
+      txt.innerHTML = 'Tek upp… <span class="time">' + fmt(rem/1000) + ' s</span> eftir. Ýttu til að stoppa.';
+      shape.style.transform = 'scale(' + (1 + Math.min(1, lvl*2)*0.35).toFixed(3) + ')';
+    },
+    done: function(){ card.classList.remove('on'); txt.textContent = orig; shape.style.transform = ''; }
+  });
+}
+/* Hold an empty slot to record straight into it */
+function recIntoSlot(target, snap){
+  var type = target.k === 'amb' ? 'amb' : (target.ri === 0 ? 'perc' : 'tone');
+  var el = target.el, held = true;
+  var hooks = {
+    opts:{noUndo:true, noPreview:true},
+    cancelled: function(){ return !held; },
+    start: function(){ el.classList.add('recording'); },
+    tick: function(rem, lvl){ el.style.setProperty('--rl', (1 + Math.min(1, lvl*2)*0.22).toFixed(3)); },
+    done: function(s){
+      el.classList.remove('recording'); el.style.removeProperty('--rl');
+      if (!s) return;
+      pushSnap(snap);
+      if (target.k === 'amb'){
+        S.amb[target.i] = {id:s.id}; renderAmb(); preview(s, 0, 'amb');
+        if (playing && !songMode) startAmb();
+      } else {
+        var slot = {id:s.id, deg:PAT[target.ri][target.si], acc:0};
+        S.rings[target.ri].slots[target.si] = slot; renderRings();
+        preview(s, deg2semi(slot.deg), target.ri === 0 ? 'perc' : 'tone');
+      }
+      renderTray(); saveState();
+    }
+  };
+  target.release = function(){ held = false; if (rec && rec.hooks === hooks) stopRec(); };
+  startCapture(type, hooks).then(function(ok){
+    if (ok === 'cancel') toast('Haltu fingrinum inni á hólfinu á meðan þú tekur upp.');
+  });
+  return target;
 }
 
 var uploadType = 'perc';
@@ -1351,7 +1422,9 @@ function analyse(data, sr, type){
   }
   return {norm:norm, start:start, end:end, dur:dur};
 }
-function addSound(type, data, sr){
+function addSound(type, data, sr, opts){
+  opts = opts || {};
+  if (!opts.noUndo) pushUndo();
   var a = analyse(data, sr, type);
   counter[type]++;
   var s = {id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), type:type,
@@ -1362,8 +1435,9 @@ function addSound(type, data, sr){
   spawnBlob(s, true);
   renderTray();
   dbPut(s);
-  preview(s);
+  if (!opts.noPreview) preview(s);
   ping(s.id);
+  return s;
 }
 
 /* ================= Pond ================= */
@@ -1479,9 +1553,22 @@ function buildRings(){
       var rc = ring.getBoundingClientRect(), cx = rc.left + rc.width/2, cy = rc.top + rc.height/2;
       var ang = function(x,y){ return Math.atan2(x-cx, -(y-cy))*180/Math.PI; };
       var a0 = ang(e.clientX, e.clientY);
+      var startRot = r.rot, snap0 = makeSnap(), x0 = e.clientX, y0 = e.clientY, moved = false, recT = null, holdT = null;
+      var emptySlot = e.target.closest('.slot');
+      if (emptySlot && !songMode){
+        emptySlot.classList.add('pressing');
+        holdT = setTimeout(function(){
+          emptySlot.classList.remove('pressing');
+          if (moved) return;
+          rotor.classList.remove('drag'); r.rot = startRot; applyRot(ri);
+          recT = recIntoSlot({k:'ring', ri:ri, si:+emptySlot.dataset.slot, el:emptySlot}, snap0);
+        }, 450);
+      }
       rotor.classList.add('drag');
       try { ring.setPointerCapture(e.pointerId); } catch(err){}
       var mv = function(ev){
+        if (recT) return;
+        if (!moved && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 10){ moved = true; clearTimeout(holdT); if (emptySlot) emptySlot.classList.remove('pressing'); }
         var a = ang(ev.clientX, ev.clientY), d = a - a0;
         if (d > 180) d -= 360; if (d < -180) d += 360;
         a0 = a; r.rot += d; applyRot(ri);
@@ -1489,23 +1576,27 @@ function buildRings(){
       var up = function(){
         ring.removeEventListener('pointermove', mv); ring.removeEventListener('pointerup', up); ring.removeEventListener('pointercancel', up);
         rotor.classList.remove('drag');
-        r.rot = Math.round(r.rot/stepDeg(r))*stepDeg(r); applyRot(ri); saveState();
+        clearTimeout(holdT); if (emptySlot) emptySlot.classList.remove('pressing');
+        if (recT){ recT.release(); return; }
+        r.rot = Math.round(r.rot/stepDeg(r))*stepDeg(r); applyRot(ri);
+        if (r.rot !== startRot){ pushSnap(snap0); saveState(); }
       };
       ring.addEventListener('pointermove', mv); ring.addEventListener('pointerup', up); ring.addEventListener('pointercancel', up);
     });
     card.querySelectorAll('.seg button').forEach(function(b){
-      b.addEventListener('click', function(){ r.speed = parseFloat(b.dataset.sp); renderRings(); saveState(); });
+      b.addEventListener('click', function(){ if (r.speed === parseFloat(b.dataset.sp)) return; pushUndo(); r.speed = parseFloat(b.dataset.sp); renderRings(); saveState(); });
     });
     card.querySelectorAll('.steps button').forEach(function(b){
       b.addEventListener('click', function(){
         var steps = rotSteps(r), nl = clamp(r.len + parseInt(b.dataset.d, 10), 3, 8);
         if (nl === r.len) return;
+        pushUndo();
         r.len = nl; r.rot = steps % nl * (360/nl);
         renderRings(); saveState();
       });
     });
     card.querySelector('.mute').addEventListener('click', function(){
-      r.mute = !r.mute; if (r.mute && ctx) choke(lastVoices[ri], ctx.currentTime); renderRings(); saveState();
+      pushUndo(); r.mute = !r.mute; if (r.mute && ctx) choke(lastVoices[ri], ctx.currentTime); renderRings(); saveState();
     });
   });
   renderRings();
@@ -1526,7 +1617,7 @@ function renderRings(){
       el.style.display = '';
       var a = si*Math.PI*2/r.len;
       el.style.left = (50 + 38*Math.sin(a)) + '%'; el.style.top = (50 - 38*Math.cos(a)) + '%';
-      el.className = 'slot' + (s ? ' filled' : '');
+      el.className = 'slot' + (s ? ' filled' : '') + (s && slot.acc === 1 ? ' acc-hi' : '') + (s && slot.acc === -1 ? ' acc-lo' : '');
       var html = '';
       if (s){
         html = miniHTML(s);
@@ -1550,7 +1641,23 @@ function renderAmb(){
     el.className = 'aslot' + (s ? ' filled' : '') + (s && playing ? ' live' : '');
     el.dataset.i = i;
     if (s){ el.innerHTML = miniHTML(s) + '<span></span>'; el.lastChild.textContent = s.name; }
-    else el.textContent = 'Dragðu umhverfishljóð hingað';
+    else {
+      el.textContent = 'Dragðu umhverfishljóð hingað, eða haltu inni til að taka upp';
+      el.addEventListener('pointerdown', function(e){
+        if (songMode) return;
+        e.preventDefault(); ensureCtx();
+        var snap0 = makeSnap(), x0 = e.clientX, y0 = e.clientY, recT = null;
+        el.classList.add('pressing');
+        var holdT = setTimeout(function(){ el.classList.remove('pressing'); recT = recIntoSlot({k:'amb', i:i, el:el}, snap0); }, 450);
+        var mv = function(ev){ if (!recT && Math.hypot(ev.clientX - x0, ev.clientY - y0) > 10){ clearTimeout(holdT); el.classList.remove('pressing'); } };
+        var up = function(){
+          window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
+          clearTimeout(holdT); el.classList.remove('pressing');
+          if (recT) recT.release();
+        };
+        window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
+      });
+    }
     if (s) el.addEventListener('pointerdown', function(e){ beginDrag(e, {id:s.id, from:{k:'amb', i:i}}, el); });
     wrap.appendChild(el);
   });
@@ -1608,16 +1715,18 @@ function dUp(e){
 function placeAt(p, t){
   var s = S.sounds.get(p.id); if (!s) return;
   var from = p.from, ambChanged = !!(from && from.k === 'amb');
+  if (from && from.k === 'ring' && t.classList.contains('slot') && from.ri === +t.dataset.ring && from.si === +t.dataset.slot) return;
+  if (from && from.k === 'amb' && t.classList.contains('aslot') && from.i === +t.dataset.i) return;
+  pushUndo();
   if (t.classList.contains('slot')){
     var ri = +t.dataset.ring, si = +t.dataset.slot, ring = S.rings[ri], prev = ring.slots[si];
     if (from && from.k === 'ring'){
-      if (from.ri === ri && from.si === si) return;
       var moving = S.rings[from.ri].slots[from.si];
       S.rings[from.ri].slots[from.si] = prev;           // swap
       ring.slots[si] = moving;
     } else {
       if (from && from.k === 'amb') S.amb[from.i] = null;
-      ring.slots[si] = {id:p.id, deg:PAT[ri][si]};
+      ring.slots[si] = {id:p.id, deg:PAT[ri][si], acc:0};
     }
     preview(s, deg2semi(ring.slots[si].deg), ri === 0 ? 'perc' : 'tone');
   } else {
@@ -1631,6 +1740,7 @@ function placeAt(p, t){
   if (ambChanged && playing) startAmb();
 }
 function removeFrom(from){
+  pushUndo();
   if (from.k === 'ring') S.rings[from.ri].slots[from.si] = null;
   else { S.amb[from.i] = null; if (playing) startAmb(); }
   renderRings(); renderAmb(); saveState();
@@ -1649,6 +1759,7 @@ function openPop(from, el){
   var s = S.sounds.get(slot.id);
   $('#popName').textContent = s.name;
   $('#popPitch').style.display = from.k === 'ring' ? '' : 'none';
+  $('#popAcc').style.display = from.k === 'ring' ? '' : 'none';
   updatePop();
   if (from.k === 'ring') preview(s, deg2semi(slot.deg), from.ri === 0 ? 'perc' : 'tone'); else preview(s, 0, 'amb');
   pop.classList.add('on'); $('#popScrim').classList.add('on');
@@ -1659,14 +1770,16 @@ function openPop(from, el){
 }
 function updatePop(){
   if (!popFrom || popFrom.k !== 'ring') return;
-  var d = S.rings[popFrom.ri].slots[popFrom.si].deg;
+  var sl = S.rings[popFrom.ri].slots[popFrom.si], d = sl.deg, a = sl.acc || 0;
   $('#pVal').textContent = (d > 0 ? '+' : '') + d;
+  document.querySelectorAll('#popAcc button').forEach(function(b){ b.classList.toggle('on', +b.dataset.acc === a); });
 }
 function closePop(){ popFrom = null; $('#pop').classList.remove('on'); $('#popScrim').classList.remove('on'); }
 function nudgePitch(dir){
   if (!popFrom || popFrom.k !== 'ring') return;
   var slot = S.rings[popFrom.ri].slots[popFrom.si];
-  slot.deg = clamp(slot.deg + dir, -8, 9);
+  var nd = clamp(slot.deg + dir, -8, 9); if (nd === slot.deg) return;
+  pushUndo(); slot.deg = nd;
   updatePop(); renderRings(); saveState();
   preview(S.sounds.get(slot.id), deg2semi(slot.deg), popFrom.ri === 0 ? 'perc' : 'tone');
 }
@@ -1674,6 +1787,15 @@ $('#pUp').addEventListener('click', function(){ nudgePitch(1); });
 $('#pDown').addEventListener('click', function(){ nudgePitch(-1); });
 $('#popRm').addEventListener('click', function(){ if (popFrom) removeFrom(popFrom); closePop(); });
 $('#popScrim').addEventListener('click', closePop);
+document.querySelectorAll('#popAcc button').forEach(function(b){
+  b.addEventListener('click', function(){
+    if (!popFrom || popFrom.k !== 'ring') return;
+    var slot = S.rings[popFrom.ri].slots[popFrom.si], a = +b.dataset.acc;
+    if ((slot.acc || 0) !== a){ pushUndo(); slot.acc = a; renderRings(); saveState(); }
+    updatePop();
+    preview(S.sounds.get(slot.id), deg2semi(slot.deg), popFrom.ri === 0 ? 'perc' : 'tone', (popFrom.ri === 0 ? 1 : 0.8)*accMul(a));
+  });
+});
 
 /* ================= Editor ================= */
 var edId = null, wave = $('#wave'), cv = $('#cv'), edDrag = null, delArmed = false;
@@ -1702,11 +1824,12 @@ function updateTuneUI(){
   var midi = 69 + 12*Math.log(s.f0/440)/Math.LN2, pc = ((Math.round(midi) % 12) + 12) % 12;
   $('#tuneTxt').textContent = 'Tónninn er nálægt ' + NOTE_NAMES[pc] + (s.autotune !== false ? ' og er stilltur á ' + NOTE_NAMES[S.root] + '.' : '.');
 }
-$('#tuneChk').addEventListener('change', function(e){ var s = cur(); if (!s) return; s.autotune = e.target.checked; updateTuneUI(); dbPut(s); preview(s, 0, 'tone'); });
+$('#tuneChk').addEventListener('change', function(e){ var s = cur(); if (!s) return; pushUndo(); s.autotune = e.target.checked; updateTuneUI(); dbPut(s); preview(s, 0, 'tone'); });
 function closeEditor(){
   var s = cur();
   if (s){
-    s.name = $('#edName').value.trim() || s.name;
+    var nn = $('#edName').value.trim();
+    if (nn && nn !== s.name){ pushUndo(); s.name = nn; }
     refreshBlob(s); dbPut(s); renderTray(); renderRings(); renderAmb();
     if (playing && S.amb.some(function(a){ return a && a.id === s.id; })) startAmb();
   }
@@ -1741,6 +1864,7 @@ function drawSel(){
 }
 wave.addEventListener('pointerdown', function(e){
   var s = cur(); if (!s) return;
+  pushUndo();
   e.preventDefault();
   var rc = wave.getBoundingClientRect(), px = e.clientX - rc.left;
   var sx = s.start/s.dur*rc.width, ex = s.end/s.dur*rc.width, md;
@@ -1792,7 +1916,7 @@ $('#edName').addEventListener('keydown', function(e){ if (e.key === 'Enter') clo
 document.querySelectorAll('#edTypes button').forEach(function(b){
   b.addEventListener('click', function(){
     var s = cur(); if (!s || s.type === b.dataset.type) return;
-    s.type = b.dataset.type; s.v = counter[s.type]++;
+    pushUndo(); s.type = b.dataset.type; s.v = counter[s.type]++;
     if (s.type === 'tone' && !s.f0) s.f0 = detectPitch(s);
     styleEditor(s); refreshBlob(s); renderTray(); renderRings(); renderAmb(); dbPut(s);
   });
@@ -1801,6 +1925,7 @@ $('#edDel').addEventListener('click', function(){
   var btn = $('#edDel');
   if (!delArmed){ delArmed = true; btn.classList.add('warn'); btn.textContent = 'Ýttu aftur til að eyða'; return; }
   var s = cur(); if (!s) return;
+  pushUndo(); graveyard.set(s.id, s);
   S.sounds.delete(s.id);
   var b = blobs.get(s.id); if (b){ b.el.remove(); blobs.delete(s.id); }
   S.rings.forEach(function(r){ r.slots = r.slots.map(function(x){ return x && x.id === s.id ? null : x; }); });
@@ -1993,6 +2118,7 @@ async function openProject(id){
   if (curProj) await flushState();
   clearWorkspace();
   curProj = id;
+  undoStack = []; graveyard.clear(); updateUndoBtn();
   tx('state','readwrite', function(st){ return st.put({current:id}, 'meta'); });
   var list = await tx('sounds','readonly', function(st){ return st.index('proj').getAll(id); }) || [];
   list.sort(function(a,b){ return a.t - b.t; });
@@ -2133,9 +2259,61 @@ $('#resetBtn').addEventListener('click', async function(){
   if (!resetArmed){ resetArmed = true; btn.classList.add('warn'); btn.textContent = 'Ýttu aftur til að eyða öllum hljóðum þessa hóps';
     setTimeout(function(){ resetArmed = false; btn.classList.remove('warn'); btn.textContent = 'Byrja upp á nýtt'; }, 4000); return; }
   resetArmed = false; btn.classList.remove('warn'); btn.textContent = 'Byrja upp á nýtt';
+  var snap = makeSnap();
+  S.sounds.forEach(function(s){ graveyard.set(s.id, s); });
   clearWorkspace();
   await deleteProjSounds(curProj);
+  pushSnap(snap);
+  toast('Öllu var eytt. Ýttu á Afturkalla ef þetta var óvart.');
   saveState(); syncControls(); renderRings(); renderAmb(); renderTray();
+});
+
+/* ================= Undo ================= */
+var undoStack = [], graveyard = new Map();
+function makeSnap(){
+  commitCur();
+  var meta = {};
+  S.sounds.forEach(function(s){ meta[s.id] = {name:s.name, type:s.type, v:s.v, start:s.start, end:s.end, autotune:s.autotune, f0:s.f0}; });
+  return {arr:copyJSON({parts:S.parts, cur:S.cur, song:S.song, partsOn:S.partsOn, bpm:S.bpm, swing:S.swing, root:S.root, ambVol:S.ambVol}), meta:meta};
+}
+function pushSnap(sn){ undoStack.push(sn); if (undoStack.length > 40) undoStack.shift(); updateUndoBtn(); }
+function pushUndo(){ pushSnap(makeSnap()); }
+function updateUndoBtn(){ var b = $('#undoBtn'); if (b) b.disabled = !undoStack.length; }
+function undo(){
+  var sn = undoStack.pop(); updateUndoBtn(); if (!sn) return;
+  closePop(); closePartPop();
+  if (edId){ edId = null; $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+  // sounds added since the snapshot go away; deleted ones come back
+  Array.from(S.sounds.values()).forEach(function(s){
+    if (sn.meta[s.id]) return;
+    graveyard.set(s.id, s); S.sounds.delete(s.id);
+    var b = blobs.get(s.id); if (b){ b.el.remove(); blobs.delete(s.id); }
+    dbDel(s.id);
+  });
+  Object.keys(sn.meta).forEach(function(id){
+    var s = S.sounds.get(id), back = false;
+    if (!s){ s = graveyard.get(id); if (!s) return; graveyard.delete(id); S.sounds.set(id, s); back = true; }
+    var m = sn.meta[id], changed = back;
+    for (var k in m){ if (s[k] !== m[k]){ s[k] = m[k]; changed = true; } }
+    if (back) spawnBlob(s, true); else if (changed) refreshBlob(s);
+    if (changed) dbPut(s);
+  });
+  var a = sn.arr;
+  S.parts = a.parts; S.cur = a.cur; S.song = a.song; S.partsOn = a.partsOn;
+  S.bpm = a.bpm; S.swing = a.swing; S.root = a.root; S.ambVol = a.ambVol;
+  loadPart(S.cur);
+  syncControls(); renderRings(); renderAmb(); renderTray(); renderParts(); renderSong();
+  syncDelays(); updateAmbGain();
+  if (playing && !songMode) startAmb();
+  saveState();
+  toast('Afturkallað.');
+}
+$('#undoBtn').addEventListener('click', undo);
+document.addEventListener('keydown', function(e){
+  if ((e.metaKey || e.ctrlKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')){
+    var t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') && t.type === 'text') return;
+    e.preventDefault(); undo();
+  }
 });
 
 /* ================= Parts (A–D) ================= */
@@ -2179,7 +2357,7 @@ function renderParts(){
   var html = '<button class="ptoggle" id="ptoggle" aria-pressed="' + (S.partsOn ? 'true' : 'false') + '"><span class="pdots" aria-hidden="true"><i style="background:#FF48B0"></i><i style="background:#FFE800"></i><i style="background:#5EC8E5"></i><i style="background:#00A95C"></i></span>Partar</button>';
   document.querySelector('.tabs [data-page="lag"]').style.display = S.partsOn ? '' : 'none';
   if (!S.partsOn){
-    html += '<span class="pempty">Dragðu hljóð í hólfin og snúðu hring til að breyta hvar hann byrjar.</span>';
+    html += '<span class="pempty">Dragðu hljóð í hólfin, eða haltu inni á tómu hólfi til að taka upp beint í það.</span>';
     bar.innerHTML = html;
     $('#ptoggle').addEventListener('click', toggleParts);
     return;
@@ -2189,7 +2367,7 @@ function renderParts(){
   });
   html += '<button class="pcopy" id="pcopy">Afrita…</button>';
   if (!partUsed(S.cur)) html += '<span class="pempty">' + PART_NAME[S.cur] + ' er tómt. Dragðu hljóð í hringina eða afritaðu annan part.</span>';
-  else html += '<span class="pempty">Dragðu hljóð í hólfin og snúðu hring til að breyta hvar hann byrjar.</span>';
+  else html += '<span class="pempty">Dragðu hljóð í hólfin, eða haltu inni á tómu hólfi til að taka upp beint í það.</span>';
   bar.innerHTML = html;
   bar.querySelectorAll('.ptab').forEach(function(b){ b.addEventListener('click', function(){ selectPart(b.dataset.p); }); });
   $('#ptoggle').addEventListener('click', toggleParts);
@@ -2214,7 +2392,7 @@ function openCopyMenu(anchor){
   if (partUsed(S.cur)) html += '<button class="rm pc-row warnrow" data-clear="1">Hreinsa ' + PART_NAME[S.cur] + '</button>';
   openPartPop(anchor, html, function(pop){
     pop.querySelectorAll('[data-from]').forEach(function(b){ b.addEventListener('click', function(){
-      var from = b.dataset.from, P = S.parts[from];
+      pushUndo(); var from = b.dataset.from, P = S.parts[from];
       S.parts[S.cur] = {rings:copyJSON(P.rings), amb:copyJSON(P.amb), world:P.world, bars:P.bars};
       loadPart(S.cur); renderRings(); renderAmb(); renderParts(); closePartPop(); saveState();
       if (playing && !songMode) startAmb();
@@ -2222,7 +2400,7 @@ function openCopyMenu(anchor){
     }); });
     var c = pop.querySelector('[data-clear]');
     if (c) c.addEventListener('click', function(){
-      S.parts[S.cur] = emptyPart(); loadPart(S.cur); renderRings(); renderAmb(); renderParts(); closePartPop(); saveState();
+      pushUndo(); S.parts[S.cur] = emptyPart(); loadPart(S.cur); renderRings(); renderAmb(); renderParts(); closePartPop(); saveState();
       if (playing && !songMode) startAmb();
     });
   });
@@ -2241,11 +2419,11 @@ function renderSong(){
       '<div class="pctl"><button class="pbars">' + P.bars + ' taktar</button><button class="pedit">Breyta</button></div>';
     d.querySelector('.padd').addEventListener('click', function(){
       if (S.song.length >= 24){ toast('Lagið er orðið nógu langt.'); return; }
-      S.song.push(k); renderSong(); saveState();
+      pushUndo(); S.song.push(k); renderSong(); saveState();
       if (!used) toast(PART_NAME[k] + ' er tómt, það verður þögn þar.');
     });
     d.querySelector('.pbars').addEventListener('click', function(){
-      var opts = [2,4,8]; P.bars = opts[(opts.indexOf(P.bars) + 1) % opts.length]; renderSong(); saveState();
+      pushUndo(); var opts = [2,4,8]; P.bars = opts[(opts.indexOf(P.bars) + 1) % opts.length]; renderSong(); saveState();
     });
     d.querySelector('.pedit').addEventListener('click', function(){ showPage('rada'); selectPart(k); });
     pal.appendChild(d);
@@ -2271,21 +2449,21 @@ function openStripPop(anchor, i){
   openPartPop(anchor, html, function(pop){
     pop.querySelectorAll('[data-m]').forEach(function(b){ b.addEventListener('click', function(){
       var j = i + (+b.dataset.m); if (j < 0 || j >= S.song.length) return;
-      var t = S.song[i]; S.song[i] = S.song[j]; S.song[j] = t; i = j;
+      pushUndo(); var t = S.song[i]; S.song[i] = S.song[j]; S.song[j] = t; i = j;
       renderSong(); saveState();
       var nb = document.querySelector('.stile[data-i="' + j + '"]'); if (nb){ closePartPop(); openStripPop(nb, j); }
     }); });
-    pop.querySelector('[data-x]').addEventListener('click', function(){ S.song.splice(i, 1); closePartPop(); renderSong(); saveState(); });
+    pop.querySelector('[data-x]').addEventListener('click', function(){ pushUndo(); S.song.splice(i, 1); closePartPop(); renderSong(); saveState(); });
   });
 }
 document.querySelectorAll('[data-form]').forEach(function(b){
   b.addEventListener('click', function(){
-    S.song = b.dataset.form.split(''); renderSong(); saveState();
+    pushUndo(); S.song = b.dataset.form.split(''); renderSong(); saveState();
     var empty = S.song.filter(function(k, i, a){ return a.indexOf(k) === i && !partUsed(k); });
     if (empty.length) toast('Athugið: ' + empty.map(function(k){ return PART_NAME[k]; }).join(' og ') + ' er enn tómt.');
   });
 });
-$('#stripClear').addEventListener('click', function(){ if (playing && songMode) stop(); S.song = []; renderSong(); saveState(); });
+$('#stripClear').addEventListener('click', function(){ if (playing && songMode) stop(); if (S.song.length) pushUndo(); S.song = []; renderSong(); saveState(); });
 $('#songPlay').addEventListener('click', function(){ if (playing && songMode) stop(); else playSongMode(); });
 
 /* ================= Wiring ================= */
@@ -2304,7 +2482,7 @@ document.querySelector('[data-goto="rada"]').addEventListener('click', function(
 document.querySelectorAll('.rec').forEach(function(card){
   var type = card.dataset.type;
   card.querySelector('.rec-btn').addEventListener('click', function(){
-    if (rec){ var same = rec.card === card; stopRec(); if (same) return; }
+    if (rec){ var same = rec.hooks.card === card; stopRec(); if (same) return; }
     startRec(type, card);
   });
   card.querySelector('.file').addEventListener('click', function(){ uploadType = type; $('#fileIn').click(); });
@@ -2313,10 +2491,13 @@ $('#fileIn').addEventListener('change', function(e){
   var f = e.target.files && e.target.files[0]; if (f) loadFile(f, uploadType); e.target.value = '';
 });
 $('#playBtn').addEventListener('click', function(){ playing ? stop() : play(); });
-$('#swing').addEventListener('input', function(e){ S.swing = +e.target.value/100; $('#swingOut').textContent = e.target.value; saveState(); });
-$('#bpm').addEventListener('input', function(e){ S.bpm = +e.target.value; $('#bpmOut').textContent = S.bpm; if ($('#songLen')) renderSong(); syncDelays(); applyMagic(); saveState(); });
-$('#ambVol').addEventListener('input', function(e){ S.ambVol = +e.target.value; updateAmbGain(); saveState(); });
-$('#root').addEventListener('change', function(e){ S.root = +e.target.value; saveState(); if (edId) updateTuneUI(); });
+var sliderArmed = false;
+function armSlider(){ if (!sliderArmed){ pushUndo(); sliderArmed = true; } }
+['#swing','#bpm','#ambVol'].forEach(function(id){ $(id).addEventListener('change', function(){ sliderArmed = false; }); });
+$('#swing').addEventListener('input', function(e){ armSlider(); S.swing = +e.target.value/100; $('#swingOut').textContent = e.target.value; saveState(); });
+$('#bpm').addEventListener('input', function(e){ armSlider(); S.bpm = +e.target.value; $('#bpmOut').textContent = S.bpm; if ($('#songLen')) renderSong(); syncDelays(); applyMagic(); saveState(); });
+$('#ambVol').addEventListener('input', function(e){ armSlider(); S.ambVol = +e.target.value; updateAmbGain(); saveState(); });
+$('#root').addEventListener('change', function(e){ pushUndo(); S.root = +e.target.value; saveState(); if (edId) updateTuneUI(); });
 
 // iOS needs audio to be unlocked inside a gesture
 ['pointerdown','touchend','click'].forEach(function(ev){
