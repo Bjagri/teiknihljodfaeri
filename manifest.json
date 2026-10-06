@@ -3,8 +3,8 @@
   "short_name": "Teiknihljóðfærið",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#16203A",
-  "theme_color": "#16203A",
+  "background_color": "#F3EEE4",
+  "theme_color": "#F3EEE4",
   "lang": "is",
   "icons": [
     { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
