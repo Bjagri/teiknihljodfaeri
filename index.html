@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Teiknihljóðfærið">
-<meta name="theme-color" content="#F3EEE4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1E2238" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#EDEDEA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171A29" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
@@ -17,146 +17,138 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* Teiknihljóðfærið — útlit 2
+   Hljóðlát umgjörð í einum steinlit, verkið á hvítu blaði. Hvert hljóð á einn lit
+   sem fylgir því um allar þrjár sýnirnar; liturinn er á myndum og slögum, ekki á umgjörðinni.
+   Engir skuggar nema á klippiglugganum, engin mynstur, eitt letur. */
 :root{
-  --paper:#F3EEE4; --card:#FBF8F1; --ink:#27306B; --ink-soft:#5A6190;
-  --line:rgba(39,48,107,.24);
-  --pink:#FF48B0; --blue:#0078BF; --yellow:#FFE800; --green:#00A95C;
+  --umgjord:#EDEDEA; --blad:#FFFFFF; --holf:#F5F4F0;
+  --ink:#27306B; --ink-soft:#5E6488; --kantur:#E2DFD8; --kantur-sterkur:#C9C5BB;
+  --pink:#FF48B0; --upptaka:#D4137A; --blue:#0078BF; --yellow:#FFE800; --green:#00A95C;
   --aqua:#5EC8E5; --orange:#FF6C2F;
-  --mis:#FF48B0; --mis2:#0078BF;
-  --blob-1:42px 58px 46px 62px / 56px 44px 60px 48px;
-  --blob-2:60px 44px 64px 46px / 46px 60px 44px 58px;
-  --blob-3:50px 64px 42px 56px / 62px 48px 56px 42px;
-  --pill-1:26px 34px 28px 38px / 34px 26px 38px 28px;
-  --pill-2:36px 26px 38px 28px / 26px 36px 28px 38px;
-  --bub-1:52% 48% 55% 45% / 48% 54% 46% 52%;
-  --bub-2:46% 54% 44% 56% / 55% 45% 53% 47%;
+  --hringur:999px; --spjald:18px; --reitur:14px;
   --letur:"Fredoka","Baloo 2",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9;
-    --line:rgba(243,238,228,.22);
+    --umgjord:#171A29; --blad:#22263A; --holf:#1C2032;
+    --ink:#F1EEE6; --ink-soft:#AEB0C6; --kantur:#30354D; --kantur-sterkur:#474D6B;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#1E2238; --card:#272C47; --ink:#F3EEE4; --ink-soft:#B9B6C9;
-  --line:rgba(243,238,228,.22);
+  --umgjord:#171A29; --blad:#22263A; --holf:#1C2032;
+  --ink:#F1EEE6; --ink-soft:#AEB0C6; --kantur:#30354D; --kantur-sterkur:#474D6B;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{
-  background:var(--paper);color:var(--ink);font-family:var(--letur);font-weight:400;
+  background:var(--umgjord);color:var(--ink);font-family:var(--letur);font-weight:400;
   -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;
 }
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;
-  transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .25s,color .25s}
-button:active{transform:scale(.94)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+  transition:transform .18s cubic-bezier(.3,1.6,.5,1),background-color .2s,color .2s}
+button:active{transform:scale(.95)}
+button:focus-visible,input:focus-visible,.reitur:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){button:active{transform:none}}
 .umgjord{
-  max-width:1100px;margin:0 auto;
-  padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 110px calc(16px + env(safe-area-inset-left))
+  max-width:1180px;margin:0 auto;
+  padding:calc(14px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) 116px calc(16px + env(safe-area-inset-left))
 }
 
 /* ---- haus ---- */
-header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+header{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;margin-bottom:18px;min-height:52px}
 h1{
-  font-weight:700;font-size:clamp(23px,4.6vw,30px);margin:0;letter-spacing:-.01em;line-height:1;
-  display:flex;align-items:center;gap:10px;text-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
+  font-weight:700;font-size:clamp(24px,4.4vw,32px);margin:0;letter-spacing:-.015em;line-height:1;
+  display:flex;align-items:center;gap:12px
 }
-h1 span{color:inherit}
-h1 i{display:inline-flex;gap:4px;flex:none}
-h1 i b{width:12px;height:12px;display:block}
+h1 i{display:inline-flex;gap:5px;flex:none}
+h1 i b{width:13px;height:13px;display:block}
 h1 i b:nth-child(1){background:var(--pink);border-radius:50%}
 h1 i b:nth-child(2){background:var(--yellow);border-radius:3px;transform:rotate(45deg) scale(.85)}
 h1 i b:nth-child(3){background:var(--green);border-radius:42% 58% 63% 37%/45% 40% 60% 55%}
-.flipar{display:flex;gap:4px;margin-left:auto;background:var(--card);padding:4px;border-radius:var(--pill-1);box-shadow:0 2px 0 var(--line)}
-.flipi{padding:9px 17px;border-radius:var(--pill-2);font-weight:500;font-size:16px;color:var(--ink-soft)}
-.flipi:nth-child(2){border-radius:var(--pill-1)}
-.flipi[aria-selected="true"]{background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)}
-
-/* ---- almennir takkar ---- */
-.takki{
-  font-weight:600;font-size:16px;background:var(--ink);color:var(--paper);
-  border-radius:var(--pill-2);padding:11px 20px;box-shadow:2px 2px 0 rgba(255,72,176,.7)
+.flipar{display:flex;gap:4px;margin-left:auto;background:var(--blad);padding:4px;border-radius:var(--hringur);
+  border:1px solid var(--kantur)}
+.flipi{padding:10px 20px;border-radius:var(--hringur);font-weight:500;font-size:17px;color:var(--ink-soft);min-height:44px}
+.flipi[aria-selected="true"]{background:var(--ink);color:var(--blad)}
+@media (max-width:520px){
+  .flipar{margin-left:0;width:100%}
+  .flipi{flex:1;padding:10px 8px}
 }
-.takki.aukatakki{background:var(--card);color:var(--ink);box-shadow:2px 2px 0 rgba(0,120,191,.55)}
-.takki.gulur{background:var(--ink);color:var(--paper)}
-.takki.raudur{background:var(--pink);color:#fff;box-shadow:2px 2px 0 var(--ink)}
+
+/* ---- almennir takkar: allir fullkomlega ávalir, flatir ---- */
+.takki{
+  font-weight:600;font-size:16px;background:var(--ink);color:var(--blad);
+  border-radius:var(--hringur);padding:12px 22px;min-height:46px
+}
+.takki.aukatakki{background:var(--blad);color:var(--ink);border:1px solid var(--kantur-sterkur);padding:11px 21px}
+.takki.gulur{background:var(--ink);color:var(--blad)}
+.takki.raudur{background:var(--upptaka);color:#fff}
 .takkarod{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* ---- uppsetning ---- */
-.spjaldalisti{display:grid;gap:18px;grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (max-width:700px){ .spjaldalisti{grid-template-columns:1fr} }
+.spjaldalisti{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:700px){ .spjaldalisti{grid-template-columns:minmax(0,1fr)} }
 .spjald{
-  background-color:var(--card);color:var(--ink);padding:16px;position:relative;
-  background-image:radial-gradient(circle,var(--ht,rgba(255,72,176,.14)) 1px,transparent 1.5px);
-  background-size:10px 10px;box-shadow:4px 5px 0 var(--sh,rgba(0,120,191,.35));
-  border-radius:var(--blob-1)
+  background:var(--blad);color:var(--ink);padding:16px;position:relative;
+  border:1px solid var(--kantur);border-radius:var(--spjald)
 }
-.spjald:nth-child(3n+2){border-radius:var(--blob-2);--ht:rgba(255,200,0,.22);--sh:rgba(255,72,176,.35)}
-.spjald:nth-child(3n){border-radius:var(--blob-3);--ht:rgba(0,169,92,.13);--sh:rgba(255,108,47,.35)}
-.spjaldhaus{display:flex;gap:9px;align-items:center;margin:2px 0 12px}
+.spjaldhaus{display:flex;gap:10px;align-items:center;margin:0 0 14px}
 .numer{
-  font-weight:600;font-size:14px;color:var(--paper);background:var(--ink);
-  width:28px;height:28px;border-radius:var(--bub-1);display:grid;place-items:center;flex:none
+  font-weight:600;font-size:16px;color:var(--a-texti,#fff);background:var(--litur,var(--ink));
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none
 }
 .nafn{
-  flex:1;min-width:0;font:inherit;font-size:19px;font-weight:600;color:var(--ink);
-  background:var(--paper);border:0;border-radius:var(--pill-2);padding:7px 13px;
+  flex:1;min-width:0;font:inherit;font-size:20px;font-weight:600;color:var(--ink);
+  background:var(--holf);border:1px solid transparent;border-radius:12px;padding:7px 12px;
   -webkit-user-select:text;user-select:text
 }
-.reitir{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nafn:hover{border-color:var(--kantur)}
+.nafn:focus{background:var(--blad);border-color:var(--kantur-sterkur);outline:none}
+.reitir{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .reitur{
-  border:2.5px dashed var(--line);border-radius:var(--bub-2);aspect-ratio:1;
-  background:radial-gradient(circle,rgba(39,48,107,.09) 1px,transparent 1.5px) 0 0/6px 6px,var(--paper);
+  border:2px dashed var(--kantur-sterkur);border-radius:var(--reitur);aspect-ratio:1;background:var(--holf);
   display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;padding:8px
 }
-.reitarammi:nth-child(2) .reitur{border-radius:var(--bub-1)}
-.reitur:hover,.reitur.yfir{border-color:var(--pink);border-style:solid}
+.reitur.fullur{border:1px solid var(--kantur);background:#fff;padding:6px}
+.reitur:hover,.reitur.yfir{border-color:var(--litur,var(--pink));border-style:solid}
 .reitur img{width:100%;height:100%;object-fit:contain}
-.merki{font-size:13px;color:var(--ink-soft);text-align:center;line-height:1.3;padding:4px}
-.reitarammi{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.merki{font-size:14px;color:var(--ink-soft);text-align:center;line-height:1.3;padding:4px;max-width:12em}
+.merki b{display:block;font-size:30px;font-weight:400;line-height:1;margin-bottom:4px;color:var(--kantur-sterkur)}
+.reitarammi{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
 .reitarammi .reitur{width:100%}
 .reitmerki{
-  font-size:13px;font-weight:500;color:var(--ink-soft);text-align:center;
+  font-size:14px;font-weight:500;color:var(--ink-soft);text-align:center;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%
 }
-.hljodrod{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
-.hljodstada{font-size:14px;color:var(--ink-soft);flex:1;min-width:110px}
+.hljodrod{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.hljodstada{font-size:15px;color:var(--ink-soft);flex:1;min-width:110px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .hljodstada.tilbuid{color:var(--green);font-weight:600}
 .smatakki{
-  padding:9px 14px;font-size:14px;font-weight:500;border-radius:var(--pill-1);
-  background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)
+  padding:9px 15px;font-size:15px;font-weight:500;border-radius:var(--hringur);min-height:40px;
+  background:var(--ink);color:var(--blad)
 }
-.smatakki:nth-of-type(even){border-radius:var(--pill-2)}
-.smatakki.rautt{background:var(--pink);color:#fff;box-shadow:2px 2px 0 var(--ink)}
-.smatakki.tekurupp{background:var(--pink);color:#fff;animation:pulsa .8s infinite}
-.smatakki.ljos{background:var(--paper);color:var(--ink);box-shadow:2px 2px 0 var(--line)}
-@keyframes pulsa{50%{opacity:.5}}
+.smatakki.rautt{background:var(--upptaka);color:#fff}
+.smatakki.tekurupp{background:var(--upptaka);color:#fff;animation:pulsa .8s infinite}
+.smatakki.ljos{background:var(--blad);color:var(--ink);border:1px solid var(--kantur-sterkur);padding:8px 14px}
+@keyframes pulsa{50%{opacity:.55}}
 .eyda{
-  position:absolute;top:12px;right:14px;color:var(--ink-soft);font-size:22px;
-  line-height:1;padding:2px 6px
+  flex:none;width:40px;height:40px;border-radius:50%;color:var(--ink-soft);font-size:24px;
+  line-height:1;display:grid;place-items:center
 }
-.eyda:hover{color:var(--pink)}
+.eyda:hover{color:var(--pink);background:var(--holf)}
 .merkitakki{
-  font-size:11px;font-weight:600;background:var(--paper);color:var(--ink-soft);
-  border-radius:999px;padding:2px 8px;margin-left:5px;box-shadow:1.5px 1.5px 0 var(--line)
+  font-size:12px;font-weight:600;background:var(--holf);color:var(--ink-soft);
+  border-radius:var(--hringur);padding:3px 9px
 }
 
 /* ---- spilun ---- */
-.spilborð{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.spilborð{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+@media (max-width:520px){ .spilborð{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} }
 .padd{
-  position:relative;background:var(--card);padding:12px;aspect-ratio:1;cursor:pointer;
-  display:flex;flex-direction:column;box-shadow:5px 6px 0 currentColor;border-radius:var(--blob-2)
-}
-.padd:nth-child(3n+2){border-radius:var(--blob-3)}
-.padd:nth-child(3n){border-radius:var(--blob-1)}
-.padd::after{
-  content:"";position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;
-  background-image:radial-gradient(circle,currentColor 1px,transparent 1.5px);
-  background-size:10px 10px;opacity:.16;pointer-events:none
+  position:relative;background:#fff;padding:10px 10px 0;aspect-ratio:1;cursor:pointer;
+  display:flex;flex-direction:column;border-radius:var(--spjald);border:1px solid var(--kantur);
+  overflow:hidden
 }
 .padd .mynd{flex:1;min-height:0;position:relative;z-index:1}
 .padd .mynd img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain}
@@ -165,12 +157,14 @@ h1 i b:nth-child(3){background:var(--green);border-radius:42% 58% 63% 37%/45% 40
 .padd.spilar .mynd img.virk{opacity:1}
 .padd.spilar{animation:hristing .38s ease-in-out infinite}
 .padd .titill{
-  position:relative;z-index:1;font-weight:500;font-size:15px;color:var(--ink);
-  text-align:center;padding-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+  position:relative;z-index:1;font-weight:600;font-size:17px;color:var(--a-texti,#fff);
+  background:var(--litur);text-align:center;margin:8px -10px 0;padding:9px 10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
+.padd .titill span{color:var(--a-texti,#fff)}
 .hringur{
   position:absolute;top:0;left:0;right:0;bottom:0;border-radius:inherit;
-  border:3px solid currentColor;opacity:0;pointer-events:none
+  border:4px solid currentColor;opacity:0;pointer-events:none;z-index:2
 }
 .padd.spilar .hringur{animation:bylgja .55s ease-out}
 @keyframes hristing{
@@ -179,124 +173,124 @@ h1 i b:nth-child(3){background:var(--green);border-radius:42% 58% 63% 37%/45% 40
   100%{transform:rotate(-2.5deg) scale(1.03)}
 }
 @keyframes bylgja{
-  from{opacity:.9;transform:scale(1)}
-  to{opacity:0;transform:scale(1.3)}
+  from{opacity:1;transform:scale(1)}
+  to{opacity:0;transform:scale(1.12)}
 }
 @media (prefers-reduced-motion:reduce){
   .padd.spilar{animation:none;transform:scale(1.04)}
-  .padd.spilar .hringur{animation:none;opacity:.6}
+  .padd.spilar .hringur{animation:none;opacity:1}
 }
 
 /* ---- taktur ---- */
 .taktrod{display:grid;align-items:center;margin-bottom:10px}
-.skrefhaus{font-size:13px;font-weight:500;color:var(--ink-soft);text-align:center;padding-bottom:2px}
-.skrefhaus.thungt{color:var(--pink);font-weight:600}
+.skrefhaus{font-size:14px;font-weight:500;color:var(--ink-soft);text-align:center;padding-bottom:2px}
+.skrefhaus.thungt{color:var(--ink);font-weight:700}
 .taktnafn{
-  display:flex;align-items:center;gap:8px;background:var(--card);color:var(--ink);
-  border-radius:var(--pill-1);padding:6px 10px;min-width:0;box-shadow:2px 2px 0 currentColor
+  display:flex;align-items:center;gap:8px;background:var(--blad);color:var(--ink);
+  border:1px solid var(--kantur);border-radius:var(--hringur);padding:5px 12px 5px 5px;min-width:0
 }
-.taktnafn .thumbi{width:34px;height:34px;flex:none;border-radius:var(--bub-2);background:var(--paper);
-  object-fit:contain;transition:transform .07s}
+.taktnafn .thumbi{width:36px;height:36px;flex:none;border-radius:50%;background:#fff;
+  border:2px solid var(--litur,var(--kantur));object-fit:contain;transition:transform .07s}
 .taktnafn.slaer .thumbi{transform:scale(1.22) rotate(-7deg)}
-.taktnafn .heiti{font-size:14px;font-weight:500;color:var(--ink);
+.taktnafn .heiti{font-size:15px;font-weight:600;color:var(--ink);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .skref{
-  aspect-ratio:1;border:2.5px dashed var(--line);border-radius:var(--bub-1);padding:0;position:relative;
-  background:radial-gradient(circle,rgba(39,48,107,.09) 1px,transparent 1.5px) 0 0/6px 6px,var(--card)
+  aspect-ratio:1;border:2px solid var(--kantur);border-radius:50%;padding:0;position:relative;
+  background:var(--blad)
 }
-.skref:nth-child(3n){border-radius:var(--bub-2)}
-.skref.thungt{border-color:var(--ink-soft)}
-.skref[aria-pressed="true"]{background:currentColor;border-style:solid;border-color:currentColor;
-  box-shadow:2px 2px 0 var(--line)}
-.skref.nuna{border-color:var(--ink);border-style:solid;box-shadow:0 0 0 3px var(--ink)}
+.skref.thungt{border-color:var(--kantur-sterkur);background:var(--holf)}
+.skref[aria-pressed="true"]{background:currentColor;border-color:currentColor}
+.skref.nuna{outline:3px solid var(--ink);outline-offset:3px}
 .skref[aria-pressed="true"].nuna{transform:scale(1.08)}
 @media (max-width:620px){
-  .taktnafn{padding:4px 7px;gap:5px}
-  .taktnafn .thumbi{width:24px;height:24px}
-  .taktnafn .heiti{font-size:12px}
+  .taktnafn{padding:3px;gap:0;justify-content:center}
+  .taktnafn .thumbi{width:28px;height:28px}
+  .taktnafn .heiti{display:none}
+  .skref{border-width:1.5px}
 }
-.val{display:flex;gap:3px;background:var(--card);padding:4px;border-radius:var(--pill-1);box-shadow:0 2px 0 var(--line)}
-.val button{font-size:15px;font-weight:500;color:var(--ink-soft);padding:8px 15px;border-radius:var(--pill-2)}
-.val button:nth-child(2){border-radius:var(--pill-1)}
-.val button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.val{display:flex;gap:3px;background:var(--blad);padding:4px;border-radius:var(--hringur);border:1px solid var(--kantur)}
+.val button{font-size:15px;font-weight:500;color:var(--ink-soft);padding:8px 16px;border-radius:var(--hringur);min-height:38px}
+.val button[aria-pressed="true"]{background:var(--ink);color:var(--blad)}
 
-/* ---- klippiborð ---- */
+/* ---- klippiborð (eini fljótandi flöturinn) ---- */
 .yfirlag{
-  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(27,32,60,.55);
+  position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(23,26,41,.5);
   z-index:20;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto
 }
 .klippispjald{
-  background:var(--card);color:var(--ink);padding:20px;width:100%;max-width:640px;
-  border-radius:48px 66px 52px 60px / 56px 48px 62px 50px;
-  box-shadow:6px 7px 0 var(--mis),0 18px 44px rgba(0,0,0,.25)
+  background:var(--blad);color:var(--ink);padding:22px;width:100%;max-width:660px;
+  border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.22) /* taste-skill-ignore: raunverulegur gluggi ofan á */
 }
-.klippihaus{display:flex;align-items:center;gap:10px;margin:0 0 14px}
-.klippihaus h2{font-size:21px;font-weight:600;margin:0;flex:1;min-width:0;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 rgba(255,72,176,.4)}
+.klippihaus{display:flex;align-items:center;gap:10px;margin:0 0 16px}
+.klippihaus h2{font-size:24px;font-weight:600;margin:0;flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bylgja{
-  position:relative;background:var(--paper);height:150px;overflow:hidden;
-  border-radius:28px 40px 30px 44px / 36px 28px 42px 30px;
+  position:relative;background:var(--holf);height:160px;overflow:hidden;border-radius:14px;
   touch-action:none;cursor:ew-resize;-webkit-user-select:none;user-select:none
 }
 .bylgja canvas{display:block;width:100%;height:100%}
-.skuggi{position:absolute;top:0;bottom:0;background:rgba(39,48,107,.26);pointer-events:none}
-.handfang{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:var(--pink);pointer-events:none}
-.handfang::before{content:"";position:absolute;top:0;left:-10px;width:23px;height:22px;
-  background:var(--pink);border-radius:0 0 10px 10px}
+.skuggi{position:absolute;top:0;bottom:0;background:rgba(39,48,107,.22);pointer-events:none}
+.handfang{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--pink);pointer-events:none}
+.handfang::before{content:"";position:absolute;top:0;left:-11px;width:26px;height:24px;
+  background:var(--pink);border-radius:0 0 12px 12px}
 .handfang.endi{background:var(--blue)}
 .handfang.endi::before{background:var(--blue)}
-.timamerki{display:flex;justify-content:space-between;font-size:15px;color:var(--ink-soft);
+.timamerki{display:flex;justify-content:space-between;font-size:16px;color:var(--ink);
   margin-top:10px;font-variant-numeric:tabular-nums}
-.klippilina{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
-.klippilina label{font-size:16px;font-weight:500;display:flex;align-items:center;gap:10px}
+.timamerki span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;
+  background:var(--pink);margin-right:7px;vertical-align:-1px}
+.timamerki span+span::before{background:var(--blue)}
+.klippilina{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+.klippilina label{font-size:17px;font-weight:500;display:flex;align-items:center;gap:12px}
 .tonntala{
-  font-weight:600;font-size:16px;background:var(--ink);color:var(--paper);
-  border-radius:999px;padding:4px 12px;min-width:56px;text-align:center;
-  font-variant-numeric:tabular-nums;box-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
+  font-weight:600;font-size:16px;background:var(--holf);color:var(--ink);
+  border-radius:var(--hringur);padding:5px 12px;min-width:56px;text-align:center;
+  font-variant-numeric:tabular-nums
 }
+.skyring{font-size:15px;color:var(--ink-soft);line-height:1.5;margin:16px 0 0}
 
 /* ---- stjórnborð neðst ---- */
 .stjornbord{
-  position:fixed;left:0;right:0;bottom:0;background:var(--card);
-  border-top:2.5px solid var(--line);
+  position:fixed;left:0;right:0;bottom:0;background:var(--blad);
   padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-  display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;z-index:5
+  display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;justify-content:center;z-index:5
 }
 .rofi{
-  display:flex;align-items:center;gap:9px;font-weight:500;font-size:16px;
-  background:var(--paper);color:var(--ink);padding:10px 18px;border-radius:var(--pill-1);
-  box-shadow:2px 2px 0 var(--line)
+  display:flex;align-items:center;gap:9px;font-weight:500;font-size:16px;min-height:44px;
+  background:var(--blad);color:var(--ink);padding:10px 18px;border-radius:var(--hringur);
+  border:1px solid var(--kantur-sterkur)
 }
-.rofi .pera{width:12px;height:12px;border-radius:50%;background:var(--line)}
-.rofi[aria-pressed="true"]{background:var(--ink);color:var(--paper);box-shadow:2px 2px 0 rgba(255,72,176,.7)}
+.rofi .pera{width:12px;height:12px;border-radius:50%;background:var(--kantur-sterkur)}
+.rofi[aria-pressed="true"]{background:var(--ink);color:var(--blad);border-color:var(--ink)}
 .rofi[aria-pressed="true"] .pera{background:var(--yellow)}
-.sleði{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:500;color:var(--ink)}
+.sleði{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:var(--ink)}
 input[type=range]{
-  -webkit-appearance:none;appearance:none;height:8px;width:140px;background:var(--line);
-  border-radius:6px 10px 7px 9px
+  -webkit-appearance:none;appearance:none;height:8px;width:140px;background:var(--kantur-sterkur);
+  border-radius:var(--hringur)
 }
 input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;width:26px;height:26px;background:var(--ink);border:4px solid var(--card);
-  border-radius:52% 48% 55% 45% / 48% 54% 46% 52%;box-shadow:1.5px 1.5px 0 rgba(255,72,176,.6)
+  -webkit-appearance:none;width:28px;height:28px;background:var(--ink);border:4px solid var(--blad);
+  border-radius:50%
 }
-input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--card)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--ink);border:4px solid var(--blad)}
 
-.tomt{text-align:center;color:var(--ink-soft);padding:56px 20px;font-size:17px;line-height:1.5}
-.tomt strong{color:var(--pink)}
+.tomt{text-align:center;color:var(--ink-soft);padding:64px 20px;font-size:18px;line-height:1.5;
+  background:var(--blad);border:1px solid var(--kantur);border-radius:var(--spjald)}
+.tomt strong{color:var(--ink)}
 .falid{display:none}
-.hulinn{position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0}
+.hulinn{position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0} /* taste-skill-ignore: falinn skráarreitur */
 @supports not (aspect-ratio: 1 / 1){
   .reitur{height:132px}
-  .padd{height:184px}
+  .padd{height:200px}
   .skref{height:42px}
-  @media (max-width:620px){ .skref{height:34px} }
+  @media (max-width:620px){ .skref{height:30px} }
 }
 </style>
 </head>
 <body>
 <div class="umgjord">
   <header>
-    <h1><i aria-hidden="true"><b></b><b></b><b></b></i>Teikni<span>hljóðfærið</span></h1>
+    <h1><i aria-hidden="true"><b></b><b></b><b></b></i><span>Teiknihljóðfærið</span></h1>
     <div class="flipar" role="tablist">
       <button class="flipi" id="flipiUppsetning" role="tab" aria-selected="true">Uppsetning</button>
       <button class="flipi" id="flipiSpila" role="tab" aria-selected="false">Spila</button>
@@ -328,7 +322,7 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
   <section id="taktur" class="falid">
     <div class="takkarod" style="margin-bottom:20px">
       <button class="takki gulur" id="taktSpila">▶ Spila lykkju</button>
-      <label class="sleði" style="color:#C7D0E4">Hraði
+      <label class="sleði">Hraði
         <input type="range" id="hradi" min="50" max="240" value="100">
         <span class="tonntala" id="hradiTala" style="min-width:86px">100 bpm</span>
       </label>
@@ -374,8 +368,8 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
       <button class="takki aukatakki" id="finnaUpphaf">Finna upphafið</button>
       <button class="takki aukatakki" id="nullstilla">Núllstilla</button>
     </div>
-    <p style="font-size:14px;color:var(--ink-soft);line-height:1.5;margin:16px 0 0">
-      Dragðu fingurinn á bylgjuna til að færa gula upphafsmerkið og það rauða í endann.
+    <p class="skyring">
+      Dragðu fingurinn á bylgjuna til að færa bleika upphafsmerkið og það bláa í endann.
       Tónhæðin er í hálftónum — hljóðið verður líka hraðara þegar það hækkar, alveg eins og
       þegar segulband er spilað hraðar.
     </p>
@@ -393,6 +387,9 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 "use strict";
 
 const litir = ["#FF48B0","#0078BF","#00A95C","#FF6C2F","#5EC8E5","#FFE800"];
+/* texti sem sést á hverjum lit (dökkur á ljósu litunum) */
+const litaTexti = ["#1B2150","#fff","#1B2150","#1B2150","#1B2150","#1B2150"];
+function litastill(i){ return "--litur:"+litir[i % litir.length]+";--a-texti:"+litaTexti[i % litir.length]; }
 let paddar = [];
 let naestaId = 1;
 
@@ -544,22 +541,23 @@ function teiknaUppsetningu(){
   paddar.forEach((p,i)=>{
     const spjald = document.createElement("div");
     spjald.className = "spjald";
+    spjald.setAttribute("style", litastill(i));
     spjald.innerHTML = `
-      <button class="eyda" title="Eyða takka" data-eyda="${p.id}">&times;</button>
       <div class="spjaldhaus">
         <span class="numer">${i+1}</span>
         <input class="nafn" value="${p.nafn.replace(/"/g,"&quot;")}" data-nafn="${p.id}" aria-label="Nafn takka">
+        <button class="eyda" title="Eyða takka" aria-label="Eyða takka" data-eyda="${p.id}">&times;</button>
       </div>
       <div class="reitir">
         <div class="reitarammi">
-          <div class="reitur" data-mynd="kyrr" data-id="${p.id}" tabindex="0" role="button" aria-label="Kyrr mynd">
-            ${p.kyrr ? `<img src="${p.kyrr}" alt="">` : `<span class="merki">Smelltu eða dragðu mynd hingað</span>`}
+          <div class="reitur ${p.kyrr?"fullur":""}" data-mynd="kyrr" data-id="${p.id}" tabindex="0" role="button" aria-label="Kyrr mynd">
+            ${p.kyrr ? `<img src="${p.kyrr}" alt="">` : `<span class="merki"><b aria-hidden="true">+</b>Settu inn mynd</span>`}
           </div>
           <span class="reitmerki">Kyrr mynd</span>
         </div>
         <div class="reitarammi">
-          <div class="reitur" data-mynd="virk" data-id="${p.id}" tabindex="0" role="button" aria-label="Mynd á hreyfingu">
-            ${p.virk ? `<img src="${p.virk}" alt="">` : `<span class="merki">Myndin sem hristist</span>`}
+          <div class="reitur ${p.virk?"fullur":""}" data-mynd="virk" data-id="${p.id}" tabindex="0" role="button" aria-label="Mynd á hreyfingu">
+            ${p.virk ? `<img src="${p.virk}" alt="">` : `<span class="merki"><b aria-hidden="true">+</b>Myndin sem hristist</span>`}
           </div>
           <span class="reitmerki">Mynd á hreyfingu</span>
         </div>
@@ -679,7 +677,7 @@ function teiknaSpilbord(){
   paddar.forEach((p,i)=>{
     const b = document.createElement("button");
     b.className = "padd";
-    b.style.color = litir[i % litir.length];
+    b.setAttribute("style", litastill(i) + ";color:" + litir[i % litir.length]);
     b.dataset.id = p.id;
     const kyrr = p.kyrr || p.virk;
     const virk = p.virk || p.kyrr;
@@ -689,7 +687,7 @@ function teiknaSpilbord(){
         ${kyrr ? `<img class="kyrr" src="${kyrr}" alt="">` : `<img class="kyrr" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
         ${virk ? `<img class="virk" src="${virk}" alt="">` : `<img class="virk" alt="" src="data:image/svg+xml,${teiknaAuda(i)}">`}
       </span>
-      <span class="titill">${p.nafn}</span>
+      <span class="titill"><span>${p.nafn}</span></span>
     `;
     b.addEventListener("pointerdown", ev=>{ ev.preventDefault(); spila(p, b); });
     spilborð.appendChild(b);
@@ -939,12 +937,12 @@ function teiknaTakt(){
   paddar.forEach((p,i)=>{
     const rod = document.createElement("div");
     rod.className = "taktrod";
-    rod.style.color = litir[i % litir.length];
+    rod.setAttribute("style", litastill(i) + ";color:" + litir[i % litir.length]);
     const mynd = p.kyrr || p.virk;
     rod.innerHTML = `
       <span class="taktnafn" data-nafnrod="${p.id}">
         ${mynd ? `<img class="thumbi" src="${mynd}" alt="">`
-               : `<span class="thumbi" style="background:${litir[i%litir.length]};border-radius:8px"></span>`}
+               : `<span class="thumbi" style="background:${litir[i%litir.length]}"></span>`}
         <span class="heiti">${p.nafn}</span>
       </span>
       ${p.mynstur.slice(0, skrefFjoldi).map((a,s)=>
@@ -1177,7 +1175,7 @@ document.getElementById("innSkra").onchange = async function(){
 };
 
 /* ---------- byrjun ---------- */
-paddar.push(nyrPadd(), nyrPadd(), nyrPadd(), nyrPadd());
+for(let n = 0; n < 4; n++) paddar.push(nyrPadd());
 teiknaUppsetningu();
 })();
 </script>
